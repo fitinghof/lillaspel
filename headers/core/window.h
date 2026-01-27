@@ -19,12 +19,11 @@ private:
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 public:
-    Window(const HINSTANCE instance, int nCmdShow, const UINT width = 0, const UINT height = 0);
+    Window(const HINSTANCE instance, int nCmdShow, const std::string name = "Window", const UINT width = 1024, const UINT height = 576);
     ~Window();
 
     HWND GetHWND() const;
     UINT GetWidth() const;
     UINT GetHeight() const;
     void Show(int nCmdShow) const;
-    void SetFullscreen(bool fullscreen) const;
 };

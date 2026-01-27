@@ -1,5 +1,5 @@
 #include "engine/game.h"
 
 void Game::Run() {
-	Logger::log("This is game");
+	Logger::Log("This is game");
 }

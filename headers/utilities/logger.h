@@ -3,6 +3,7 @@
 #include <iostream>
 #include <string>
 #include <fstream>
+#include <ctime>
 
 // Just the basic stuff, someone rewrite for more functionality
 

@@ -1,8 +1,9 @@
 #include <iostream>
 #include "test.h"
+#include "utilities/logger.h"
 
 // Main code
 int main(int)
 {
-    std::cout << testfunc();;
+    Logger::log("Test");
 }

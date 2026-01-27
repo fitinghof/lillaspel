@@ -4,16 +4,6 @@
 #================================================
 cmake_minimum_required(VERSION 3.20) # FetchContent is available in 3.11+
 # https://www.programmersought.com/article/68945253024/
-# cmake --build .
-# cmake .. -G "Visual Studio 16 2019" -A Win32 -DCMAKE_BUILD_TYPE=Release
-#cmake -G "NMake Makefiles" aseprite-dir
-#[[
-visual studio 2019
-  Configuration Properties
-    -Linker
-      -Subsystem > /SUBSYSTEM:WINDOWS (default from vs2019)
-      -Subsystem > /SUBSYSTEM:CONSOLE (this is for directx11 win 32 for main entry) 
-]]
 
 project(lillaspel VERSION 0.0.1)
 message("START OF CMAKELIST...")
@@ -71,18 +61,41 @@ set(ENABLE_DIRECTXHEADERS OFF)
 set(ENABLE_DIRECTXTK12 OFF)
 set(ENABLE_IMGUI ON)
 
+
+include(FetchContent)
+
+FetchContent_Declare(
+    DirectXTK
+    GIT_REPOSITORY https://github.com/microsoft/DirectXTK.git
+    GIT_TAG main
+)
+
+FetchContent_MakeAvailable(DirectXTK)
+
+FetchContent_Declare(
+    OpenAL
+    GIT_REPOSITORY https://github.com/kcat/openal-soft
+    GIT_TAG 1.25.1
+)
+FetchContent_MakeAvailable(OpenAL)
+
+# Download single header into your project
+set(JSON_SINGLE_INCLUDE "${CMAKE_BINARY_DIR}/include/json.hpp")
+file(DOWNLOAD
+    "https://raw.githubusercontent.com/nlohmann/json/v3.11.3/single_include/nlohmann/json.hpp"
+    ${JSON_SINGLE_INCLUDE}
+    TLS_VERIFY ON
+)
+
 if(ENABLE_DXSDK)
   if( DEFINED ENV{DXSDK_DIR} ) # system path var
     set( DX_DIR $ENV{DXSDK_DIR})
   endif()
-  #message("DX SDK: " ${DX_DIR})
+
   list(APPEND CPP_INCLUDE_DIRS ${DX_DIR}/Include)
-  #link_libraries(${DX_DIR}/Lib/x86) # incorrect lib dir
-  #link_directories(${DX_DIR}/Lib/x86/d3d11.lib)
+
   link_directories(${DX_DIR}/Lib/${WINDOW_BIT})
-  #find_library(d3d11_LIB NAMES d3d11 HINTS ${DX_DIR}/Lib/x86)
-  #find_library(d3dx11_LIB NAMES d3dx11 HINTS ${DX_DIR}/Lib/x86)
-  #find_library(dxguid_LIB NAMES dxguid HINTS ${DX_DIR}/Lib/x86)
+
 endif()
 
 if(ENABLE_WINDXSDK)
@@ -111,11 +124,7 @@ if(ENABLE_DIRECTXHEADERS)
     if (NOT directx_headers_POPULATED) # Have we downloaded yet?
       set(FETCHCONTENT_QUIET NO)
       FetchContent_Populate(directx_headers)
-      #message("directx_headers_LIBRARY: " ${directx_headers_LIBRARY})
-      #message("directx_headers_INCLUDE_DIR: " ${directx_headers_INCLUDE_DIR}) 
-      #message("directx_headers_SOURCE_DIR: " ${directx_headers_SOURCE_DIR}) 
-      #message("directx_headers_BINARY_DIR: " ${directx_headers_BINARY_DIR}) 
-      #list(APPEND CPP_HEADER_FILES ${directx_headers_SOURCE_DIR}/include/directx/d3d12.h)
+
       # include folder
       include_directories(${directx_headers_SOURCE_DIR}/include/directx)
       # build directx_headers
@@ -136,11 +145,6 @@ if(ENABLE_DIRECTXTK12)
     if (NOT directxtk12_POPULATED) # Have we downloaded raylib yet?
       set(FETCHCONTENT_QUIET NO)
       FetchContent_Populate(directxtk12)
-      #message("directxtk12_LIBRARY: " ${directxtk12_LIBRARY}) # fail but define in cmake
-      #message("directxtk12_INCLUDE_DIR: " ${directxtk12_INCLUDE_DIR}) #pass
-      #message("directxtk12_SOURCE_DIR: " ${directxtk12_SOURCE_DIR}) # pass
-      #message("directxtk12_BINARY_DIR: " ${directxtk12_BINARY_DIR}) # pass
-      #set(FT_WITH_ZLIB OFF CACHE BOOL "" FORCE)
       add_subdirectory(${directxtk12_SOURCE_DIR} ${directxtk12_BINARY_DIR}) #add to build in sub dir
     endif()
   endif()
@@ -185,18 +189,7 @@ if(ENABLE_IMGUI)
   endif()
 endif()
 
-#message("CMAKE_CURRENT_SOURCE_DIR  >>> " ${CMAKE_CURRENT_SOURCE_DIR})
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-#include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
-#[[
-# src dir
-file(GLOB CPP_SOURCE_FILES
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.h"
-)
-file(GLOB CPP_HEADER_FILES
-  "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
-)
-]]
+
 #================================================
 # INCLUDE DIR FOLDERS
 #================================================
@@ -210,18 +203,14 @@ add_executable(${PROJECT_NAME}
   ${CPP_HEADER_FILES}
   ${CPP_SOURCE_FILES}
 )
+
+target_include_directories(${PROJECT_NAME} PRIVATE "${CMAKE_BINARY_DIR}/include")
+
 # https://stackoverflow.com/questions/33137590/link-against-dx10-using-cmake
 target_link_libraries(${PROJECT_NAME} 
   d3d11
-  #d3dx11
-  #dxguid
-  #${d3d11_LIB}
-  #${d3dx11_LIB}
-  #${dxguid_LIB}
+  DirectXTK
+  OpenAL::OpenAL
 )
 
-#target_compile_options(${PROJECT_NAME} PRIVATE -Wall)
-#set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-#set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-#include(CPack)
 message("END OF CMAKELIST...")

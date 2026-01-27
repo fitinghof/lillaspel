@@ -1,5 +1,8 @@
+#pragma once
+
 #include <iostream>
 #include <string>
+#include <fstream>
 
 // Just the basic stuff, someone rewrite for more functionality
 
@@ -9,15 +12,27 @@
 
 class Logger {
 public:
-	static void log(std::string info) {
+	static void Log(std::string info) {
 		std::cout << info << std::endl;
+
+		PrintToFile(info);
 	}
 
-	static void warn(std::string info) {
+	static void Warn(std::string info) {
 		std::cout << YELLOW << "[WARNING] " << info << RESET_COLOR << std::endl;
+		
+		PrintToFile("[WARNING] " + info);
 	}
 
-	static void error(std::string info) {
+	static void Error(std::string info) {
 		std::cout << RED << "[ERROR] " << info << RESET_COLOR << std::endl;
+
+		PrintToFile("[ERROR] " + info);
+	}
+
+	static void PrintToFile(std::string info) {
+		std::ofstream file("log.txt", std::ios::app);
+		file << info << "\n";
+		file.close();
 	}
 };

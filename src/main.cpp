@@ -5,7 +5,7 @@
 // Main code
 int main(int)
 {
-    Logger::log("This is a normal log.");
-    Logger::warn("This is a warning.");
-    Logger::error("This is an error.");
+    Logger::Log("This is a normal log.");
+    Logger::Warn("This is a warning.");
+    Logger::Error("This is an error.");
 }

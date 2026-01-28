@@ -4,12 +4,14 @@
 #include <d3d11.h>
 #include <string>
 #include <wrl/client.h>
+#include "utilities/logger.h"
+#include <format>
 
 class InputLayout {
 private:
 	std::vector<std::string> semanticNames; // Needed to store the semantic names of the element descriptions
 	std::vector<D3D11_INPUT_ELEMENT_DESC> elements;
-	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout = nullptr;
+	Microsoft::WRL::ComPtr<ID3D11InputLayout> inputLayout = Microsoft::WRL::ComPtr<ID3D11InputLayout>(nullptr);
 
 	size_t next_pos = 0;
 

@@ -8,6 +8,8 @@
 #include "rendering/shader.h"
 #include "rendering/inputLayout.h"
 #include "rendering/sampler.h"
+#include "rendering/vertex.h"
+#include "rendering/vertexBuffer.h"
 
 class Renderer {
 public:
@@ -44,7 +46,7 @@ private:
 	void CreateInputLayout(const std::string& vShaderByteCode);
 	void CreateSampler();
 
-	void LoadShaders(const std::string& vShaderByteCode);
+	void LoadShaders(std::string& vShaderByteCode);
 
 	void RenderPass();
 };

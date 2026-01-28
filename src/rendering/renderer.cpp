@@ -1,6 +1,3 @@
-#include "renderer.h"
-#include "renderer.h"
-#include "renderer.h"
 #include "rendering/renderer.h"
 
 void Renderer::Init(const Window& window)
@@ -14,7 +11,7 @@ void Renderer::Init(const Window& window)
 
 	std::string vShaderByteCode;
 	LoadShaders(vShaderByteCode);
-	CreateInputLayout(this->device.Get(), vShaderByteCode);
+	CreateInputLayout(vShaderByteCode);
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -71,7 +68,7 @@ void Renderer::CreateInputLayout(const std::string& vShaderByteCode)
 	this->inputLayout = std::unique_ptr<InputLayout>(new InputLayout());
 	this->inputLayout->AddInputElement("POSITION", DXGI_FORMAT_R32G32B32_FLOAT);
 	this->inputLayout->AddInputElement("NORMAL", DXGI_FORMAT_R32G32B32_FLOAT);
-	this->inputLayout->AddInputElement("UV", DXGI_FORMAT_R32G32_FLOAT);
+	this->inputLayout->AddInputElement("TEXCOORD", DXGI_FORMAT_R32G32_FLOAT);
 	this->inputLayout->FinalizeInputLayout(this->device.Get(), vShaderByteCode.c_str(), vShaderByteCode.length());
 }
 
@@ -81,14 +78,14 @@ void Renderer::CreateSampler()
 	this->sampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_WRAP);
 }
 
-void Renderer::LoadShaders(const std::string& vShaderByteCode)
+void Renderer::LoadShaders(std::string& vShaderByteCode)
 {
-	this->vShader = new Shader();
-	this->vShader->Initialize(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
-	vShaderByteCode = this->vShader->GetShaderByteCode();
+	this->vertexShader = std::unique_ptr<Shader>(new Shader());
+	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
+	vShaderByteCode = this->vertexShader->GetShaderByteCode();
 
-	this->pShader = new Shader();
-	this->pShader->Initialize(this->device.Get(), ShaderType::PIXEL_SHADER, "PSTest.cso");
+	this->pixelShader = std::unique_ptr<Shader>(new Shader());
+	this->pixelShader->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "PSTest.cso");
 }
 
 void Renderer::Render()
@@ -109,9 +106,9 @@ void Renderer::RenderPass()
 	immediateContext->PSSetSamplers(0, 1, &s);
 
 	// Shaders
-	this->vertexShader->BindShader(this->immediateContext);
-	this->immediateContext->RSSetViewports(1, this->viewport);
-	this->pixelShader->BindShader(this->immediateContext);
+	this->vertexShader->BindShader(this->immediateContext.Get());
+	this->immediateContext->RSSetViewports(1, &this->viewport);
+	this->pixelShader->BindShader(this->immediateContext.Get());
 
 	// Set up inputs
 	this->immediateContext->IASetInputLayout(this->inputLayout->GetInputLayout());
@@ -119,5 +116,24 @@ void Renderer::RenderPass()
 
 	// Render target
 	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
-	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDSV(0));
+	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
+
+	Vertex vertexData[] = {
+		// Triangle 1
+		{-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f},
+		{-0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f},
+		{ 0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f}
+	};
+
+	VertexBuffer* tempVBuffer = new VertexBuffer();
+	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 3, vertexData);
+
+	UINT stride = tempVBuffer->GetVertexSize();
+	UINT offset = 0;
+	ID3D11Buffer* vBuff = tempVBuffer->GetBuffer();
+
+	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
+
+	this->immediateContext->Draw(3, 0);
+	//this->immediateContext->DrawIndexed(mesh->GetIndexBuffer()->GetNrOfIndices(), 0, 0);
 }

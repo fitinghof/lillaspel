@@ -1,7 +1,23 @@
-#include "Shader.h"
+#include "rendering/shader.h"
 
 Shader::Shader() : type(ShaderType::PIXEL_SHADER)
 {
+}
+
+Shader::~Shader()
+{
+	if (this->shader.vertex)
+		this->shader.vertex->Release();
+	else if (this->shader.hull)
+		this->shader.hull->Release();
+	else if (this->shader.domain)
+		this->shader.domain->Release();
+	else if (this->shader.geometry)
+		this->shader.geometry->Release();
+	else if (this->shader.pixel)
+		this->shader.pixel->Release();
+	else if (this->shader.compute)
+		this->shader.compute->Release();
 }
 
 void Shader::Init(ID3D11Device* device, ShaderType shaderType, const char* csoPath)
@@ -26,22 +42,22 @@ void Shader::Init(ID3D11Device* device, ShaderType shaderType, const char* csoPa
 	switch (shaderType)
 	{
 	case ShaderType::VERTEX_SHADER:
-		hr = device->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr, this->shader.vertex.GetAddressOf());
+		hr = device->CreateVertexShader(shaderData.c_str(), shaderData.length(), nullptr, &this->shader.vertex);
 		break;
 	case ShaderType::HULL_SHADER:
-		hr = device->CreateHullShader(shaderData.c_str(), shaderData.length(), nullptr, this->shader.hull.GetAddressOf());
+		hr = device->CreateHullShader(shaderData.c_str(), shaderData.length(), nullptr, &this->shader.hull);
 		break;
 	case ShaderType::DOMAIN_SHADER:
-		hr = device->CreateDomainShader(shaderData.c_str(), shaderData.length(), nullptr, this->shader.domain.GetAddressOf());
+		hr = device->CreateDomainShader(shaderData.c_str(), shaderData.length(), nullptr, &this->shader.domain);
 		break;
 	case ShaderType::GEOMETRY_SHADER:
-		hr = device->CreateGeometryShader(shaderData.c_str(), shaderData.length(), nullptr, this->shader.geometry.GetAddressOf());
+		hr = device->CreateGeometryShader(shaderData.c_str(), shaderData.length(), nullptr, &this->shader.geometry);
 		break;
 	case ShaderType::PIXEL_SHADER:
-		hr = device->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, this->shader.pixel..GetAddressOf());
+		hr = device->CreatePixelShader(shaderData.c_str(), shaderData.length(), nullptr, &this->shader.pixel);
 		break;
 	case ShaderType::COMPUTE_SHADER:
-		hr = device->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, this->shader.compute.GetAddressOf());
+		hr = device->CreateComputeShader(shaderData.c_str(), shaderData.length(), nullptr, &this->shader.compute);
 		break;
 	}
 
@@ -85,22 +101,22 @@ void Shader::BindShader(ID3D11DeviceContext* context) const
 	switch (this->type)
 	{
 	case ShaderType::VERTEX_SHADER:
-		context->VSSetShader(this->shader.vertex.Get(), nullptr, 0);
+		context->VSSetShader(this->shader.vertex, nullptr, 0);
 		break;
 	case ShaderType::HULL_SHADER:
-		context->HSSetShader(this->shader.hull.Get(), nullptr, 0);
+		context->HSSetShader(this->shader.hull, nullptr, 0);
 		break;
 	case ShaderType::DOMAIN_SHADER:
-		context->DSSetShader(this->shader.domain.Get(), nullptr, 0);
+		context->DSSetShader(this->shader.domain, nullptr, 0);
 		break;
 	case ShaderType::GEOMETRY_SHADER:
-		context->GSSetShader(this->shader.geometry.Get(), nullptr, 0);
+		context->GSSetShader(this->shader.geometry, nullptr, 0);
 		break;
 	case ShaderType::PIXEL_SHADER:
-		context->PSSetShader(this->shader.pixel.Get(), nullptr, 0);
+		context->PSSetShader(this->shader.pixel, nullptr, 0);
 		break;
 	case ShaderType::COMPUTE_SHADER:
-		context->CSSetShader(this->shader.compute.Get(), nullptr, 0);
+		context->CSSetShader(this->shader.compute, nullptr, 0);
 		break;
 	}
 }

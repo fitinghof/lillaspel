@@ -1,4 +1,4 @@
-#include "vertexBuffer.h"
+#include "rendering/vertexBuffer.h"
 
 void VertexBuffer::Init(ID3D11Device* device, UINT sizeOfVertex, UINT nrOfVerticesInBuffer, void* vertexData)
 {

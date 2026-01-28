@@ -24,14 +24,15 @@ private:
 
 	ShaderType type;
 
+	// ComPtr:s didn't work well in a union, maybe someone should check out if there's a different approach
 	union
 	{
-		Microsoft::WRL::ComPtr<ID3D11VertexShader> vertex = nullptr;
-		Microsoft::WRL::ComPtr<ID3D11HullShader> hull;
-		Microsoft::WRL::ComPtr<ID3D11DomainShader> domain;
-		Microsoft::WRL::ComPtr<ID3D11GeometryShader> geometry;
-		Microsoft::WRL::ComPtr<ID3D11PixelShader> pixel;
-		Microsoft::WRL::ComPtr<ID3D11ComputeShader> compute;
+		ID3D11VertexShader* vertex = nullptr;
+		ID3D11HullShader* hull;
+		ID3D11DomainShader* domain;
+		ID3D11GeometryShader* geometry;
+		ID3D11PixelShader* pixel;
+		ID3D11ComputeShader* compute;
 	} shader;
 
 	Microsoft::WRL::ComPtr<ID3DBlob> shaderBlob = nullptr;
@@ -40,7 +41,7 @@ private:
 
 public:
 	Shader();
-	~Shader() = default;
+	~Shader();
 	Shader(const Shader& other) = delete;
 	Shader& operator=(const Shader& other) = delete;
 	Shader(Shader&& other) = delete;

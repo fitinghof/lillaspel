@@ -1,4 +1,5 @@
 #include "rendering/inputLayout.h"
+#include "string"
 
 void InputLayout::AddInputElement(const std::string& semanticName, DXGI_FORMAT format)
 {
@@ -40,7 +41,7 @@ void InputLayout::FinalizeInputLayout(ID3D11Device* device, const void* vsDataPt
 	HRESULT hr = device->CreateInputLayout(this->elements.data(), this->elements.size(), vsDataPtr, vsDataSize, this->inputLayout.GetAddressOf());
 
 	if (FAILED(hr)) {
-		throw std::exception("Failed to create input layout");
+		throw std::exception(std::format("Failed to create input layout {}", hr).c_str());
 	}
 }
 

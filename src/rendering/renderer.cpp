@@ -94,6 +94,16 @@ void Renderer::Render()
 	this->swapChain->Present(0, 0);
 }
 
+ID3D11Device* Renderer::GetDevice() const
+{
+	return this->device.Get();
+}
+
+ID3D11DeviceContext* Renderer::GetContext() const
+{
+	return this->immediateContext.Get();
+}
+
 void Renderer::RenderPass()
 {
 	// Clear previous frame
@@ -118,6 +128,12 @@ void Renderer::RenderPass()
 	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
 	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
 
+	/*MatrixContainer* matData = nullptr;
+	XMMATRIX_ViewMatrix(cameraPos, lookPos, up)* XMMATRIX_ProjMatrix_Perspective(fov, aspectRatio);
+	CameraBufferContainer data = { *matData, 0, 0, 0 };*/
+
+
+	// Vertices - this is very temporary
 	Vertex vertexData[] = {
 		// Triangle 1
 		{-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f},

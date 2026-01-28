@@ -11,6 +11,8 @@
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
 
+#include "rendering/temp_render_defs.h"
+
 class Renderer {
 public:
 	Renderer() = default;
@@ -22,6 +24,9 @@ public:
 	/// Render a frame and show it on the window
 	/// </summary>
 	void Render();
+
+	ID3D11Device* GetDevice() const;
+	ID3D11DeviceContext* GetContext() const;
 private:
 	D3D11_VIEWPORT viewport;
 

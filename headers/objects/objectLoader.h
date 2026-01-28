@@ -1,6 +1,7 @@
 #pragma once
 #include <fastgltf/core.hpp>
 #include <string>
+#include <filesystem>
 
 
 class ObjectLoader
@@ -8,7 +9,7 @@ class ObjectLoader
 public:
 	ObjectLoader();
 	~ObjectLoader();
-	void LoadGltf(std::string path);
+	void LoadGltf(std::filesystem::path path);
 
 
 

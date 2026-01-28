@@ -10,7 +10,7 @@ ImguiManager::~ImguiManager() {
 	ImGui::DestroyContext();
 }
 
-ImguiManager::InitalizeImgui(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
+void ImguiManager::InitalizeImgui(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -24,7 +24,7 @@ ImguiManager::InitalizeImgui(HWND hwnd, ID3D11Device* device, ID3D11DeviceContex
 	ImGui_ImplDX11_Init(device, immediateContext);
 }
 
-ImguiManager::imguiAtFrameStart() {
+void ImguiManager::imguiAtFrameStart() {
 	// (Your code process and dispatch Win32 messages)
 // Start the Dear ImGui frame
 	ImGui_ImplDX11_NewFrame();
@@ -33,7 +33,7 @@ ImguiManager::imguiAtFrameStart() {
 	ImGui::ShowDemoWindow(); // Show demo window! :)
 }
 
-ImguiManager::imguiAtFrameEnd() {
+void ImguiManager::imguiAtFrameEnd() {
 	// Rendering
 // (Your code clears your framebuffer, renders your other stuff etc.)
 	ImGui::Render();

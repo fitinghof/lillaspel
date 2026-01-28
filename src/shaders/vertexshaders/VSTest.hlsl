@@ -2,7 +2,7 @@ struct VertexShaderInput
 {
     float3 position : POSITION;
     float3 normal : NORMAL;
-    float2 texcord : TEXCORD;
+    float2 texcord : TEXCOORD;
 };
 
 struct VertexShaderOutput
@@ -10,7 +10,7 @@ struct VertexShaderOutput
     float4 position : SV_POSITION;
     float4 vertexWorldPosition : VERTEX_WORLD_POSITION;
     float4 normal : NORMAL;
-    float2 texcord : TEXCORD;
+    float2 texcord : TEXCOORD;
 };
 
 VertexShaderOutput main(VertexShaderInput input)

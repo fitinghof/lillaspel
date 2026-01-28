@@ -1,9 +1,16 @@
-#include "Windows.h"
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
+#include "Windows.h"
 #include <iostream>
 #include "test.h"
 #include "utilities/logger.h"
 #include "core/game.h"
+#include "objects/objectLoader.h"
 
 // Main code
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -12,6 +19,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_ int       nCmdShow) 
 {
 	// Maybe put some memory leak flags here
+
+	ObjectLoader l;
+	l.LoadGltf("");
 
 	std::unique_ptr<Game> game = std::unique_ptr<Game>(new Game());
 

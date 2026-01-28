@@ -11,6 +11,8 @@
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
 
+#include "rendering/temp_render_defs.h"
+
 class Renderer {
 public:
 	Renderer() = default;

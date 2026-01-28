@@ -13,6 +13,17 @@ struct VertexShaderOutput
     float2 texcord : TEXCOORD;
 };
 
+cbuffer ViewProjMatrixBuffer : register(b0)
+{
+    float4x4 viewProjectionMatrix;
+    float4 cameraPos;
+};
+
+cbuffer WorldMatrixBuffer : register(b1)
+{
+    float4x4 worldMatrix;
+};
+
 VertexShaderOutput main(VertexShaderInput input)
 {
     VertexShaderOutput output;

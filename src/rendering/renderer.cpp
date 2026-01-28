@@ -4,6 +4,8 @@ void Renderer::Init(const Window& window)
 {
     SetViewport(window);
     CreateDeviceAndSwapChain(window);
+    CreateRenderTarget();
+    CreateDepthBuffer(window);
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -41,4 +43,29 @@ void Renderer::CreateDeviceAndSwapChain(const Window& window)
     {
         throw std::runtime_error("Failed to create device and swapchain, Error: " + hr);
     }
+}
+
+void Renderer::CreateRenderTarget()
+{
+    this->renderTarget = std::unique_ptr<RenderTarget>(new RenderTarget());
+    this->renderTarget->Init(this->device.Get(), this->swapChain.Get());
+}
+
+void Renderer::CreateDepthBuffer(const Window& window)
+{
+    this->depthBuffer = std::unique_ptr<DepthBuffer>(new DepthBuffer());
+    this->depthBuffer->Init(this->device.Get(), window.GetWidth(), window.GetHeight());
+}
+
+void Renderer::Render()
+{
+    RenderPass();
+    this->swapChain->Present(0,0);
+}
+
+void Renderer::RenderPass()
+{
+    float clearColor[4] = { 0,0,0.1,0 };
+    this->immediateContext->ClearRenderTargetView(this->renderTarget->GetRenderTargetView(), clearColor);
+    this->immediateContext->ClearDepthStencilView(this->depthBuffer->GetDepthStencilView(0), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
 }

@@ -16,5 +16,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
+        renderer.Render();
     }
 }

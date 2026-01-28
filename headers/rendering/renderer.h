@@ -11,6 +11,7 @@
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
 #include "rendering/constantBuffer.h"
+#include "rendering/indexBuffer.h"
 
 #include "rendering/tempRenderDefs.h"
 

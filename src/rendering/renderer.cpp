@@ -132,6 +132,9 @@ void Renderer::RenderPass()
 	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
 	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
 
+
+
+
 	// very temp
 	MatrixContainer* matData = nullptr;
 	float pos[3] = {0.0f, 0.0f, 0.0f};
@@ -150,14 +153,14 @@ void Renderer::RenderPass()
 
 	// Vertices - this is very temporary
 	Vertex vertexData[] = {
-		// Triangle 1
-		{-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f},
-		{-0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f},
-		{ 0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f}
+		{-1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
+		{-1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
+		{ 1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
+		{ 1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f}
 	};
 
 	std::unique_ptr<VertexBuffer> tempVBuffer = std::unique_ptr<VertexBuffer>(new VertexBuffer());
-	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 3, vertexData);
+	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 4, vertexData);
 
 	UINT stride = tempVBuffer->GetVertexSize();
 	UINT offset = 0;
@@ -165,8 +168,19 @@ void Renderer::RenderPass()
 
 	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
 
-	float meshPos[3] = { 0.0f, 0.0f, 1.0f };
-	float meshRot[3] = { 0.0f, 0.0f, 0.0f };
+	uint32_t indices[] = {
+		0,1,2,1,3,2
+	};
+
+	std::unique_ptr<IndexBuffer> tempIBuffer = std::unique_ptr<IndexBuffer>(new IndexBuffer());
+	tempIBuffer->Init(this->device.Get(), 6, indices);
+
+	this->immediateContext->IASetIndexBuffer(tempIBuffer->GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+
+	float meshPos[3] = { 0.0f, 0.0f, 6.0f };
+	static float rot = 0;
+	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f};
 	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
 
 	MatrixContainer* meshData = nullptr;
@@ -180,6 +194,9 @@ void Renderer::RenderPass()
 
 	delete meshData;
 
-	this->immediateContext->Draw(3, 0);
-	//this->immediateContext->DrawIndexed(mesh->GetIndexBuffer()->GetNrOfIndices(), 0, 0);
+
+
+
+	//this->immediateContext->Draw(3, 0);
+	this->immediateContext->DrawIndexed(tempIBuffer->GetNrOfIndices(), 0, 0);
 }

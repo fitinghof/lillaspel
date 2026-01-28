@@ -7,13 +7,11 @@ class ObjectLoader
 {
 public:
 	ObjectLoader();
-	~ObjectLoader():
+	~ObjectLoader();
 	void LoadGltf(std::string path);
 
 
 
 private:
-	struct ObjectResources {
-		std::vector<
-	};
-}
+
+};

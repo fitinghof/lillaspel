@@ -4,7 +4,7 @@
 #include <string>
 #include <fstream>
 #include <ctime>
-
+#include <sstream>
 
 enum LogOption
 {
@@ -50,6 +50,13 @@ private:
 		file << info << "\n";
 		file.close();
 	}
+
+	template <typename T>
+	static std::string convertAnythingToString(T info) {
+		std::ostringstream stringToReturn;
+		stringToReturn << info;
+		return stringToReturn.str();
+	}
 	
 	static void TimeStamp() {
 		time_t timestamp;
@@ -58,16 +65,17 @@ private:
 	}
 
 public:
-	static void Log(std::string info, LogOption logOption = LogOption::consoleAndLogFile) {
-		createLog(info, logOption, LogType::log);
+	template <typename T>
+	static void Log(T info, LogOption logOption = LogOption::consoleAndLogFile) {
+		createLog(convertAnythingToString(info), logOption, LogType::log);
 	}
-
-	static void Warn(std::string info, LogOption logOption = LogOption::consoleAndLogFile) {
-		createLog(info, logOption, LogType::warning);
+	template <typename T>
+	static void Warn(T info, LogOption logOption = LogOption::consoleAndLogFile) {
+		createLog(convertAnythingToString(info), logOption, LogType::warning);
 	}
-
-	static void Error(std::string info, LogOption logOption = LogOption::consoleAndLogFile) {
-		createLog(info, logOption, LogType::error);
+	template <typename T>
+	static void Error(T info, LogOption logOption = LogOption::consoleAndLogFile) {
+		createLog(convertAnythingToString(info), logOption, LogType::error);
 	}
 
 	

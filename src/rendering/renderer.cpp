@@ -128,10 +128,19 @@ void Renderer::RenderPass()
 	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
 	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
 
-	/*MatrixContainer* matData = nullptr;
-	XMMATRIX_ViewMatrix(cameraPos, lookPos, up)* XMMATRIX_ProjMatrix_Perspective(fov, aspectRatio);
-	CameraBufferContainer data = { *matData, 0, 0, 0 };*/
+	// very temp
+	MatrixContainer* matData = nullptr;
+	float pos[3] = {0.0f, 0.0f, 0.0f};
+	float lookPos[3] = {0.0f, 0.0f, -1.0f};
+	float upDir[3] = {0.0f, 1.0f, 0.0f};
+	ConstantBufferViewProjMatrix_Perspective(matData, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
+	CameraBufferContainer data = { *matData, 0.0f, 0.0f, 0.0f, 0 };
 
+	std::unique_ptr<ConstantBuffer> camBuffer;
+	camBuffer->Init(this->device.Get(), sizeof(data), &data, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	ID3D11Buffer* camBuf = static_cast<ID3D11Buffer*>(camBuffer->GetBuffer());
+	this->immediateContext->VSSetConstantBuffers(0, 1, &camBuf);
 
 	// Vertices - this is very temporary
 	Vertex vertexData[] = {

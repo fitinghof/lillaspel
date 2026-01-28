@@ -10,8 +10,9 @@
 #include "rendering/sampler.h"
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
+#include "rendering/constantBuffer.h"
 
-#include "rendering/temp_render_defs.h"
+#include "rendering/tempRenderDefs.h"
 
 class Renderer {
 public:
@@ -24,6 +25,7 @@ public:
 	/// Render a frame and show it on the window
 	/// </summary>
 	void Render();
+	// Add specific present function
 
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;

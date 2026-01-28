@@ -22,10 +22,14 @@ public:
 	void Init(const Window& window);
 
 	/// <summary>
-	/// Render a frame and show it on the window
+	/// Render a frame
 	/// </summary>
 	void Render();
-	// Add specific present function
+
+	/// <summary>
+	/// Present the swapchain to the window
+	/// </summary>
+	void Present();
 
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;

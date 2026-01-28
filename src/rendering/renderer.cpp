@@ -68,7 +68,7 @@ void Renderer::CreateInputLayout(const std::string& vShaderByteCode)
 	this->inputLayout = std::unique_ptr<InputLayout>(new InputLayout());
 	this->inputLayout->AddInputElement("POSITION", DXGI_FORMAT_R32G32B32_FLOAT);
 	this->inputLayout->AddInputElement("NORMAL", DXGI_FORMAT_R32G32B32_FLOAT);
-	this->inputLayout->AddInputElement("TEXCOORD", DXGI_FORMAT_R32G32_FLOAT);
+	this->inputLayout->AddInputElement("UV", DXGI_FORMAT_R32G32_FLOAT);
 	this->inputLayout->FinalizeInputLayout(this->device.Get(), vShaderByteCode.c_str(), vShaderByteCode.length());
 }
 
@@ -91,6 +91,10 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 void Renderer::Render()
 {
 	RenderPass();
+}
+
+void Renderer::Present()
+{
 	this->swapChain->Present(0, 0);
 }
 
@@ -131,16 +135,18 @@ void Renderer::RenderPass()
 	// very temp
 	MatrixContainer* matData = nullptr;
 	float pos[3] = {0.0f, 0.0f, 0.0f};
-	float lookPos[3] = {0.0f, 0.0f, -1.0f};
+	float lookPos[3] = {0.0f, 0.0f, 1.0f};
 	float upDir[3] = {0.0f, 1.0f, 0.0f};
 	ConstantBufferViewProjMatrix_Perspective(matData, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
-	CameraBufferContainer data = { *matData, 0.0f, 0.0f, 0.0f, 0 };
+	CameraBufferContainer data = { *matData, 0.0f, 0.0f, 0.0f, 0};
 
-	std::unique_ptr<ConstantBuffer> camBuffer;
+	std::unique_ptr<ConstantBuffer> camBuffer = std::make_unique<ConstantBuffer>();
 	camBuffer->Init(this->device.Get(), sizeof(data), &data, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
 	ID3D11Buffer* camBuf = static_cast<ID3D11Buffer*>(camBuffer->GetBuffer());
 	this->immediateContext->VSSetConstantBuffers(0, 1, &camBuf);
+
+	delete matData;
 
 	// Vertices - this is very temporary
 	Vertex vertexData[] = {
@@ -150,7 +156,7 @@ void Renderer::RenderPass()
 		{ 0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f}
 	};
 
-	VertexBuffer* tempVBuffer = new VertexBuffer();
+	std::unique_ptr<VertexBuffer> tempVBuffer = std::unique_ptr<VertexBuffer>(new VertexBuffer());
 	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 3, vertexData);
 
 	UINT stride = tempVBuffer->GetVertexSize();
@@ -158,6 +164,21 @@ void Renderer::RenderPass()
 	ID3D11Buffer* vBuff = tempVBuffer->GetBuffer();
 
 	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
+
+	float meshPos[3] = { 0.0f, 0.0f, 1.0f };
+	float meshRot[3] = { 0.0f, 0.0f, 0.0f };
+	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
+
+	MatrixContainer* meshData = nullptr;
+	ConstantBufferWorldMatrix(meshData, meshPos, meshRot, meshScale);
+
+	std::unique_ptr<ConstantBuffer> worldBuffer = std::make_unique<ConstantBuffer>();
+	worldBuffer->Init(this->device.Get(), sizeof(MatrixContainer), meshData, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	ID3D11Buffer* vertexBuf = static_cast<ID3D11Buffer*>(worldBuffer->GetBuffer());
+	this->immediateContext->VSSetConstantBuffers(1, 1, &vertexBuf);
+
+	delete meshData;
 
 	this->immediateContext->Draw(3, 0);
 	//this->immediateContext->DrawIndexed(mesh->GetIndexBuffer()->GetNrOfIndices(), 0, 0);

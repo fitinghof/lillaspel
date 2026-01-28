@@ -17,7 +17,7 @@ void ConstantBuffer::Init(ID3D11Device* device, size_t byteSize, void* initialDa
 
 	HRESULT hr = device->CreateBuffer(&bufferDesc, &data, this->buffer.GetAddressOf());
 	if (FAILED(hr)) {
-		throw std::exception(std::format("Failed to create constant buffer! {}", hr).c_str());
+		throw std::exception(std::format("Failed to create constant buffer, HRESULT: 0x{:08X}", hr).c_str());
 	}
 
 	this->bufferSize = byteSize;
@@ -38,7 +38,11 @@ void ConstantBuffer::UpdateBuffer(ID3D11DeviceContext* context, void* data)
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 
 	// Turn off GPU access
-	context->Map(this->buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	HRESULT hr = context->Map(this->buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	if (FAILED(hr))
+	{
+		throw std::exception(std::format("Failed to map, error: HRESULT: 0x{:08X}", hr).c_str());
+	}
 
 	memcpy(mappedResource.pData, data, this->bufferSize);
 

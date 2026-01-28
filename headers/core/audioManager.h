@@ -3,6 +3,7 @@
 #include "alc.h"
 #include "sndfile.h"
 #include <iostream>
+#include "utilities/logger.h"
 
 class AudioManager
 {

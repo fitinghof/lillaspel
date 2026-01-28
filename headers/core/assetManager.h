@@ -2,13 +2,19 @@
 #include <vector>
 #include <unordered_map>
 
+#include "../headers/core/audio/soundEngine.h"
+
 class AssetManager
 {
 public:
 	AssetManager();
 	~AssetManager();
 
-private:
 
+
+private:
+	MusicTrack currentMusicTrack;
+	SoundBank soundBank;
+	std::vector<SoundSource> soundSources;
 };
 

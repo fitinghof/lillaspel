@@ -1,6 +1,6 @@
-#include "MusicTrack.h"
+#include "../../../headers/core/audio/musicTrack.h"
 
-MusicTrack::MusicTrack(std::string pathToSoundFolder) : pathToSoundFolder(pathToSoundFolder)
+MusicTrack::MusicTrack()
 {
 	this->audioInstruction.fadeIn = false; //will look at this later
 	this->audioInstruction.fadeInTime = 0;
@@ -24,6 +24,11 @@ MusicTrack::~MusicTrack()
 	alDeleteBuffers(NUM_BUFFERS, this->buffers);
 }
 
+void MusicTrack::Initialize(std::string pathToMusicFolder)
+{
+	this->pathToMusicFolder = pathToMusicFolder;
+}
+
 void MusicTrack::Play()
 {
 	alGetError();
@@ -41,7 +46,7 @@ void MusicTrack::Play()
 
 	if (alGetError() != AL_NO_ERROR)
 	{
-		std::cout << "error buffering for playback" << std::endl;
+		Logger::Error("error buffering for playback");
 		return;
 	}
 
@@ -50,7 +55,7 @@ void MusicTrack::Play()
 
 	if (alGetError() != AL_NO_ERROR)
 	{
-		std::cout << "error starting playback" << std::endl;
+		Logger::Error("error buffering for playback");
 	}
 }
 
@@ -65,13 +70,13 @@ void MusicTrack::LoadTrackStandardFolder(std::string filename)
 	alSource3f(this->source, AL_VELOCITY, this->velocity[0], this->velocity[1], this->velocity[2]);
 	alSourcei(this->source, AL_LOOPING, this->audioInstruction.loopSound);
 
-	std::string fullpath = this->pathToSoundFolder + filename;
+	std::string fullpath = this->pathToMusicFolder + filename;
 	const char* file = fullpath.c_str();
 	sndfile = sf_open(file, SFM_READ, &this->sfInfo);
 
 	if (!sndfile)
 	{
-		std::cout << "could not open " << fullpath << std::endl;
+		Logger::Error("could not open " + fullpath);
 		return;
 	}
 
@@ -90,7 +95,8 @@ void MusicTrack::LoadTrackStandardFolder(std::string filename)
 		//there are 2 more cases, see tutorial part 1 for details
 
 	default:
-		std::cout << "unsupported channel count: " << sfInfo.channels << std::endl;
+		//std::cout << "unsupported channel count: " << sfInfo.channels << std::endl;
+		Logger::Error("unsupported channel count: ");
 		sf_close(sndfile);
 		return;
 	}
@@ -149,7 +155,7 @@ void MusicTrack::UpdateBufferStream()
 
 	if (alGetError() != AL_NO_ERROR)
 	{
-		std::cout << "error  checking music source state" << std::endl;
+		Logger::Error("error  checking music source state");
 	}
 
 	while (processed > 0)
@@ -171,7 +177,7 @@ void MusicTrack::UpdateBufferStream()
 
 		if (alGetError() != AL_NO_ERROR)
 		{
-			std::cout << "error buffering music data while streaming" << std::endl;
+			Logger::Error("error buffering music data while streaming");
 			return;
 		}
 	}
@@ -189,7 +195,7 @@ void MusicTrack::UpdateBufferStream()
 		alSourcePlay(this->source);
 		if (alGetError() != AL_NO_ERROR)
 		{
-			std::cout << "error restarting music" << std::endl;
+			Logger::Error("error restarting music");
 		}
 	}
 }

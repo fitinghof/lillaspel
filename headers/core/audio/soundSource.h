@@ -4,8 +4,9 @@
 #include <string>
 #include <iostream>
 #include "sndfile.h"
-#include "AudioInstruction.h"
-#include "SoundClip.h"
+#include "audioInstruction.h"
+#include "soundClip.h"
+#include "utilities/logger.h"
 
 class SoundSource
 {

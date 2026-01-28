@@ -1,14 +1,14 @@
-#include "AudioManager.h"
+#include "../../../headers/core/audioManager.h"
 
 AudioManager::AudioManager()
 {
 	this->ALCDevice = alcOpenDevice(nullptr);
-	if (!this->ALCDevice) std::cout << "failed to get sound device!" << std::endl;
+	if (!this->ALCDevice) Logger::Error("failed to get sound device!");
 
 	this->ALCContext = alcCreateContext(this->ALCDevice, nullptr);
-	if (!this->ALCContext) std::cout << "failed to create context!" << std::endl;
+	if (!this->ALCContext) Logger::Error("failed to create context!");
 
-	if(!alcMakeContextCurrent(this->ALCContext)) std::cout << "failed to set this as current context!" << std::endl;
+	if (!alcMakeContextCurrent(this->ALCContext)) Logger::Error("failed to set this as current context!");
 
 	const ALCchar* name = nullptr;
 	if (alcIsExtensionPresent(this->ALCDevice, "ALC_ENUMERATE_ALL_EXT"))
@@ -20,17 +20,18 @@ AudioManager::AudioManager()
 		name = alcGetString(this->ALCDevice, ALC_DEVICE_SPECIFIER);
 	}
 
-	std::cout << "opened " << name << std::endl;
+	std::string n = name;
+	Logger::Log("opened " + n);
 }
 
 AudioManager::~AudioManager()
 {
-	if (!alcMakeContextCurrent(nullptr)) std::cout << "failed to unset context during termination!" << std::endl;
+	if (!alcMakeContextCurrent(nullptr)) Logger::Error("failed to unset context during termination!");
 
 	alcDestroyContext(this->ALCContext);
-	if (this->ALCContext) std::cout << "failed to destroy context!" << std::endl;
+	if (this->ALCContext) Logger::Error("failed to destroy context!");
 
-	if (!alcCloseDevice(this->ALCDevice)) std::cout << "failed to close sound device!" << std::endl;
+	if (!alcCloseDevice(this->ALCDevice)) Logger::Error("failed to close sound device!");
 }
 
 void AudioManager::Initialize()

@@ -1,4 +1,4 @@
-#include "SoundSource.h"
+#include "../../../headers/core/audio/soundSource.h"
 
 SoundSource::SoundSource()
 {

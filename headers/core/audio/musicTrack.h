@@ -4,20 +4,22 @@
 #include <string>
 #include <iostream>
 #include "sndfile.h"
-#include "AudioInstruction.h"
+#include "audioInstruction.h"
+#include "utilities/logger.h"
 
 class MusicTrack
 {
 public:
-	MusicTrack(std::string pathToSoundFolder);
+	MusicTrack();
 	~MusicTrack();
 
-	const std::string pathToSoundFolder;
+	std::string pathToMusicFolder;
 	
 	void Play();
 	void Pause();
 	void Restart();
 
+	void Initialize(std::string pathToMusicFolder);
 	void UpdateBufferStream();
 	void LoadTrackStandardFolder(std::string filename);
 	void LoadTrack(std::string filepath);
@@ -39,6 +41,4 @@ private:
 	SF_INFO sfInfo;
 	short* membuf;
 	ALenum format;
-
-	MusicTrack() = delete;
 };

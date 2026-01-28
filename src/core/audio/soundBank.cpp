@@ -1,11 +1,16 @@
-#include "SoundBank.h"
+#include "../../../headers/core/audio/soundBank.h"
 
-SoundBank::SoundBank(std::string pathToSoundFolder) : pathToSoundFolder(pathToSoundFolder)
+SoundBank::SoundBank()
 {
 }
 
 SoundBank::~SoundBank()
 {
+}
+
+void SoundBank::Initialize(std::string pathToSoundFolder)
+{
+	this->pathToSoundFolder = pathToSoundFolder;
 }
 
 void SoundBank::AddSoundClipStandardFolder(const std::string filename)
@@ -28,7 +33,7 @@ SoundClip SoundBank::GetSoundClipStandardFolder(const std::string filename)
 		return this->soundClips[fullpath];
 	}
 
-	std::cout << "couldn't find " << fullpath << std::endl;
+	Logger::Log("couldn't find " + fullpath);
 	SoundClip nullClip;
 	nullClip.filepath = "";
 	nullClip.bufferID = -1;
@@ -44,7 +49,7 @@ SoundClip SoundBank::GetSoundClip(const std::string relativePath)
 		return this->soundClips[relativePath];
 	}
 
-	std::cout << "couldn't find " << relativePath << std::endl;
+	Logger::Log("couldn't find " + relativePath);
 	SoundClip nullClip;
 	nullClip.filepath = "";
 	nullClip.bufferID = -1;
@@ -91,10 +96,14 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 	const char* filepath = fullpath.c_str();
 	sndfile = sf_open(filepath, SFM_READ, &sfInfo);
 
-	if (!sndfile) std::cout << "could not open " << fullpath << std::endl;
+	if (!sndfile)
+	{
+		Logger::Error("Libsndfile error: " + std::string(sf_strerror(NULL)));
+		Logger::Log("could not open " + fullpath);
+	}
 	if (sfInfo.frames < 1 || sfInfo.frames >(sf_count_t)(INT_MAX / sizeof(short)) / sfInfo.channels)
 	{
-		std::cout << "bad sample count in " << fullpath << ", " << sfInfo.frames << std::endl;
+		Logger::Error("bad sample count in " + fullpath);
 		return;
 	}
 
@@ -113,7 +122,7 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 		//there are 2 more cases, see tutorial part 1 for details
 
 	default:
-		std::cout << "unsupported channel count: " << sfInfo.channels << std::endl;
+		Logger::Error("unsupported channel count: ");
 		sf_close(sndfile);
 		return;
 	}
@@ -126,7 +135,7 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 		free(membuf);
 		sf_close(sndfile);
 
-		std::cout << "failed to read samples in " << fullpath << ", " << numFrames << std::endl;
+		Logger::Error("failed to read samples in ");
 		return;
 	}
 
@@ -139,7 +148,8 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 	error = alGetError();
 	if (error != AL_NO_ERROR)
 	{
-		std::cout << "OpenAL error: " << alGetString(error) << std::endl;
+		std::string err = alGetString(error);
+		Logger::Error("OpenAL error: " + err);
 
 		if (buffer && alIsBuffer(buffer)) alDeleteBuffers(1, &buffer);
 		return;

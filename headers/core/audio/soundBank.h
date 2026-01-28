@@ -5,16 +5,18 @@
 #include <iostream>
 #include <unordered_map>
 #include "sndfile.h"
-#include "SoundClip.h"
+#include "soundClip.h"
+#include "utilities/logger.h"
 
 class SoundBank
 {
 public:
-	SoundBank(std::string pathToSoundFolder);
+	SoundBank();
 	~SoundBank();
 
-	const std::string pathToSoundFolder;
+	std::string pathToSoundFolder;
 
+	void Initialize(std::string pathToSoundFolder);
 	void AddSoundClipStandardFolder(const std::string filename); //filename without the path to its folder
 	void AddSoundClip(const std::string relativePath); //full/relative path to soundfile
 	SoundClip GetSoundClipStandardFolder(const std::string filename);
@@ -27,6 +29,4 @@ private:
 
 	void CreateSoundBuffer(std::string filepath);
 	void DeleteSoundBuffer(std::string filepath);
-
-	SoundBank() = delete;
 };

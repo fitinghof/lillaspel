@@ -21,7 +21,7 @@ void Sampler::Init(ID3D11Device* device, D3D11_TEXTURE_ADDRESS_MODE adressMode)
 	HRESULT hr = device->CreateSamplerState(&samplerDesc, &sampler);
 
 	if (FAILED(hr)) {
-		throw std::exception("Failed to create the sampler state");
+		throw std::exception(std::format("Failed to create the sampler state, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 }
 

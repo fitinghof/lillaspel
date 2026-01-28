@@ -2,6 +2,11 @@
 
 #include <DirectXMath.h>
 
+// This entire file exists only to simplify temporary logic in renderer.cpp
+// Hopefully we will have classes doing this in the future
+
+
+
 struct MatrixContainer {
 	DirectX::XMFLOAT4X4 matrix;
 };

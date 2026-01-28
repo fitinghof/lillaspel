@@ -18,7 +18,7 @@ void IndexBuffer::Init(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint32_
 	HRESULT hr = device->CreateBuffer(&bufferDesc, &data, &this->buffer);
 	if (FAILED(hr))
 	{
-		throw std::exception(std::format("Failed to create index buffer, HRESULT: 0x{:08X}", hr).c_str());
+		throw std::exception(std::format("Failed to create index buffer, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 
 	this->nrOfIndices = nrOfIndicesInBuffer;

@@ -17,7 +17,7 @@ void VertexBuffer::Init(ID3D11Device* device, UINT sizeOfVertex, UINT nrOfVertic
 
 	HRESULT hr = device->CreateBuffer(&bufferDesc, &data, this->buffer.GetAddressOf());
 	if (FAILED(hr)) {
-		throw std::exception("Failed to create vertex buffer.");
+		throw std::exception(std::format("Failed to create vertex buffer, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 
 	this->vertexSize = sizeOfVertex;

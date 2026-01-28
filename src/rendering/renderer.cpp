@@ -80,6 +80,8 @@ void Renderer::CreateSampler()
 
 void Renderer::LoadShaders(std::string& vShaderByteCode)
 {
+	// This shouldn't be directly hardcoded into the renderer
+
 	this->vertexShader = std::unique_ptr<Shader>(new Shader());
 	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
 	vShaderByteCode = this->vertexShader->GetShaderByteCode();
@@ -106,6 +108,11 @@ ID3D11Device* Renderer::GetDevice() const
 ID3D11DeviceContext* Renderer::GetContext() const
 {
 	return this->immediateContext.Get();
+}
+
+IDXGISwapChain* Renderer::GetSwapChain() const
+{
+	return this->swapChain.Get();
 }
 
 void Renderer::RenderPass()
@@ -135,23 +142,30 @@ void Renderer::RenderPass()
 
 
 
-	// very temp
-	MatrixContainer* matData = nullptr;
+	// Temporary logic to create the camera
+	// Will be replaced when there's an actual camera object
+	MatrixContainer* cameraMatrix = nullptr;
 	float pos[3] = {0.0f, 0.0f, 0.0f};
 	float lookPos[3] = {0.0f, 0.0f, 1.0f};
 	float upDir[3] = {0.0f, 1.0f, 0.0f};
-	ConstantBufferViewProjMatrix_Perspective(matData, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
-	CameraBufferContainer data = { *matData, 0.0f, 0.0f, 0.0f, 0};
+	ConstantBufferViewProjMatrix_Perspective(cameraMatrix, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
+	CameraBufferContainer cameraBufferContainer = { *cameraMatrix, 0.0f, 0.0f, 0.0f, 0};
 
 	std::unique_ptr<ConstantBuffer> camBuffer = std::make_unique<ConstantBuffer>();
-	camBuffer->Init(this->device.Get(), sizeof(data), &data, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	camBuffer->Init(this->device.Get(), sizeof(cameraBufferContainer), &cameraBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
 	ID3D11Buffer* camBuf = static_cast<ID3D11Buffer*>(camBuffer->GetBuffer());
 	this->immediateContext->VSSetConstantBuffers(0, 1, &camBuf);
 
-	delete matData;
+	delete cameraMatrix;
 
-	// Vertices - this is very temporary
+
+
+
+
+	// Temporary logic to create a quad
+	// Will be replaced when we can use a mesh class instead
+
 	Vertex vertexData[] = {
 		{-1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
 		{-1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
@@ -180,23 +194,23 @@ void Renderer::RenderPass()
 
 	float meshPos[3] = { 0.0f, 0.0f, 6.0f };
 	static float rot = 0;
-	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f};
+	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f}; // I know this is framerate-dependent. It's a temporary test, ok?
 	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
 
-	MatrixContainer* meshData = nullptr;
-	ConstantBufferWorldMatrix(meshData, meshPos, meshRot, meshScale);
+	MatrixContainer* worldMatrix = nullptr;
+	ConstantBufferWorldMatrix(worldMatrix, meshPos, meshRot, meshScale);
 
-	std::unique_ptr<ConstantBuffer> worldBuffer = std::make_unique<ConstantBuffer>();
-	worldBuffer->Init(this->device.Get(), sizeof(MatrixContainer), meshData, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	std::unique_ptr<ConstantBuffer> worldMatrixBuffer = std::make_unique<ConstantBuffer>();
+	worldMatrixBuffer->Init(this->device.Get(), sizeof(MatrixContainer), worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-	ID3D11Buffer* vertexBuf = static_cast<ID3D11Buffer*>(worldBuffer->GetBuffer());
-	this->immediateContext->VSSetConstantBuffers(1, 1, &vertexBuf);
+	ID3D11Buffer* worldMatrixBuf = static_cast<ID3D11Buffer*>(worldMatrixBuffer->GetBuffer());
+	this->immediateContext->VSSetConstantBuffers(1, 1, &worldMatrixBuf);
 
-	delete meshData;
-
-
+	delete worldMatrix;
 
 
-	//this->immediateContext->Draw(3, 0);
+
+
+	// Draw the quad to screen
 	this->immediateContext->DrawIndexed(tempIBuffer->GetNrOfIndices(), 0, 0);
 }

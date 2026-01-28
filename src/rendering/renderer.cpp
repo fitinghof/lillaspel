@@ -94,6 +94,16 @@ void Renderer::Render()
 	this->swapChain->Present(0, 0);
 }
 
+ID3D11Device* Renderer::GetDevice() const
+{
+	return this->device.Get();
+}
+
+ID3D11DeviceContext* Renderer::GetContext() const
+{
+	return this->immediateContext.Get();
+}
+
 void Renderer::RenderPass()
 {
 	// Clear previous frame

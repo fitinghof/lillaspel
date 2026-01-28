@@ -131,10 +131,12 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 
 # Build HLSL shaders
 set(SHADER_PATH "./src/shaders")
-set(HLSL_SHADER_FILES ${SHADER_PATH}/PSTest.hlsl ${SHADER_PATH}/VSTest.hlsl)
+set(PS_SHADER "${SHADER_PATH}/pixelshaders/PSTest.hlsl")
+set(VS_SHADER "${SHADER_PATH}/vertexshaders/VSTest.hlsl")
+set(HLSL_SHADER_FILES ${PS_SHADER} ${VS_SHADER})
 
-set_source_files_properties(${SHADER_PATH}/VSTest.hlsl PROPERTIES ShaderType "vs")
-set_source_files_properties(${SHADER_PATH}/PSTest.hlsl PROPERTIES ShaderType "ps")
+set_source_files_properties(${VS_SHADER} PROPERTIES ShaderType "vs")
+set_source_files_properties(${PS_SHADER} PROPERTIES ShaderType "ps")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
 foreach(FILE ${HLSL_SHADER_FILES})

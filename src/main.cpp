@@ -10,7 +10,7 @@
 #include "test.h"
 #include "utilities/logger.h"
 #include "core/game.h"
-#include "objects/objectLoader.h"
+#include "gameObjects/objectLoader.h"
 
 // Main code
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,

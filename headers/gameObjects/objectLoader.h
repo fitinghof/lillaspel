@@ -4,7 +4,7 @@
 #include <string>
 #include <filesystem>
 #include "rendering/vertex.h"
-#include "objects/mesh.h"
+#include "gameObjects/mesh.h"
 
 
 //struct GltfLoadResult {

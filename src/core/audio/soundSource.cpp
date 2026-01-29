@@ -32,7 +32,7 @@ SoundSource::~SoundSource()
 	delete[] this->currentBuffers;
 }
 
-void SoundSource::Play(SoundClip soundClip)
+void SoundSource::Play(SoundClip* soundClip)
 {
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
@@ -43,8 +43,8 @@ void SoundSource::Play(SoundClip soundClip)
 
 		if (state != AL_PLAYING)
 		{
-			alSourcei(this->sources[index], AL_BUFFER, (ALint)soundClip.bufferID);
-			this->currentBuffers[index] = soundClip.bufferID;
+			alSourcei(this->sources[index], AL_BUFFER, (ALint)soundClip->bufferID);
+			this->currentBuffers[index] = soundClip->bufferID;
 			alSourcePlay(this->sources[index]);
 
 			// Next search will start after this one
@@ -54,18 +54,28 @@ void SoundSource::Play(SoundClip soundClip)
 	}
 
 	// No free source, overwrite the next
-	alSourcei(this->sources[this->sourceIndex], AL_BUFFER, (ALint)soundClip.bufferID);
-	this->currentBuffers[this->sourceIndex] = soundClip.bufferID;
+	alSourcei(this->sources[this->sourceIndex], AL_BUFFER, (ALint)soundClip->bufferID);
+	this->currentBuffers[this->sourceIndex] = soundClip->bufferID;
 	alSourcePlay(this->sources[this->sourceIndex]);
 
 	this->sourceIndex = (this->sourceIndex + 1) % this->nrOfSources;
 }
 
-void SoundSource::SetPosition(float* vector3)
+void SoundSource::SetId(int newId)
 {
-	this->position[0] = vector3[0];
-	this->position[1] = vector3[1];
-	this->position[2] = vector3[2];
+	this->id = newId;
+}
+
+int SoundSource::GetId()
+{
+	return this->id;
+}
+
+void SoundSource::SetPosition(float x, float y, float z)
+{
+	this->position[0] = x;
+	this->position[1] = y;
+	this->position[2] = z;
 
 	alSource3f(this->sources[this->sourceIndex], AL_POSITION, (ALfloat)this->position[0], (ALfloat)this->position[1], (ALfloat)this->position[2]);
 }

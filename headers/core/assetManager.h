@@ -15,6 +15,5 @@ public:
 private:
 	MusicTrack currentMusicTrack;
 	SoundBank soundBank;
-	std::vector<SoundSource> soundSources;
 };
 

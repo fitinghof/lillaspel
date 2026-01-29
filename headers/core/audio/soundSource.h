@@ -13,16 +13,20 @@ class SoundSource
 public:
 	SoundSource();
 	~SoundSource();
+	SoundClip& operator=(SoundClip&) = delete;
 
-	void Play(SoundClip soundClip);
-	void SetPosition(float* vector3);
+	void Play(SoundClip* soundClip);
+	void SetPosition(float x, float y, float z);
 	void SetGain(float gain);
 	void SetPitch(float pitch);
 	void ChangePitch(float pitchChange);
 	void ChangeGain(float gainChange);
 	void SetAudioInstruction(AudioInstruction instructionSet);
+	void SetId(int newId);
+	int GetId();
 
 private:
+	int id = -1;
 	int nrOfSources = 6;
 	int sourceIndex = 0;
 	ALuint* sources;

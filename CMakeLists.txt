@@ -1,5 +1,10 @@
-cmake_minimum_required(VERSION 3.18...3.27)
+cmake_minimum_required(VERSION 3.18...3.27) # FetchContent is available in 3.11+
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5) # Makes sndfile happy
+
+# https://www.programmersought.com/article/68945253024/
+
 project(lillaspel VERSION 0.0.1 LANGUAGES CXX)
+message(STATUS "Configuring ${PROJECT_NAME} v${PROJECT_VERSION}")
 
 # Use a modern C++ standard
 set(CMAKE_CXX_STANDARD 20)
@@ -12,15 +17,12 @@ add_compile_definitions(UNICODE _UNICODE)
 # Where to put built artifacts
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 include(FetchContent)
 
-# Directory for pre-built libraries
-set(LIBRARY_DIR "${CMAKE_BINARY_DIR}/lib")
-file(MAKE_DIRECTORY "${LIBRARY_DIR}")
-
-# Download nlohmann::json single-header
+# Download nlohmann::json single-header into the build include dir so it can be used
+# URL points to the 'develop' branch single_include header
 set(JSON_SINGLE_INCLUDE "${CMAKE_BINARY_DIR}/include/nlohmann/json.hpp")
 if(NOT EXISTS "${JSON_SINGLE_INCLUDE}")
   file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/include")
@@ -35,7 +37,7 @@ else()
   message(STATUS "Using existing nlohmann/json header at ${JSON_SINGLE_INCLUDE}")
 endif()
 
-# Fetch DirectXTK
+# Fetch DirectXTK (provides a CMake target when available)
 FetchContent_Declare(
   DirectXTK
   GIT_REPOSITORY https://github.com/microsoft/DirectXTK.git
@@ -43,7 +45,7 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(DirectXTK)
 
-# Fetch OpenAL
+# Fetch OpenAL (openal-soft)
 FetchContent_Declare(
   OpenAL
   GIT_REPOSITORY https://github.com/kcat/openal-soft
@@ -51,101 +53,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(OpenAL)
 
-# Download pre-built libogg
-set(LIBOGG_DLL "${LIBRARY_DIR}/libogg.dll")
-set(LIBOGG_LIB "${LIBRARY_DIR}/libogg.lib")
-if(NOT EXISTS "${LIBOGG_DLL}")
-  message(STATUS "Downloading libogg.dll")
-  file(DOWNLOAD
-    "https://github.com/xiph/ogg/releases/download/v1.3.5/libogg-1.3.5-windows-x64-bin.zip"
-    "${LIBRARY_DIR}/libogg.zip"
-    TLS_VERIFY ON
-  )
-  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${LIBRARY_DIR}/libogg.zip"
-    WORKING_DIRECTORY "${LIBRARY_DIR}"
-  )
-  file(GLOB LIBOGG_FILES "${LIBRARY_DIR}/*.dll" "${LIBRARY_DIR}/*.lib")
-  file(COPY ${LIBOGG_FILES} DESTINATION "${LIBRARY_DIR}")
-endif()
+# Fetch sndfile
+FetchContent_Declare(
+  sndfile
+  GIT_REPOSITORY https://github.com/libsndfile/libsndfile.git
+  GIT_TAG 1.2.2
+)
+FetchContent_MakeAvailable(sndfile)
 
-# Download pre-built libvorbis
-set(LIBVORBIS_DLL "${LIBRARY_DIR}/libvorbis.dll")
-set(LIBVORBIS_LIB "${LIBRARY_DIR}/libvorbis.lib")
-set(LIBVORBISFILE_DLL "${LIBRARY_DIR}/libvorbisfile.dll")
-set(LIBVORBISFILE_LIB "${LIBRARY_DIR}/libvorbisfile.lib")
-if(NOT EXISTS "${LIBVORBIS_DLL}")
-  message(STATUS "Downloading libvorbis.dll and libvorbisfile.dll")
-  file(DOWNLOAD
-    "https://github.com/xiph/vorbis/releases/download/v1.3.7/libvorbis-1.3.7-windows-x64-bin.zip"
-    "${LIBRARY_DIR}/libvorbis.zip"
-    TLS_VERIFY ON
-  )
-  execute_process(COMMAND ${CMAKE_COMMAND} -E tar xzf "${LIBRARY_DIR}/libvorbis.zip"
-    WORKING_DIRECTORY "${LIBRARY_DIR}"
-  )
-  file(GLOB LIBVORBIS_FILES "${LIBRARY_DIR}/*.dll" "${LIBRARY_DIR}/*.lib")
-  file(COPY ${LIBVORBIS_FILES} DESTINATION "${LIBRARY_DIR}")
-endif()
-
-# ===============================
-# libsndfile (binary + headers)
-# ===============================
-
-set(LIBSNDFILE_VERSION 1.2.2)
-
-set(LIBSNDFILE_ROOT        "${LIBRARY_DIR}/libsndfile")
-set(LIBSNDFILE_DLL         "${LIBSNDFILE_ROOT}/bin/libsndfile.dll")
-set(LIBSNDFILE_LIB         "${LIBSNDFILE_ROOT}/lib/libsndfile-.lib")
-set(LIBSNDFILE_INCLUDE_DIR "${LIBSNDFILE_ROOT}/include")
-
-if(NOT EXISTS "${LIBSNDFILE_DLL}")
-  message(STATUS "Downloading libsndfile ${LIBSNDFILE_VERSION}")
-
-  file(DOWNLOAD
-    "https://github.com/libsndfile/libsndfile/releases/download/${LIBSNDFILE_VERSION}/libsndfile-${LIBSNDFILE_VERSION}-windows-x64-bin.zip"
-    "${LIBRARY_DIR}/libsndfile-bin.zip"
-    TLS_VERIFY ON
-  )
-
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xzf "${LIBRARY_DIR}/libsndfile-bin.zip"
-    WORKING_DIRECTORY "${LIBRARY_DIR}"
-  )
-
-  file(MAKE_DIRECTORY
-    "${LIBSNDFILE_ROOT}/bin"
-    "${LIBSNDFILE_ROOT}/lib"
-    "${LIBSNDFILE_ROOT}/include"
-  )
-
-  file(GLOB _SNDFILE_DLL "${LIBRARY_DIR}/*.dll")
-  file(GLOB _SNDFILE_LIB "${LIBRARY_DIR}/*.lib")
-
-  file(COPY ${_SNDFILE_DLL} DESTINATION "${LIBSNDFILE_ROOT}/bin")
-  file(COPY ${_SNDFILE_LIB} DESTINATION "${LIBSNDFILE_ROOT}/lib")
-
-  message(STATUS "Downloading libsndfile headers")
-
-  file(DOWNLOAD
-    "https://github.com/libsndfile/libsndfile/archive/refs/tags/${LIBSNDFILE_VERSION}.zip"
-    "${LIBRARY_DIR}/libsndfile-src.zip"
-    TLS_VERIFY ON
-  )
-
-  execute_process(
-    COMMAND ${CMAKE_COMMAND} -E tar xzf "${LIBRARY_DIR}/libsndfile-src.zip"
-    WORKING_DIRECTORY "${LIBRARY_DIR}"
-  )
-
-  # Copy *contents* of include/, not the directory itself
-  file(COPY
-    "${LIBRARY_DIR}/libsndfile-${LIBSNDFILE_VERSION}/include/"
-    DESTINATION "${LIBSNDFILE_INCLUDE_DIR}"
-  )
-endif()
-
-
-# Fetch fastgltf
+# fetch fastgltf
 FetchContent_Declare(
   fastgltf
   GIT_REPOSITORY https://github.com/spnda/fastgltf/
@@ -153,19 +69,22 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(fastgltf)
 
-# Fetch ImGui
+# Optionally fetch ImGui for in-project use. We'll populate and add its sources to the target.
 FetchContent_Declare(
   imgui
   GIT_REPOSITORY https://github.com/ocornut/imgui.git
   GIT_TAG v1.82
 )
 FetchContent_GetProperties(imgui)
+
 if(NOT imgui_POPULATED)
   FetchContent_MakeAvailable(imgui)
 endif()
 
-# Collect all project sources
+# Collect all project sources (all .cpp files under src/)
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
+# Optionally collect headers to show up in IDEs
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/headers/*.h" "${CMAKE_SOURCE_DIR}/headers/*.hpp")
 
 add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS})
@@ -174,10 +93,9 @@ add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 target_include_directories(${PROJECT_NAME} PRIVATE
   "${CMAKE_SOURCE_DIR}/headers"
   "${CMAKE_BINARY_DIR}/include"
-  "${LIBSNDFILE_INCLUDE_DIR}"
 )
 
-# Add ImGui sources if populated
+# If imgui was populated, add its sources and include directories.
 if(imgui_SOURCE_DIR)
   target_sources(${PROJECT_NAME} PRIVATE
     ${imgui_SOURCE_DIR}/imgui.cpp
@@ -194,26 +112,15 @@ if(imgui_SOURCE_DIR)
   )
 endif()
 
-# Link libraries
+
+# Link libraries. Keep d3d11 for DirectX usage and the fetched libraries.
+# DirectXTK provides a target named "DirectXTK" in its CMake; OpenAL provides OpenAL::OpenAL.
 target_link_libraries(${PROJECT_NAME} PRIVATE
   d3d11
   DirectXTK
   OpenAL::OpenAL
-  "${LIBSNDFILE_LIB}"
+  sndfile
   fastgltf
-  "${LIBOGG_LIB}"
-  "${LIBVORBIS_LIB}"
-  "${LIBVORBISFILE_LIB}"
-)
-
-# Copy DLLs to the output directory
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy
-    "${LIBOGG_DLL}"
-    "${LIBVORBIS_DLL}"
-    "${LIBVORBISFILE_DLL}"
-    "${LIBSNDFILE_DLL}"
-    "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
 )
 
 # Ensure consistent output directories for the target

@@ -23,38 +23,30 @@ void SoundBank::AddSoundClip(const std::string relativePath)
 	CreateSoundBuffer(relativePath);
 }
 
-SoundClip SoundBank::GetSoundClipStandardFolder(const std::string filename)
+SoundClip* SoundBank::GetSoundClipStandardFolder(const std::string filename)
 {
 	std::string fullpath = this->pathToSoundFolder + filename;
 
 	auto it = this->soundClips.find(fullpath);
 	if (it != this->soundClips.end())
 	{
-		return this->soundClips[fullpath];
+		return &this->soundClips[fullpath];
 	}
 
 	Logger::Log("couldn't find " + fullpath);
-	SoundClip nullClip;
-	nullClip.filepath = "";
-	nullClip.bufferID = -1;
-
-	return nullClip;
+	return nullptr;
 }
 
-SoundClip SoundBank::GetSoundClip(const std::string relativePath)
+SoundClip* SoundBank::GetSoundClip(const std::string relativePath)
 {
 	auto it = this->soundClips.find(relativePath);
 	if (it != this->soundClips.end())
 	{
-		return this->soundClips[relativePath];
+		return &this->soundClips[relativePath];
 	}
 
 	Logger::Log("couldn't find " + relativePath);
-	SoundClip nullClip;
-	nullClip.filepath = "";
-	nullClip.bufferID = -1;
-
-	return nullClip;
+	return nullptr;
 }
 
 bool SoundBank::RemoveSoundClipStandardFolder(const std::string filename)

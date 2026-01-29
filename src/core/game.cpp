@@ -10,19 +10,22 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 	MSG msg = {};
 
     SoundBank soundBank;
-    soundBank.Initialize("C:/Users/Gabriel/MinaFiler/lillaspel/src/core/audio/");
-    soundBank.AddSoundClipStandardFolder("JazzAnger.wav");
+    soundBank.Initialize("C:/Users/Gabriel/Music/");
+    soundBank.AddSoundClipStandardFolder("Electro4.wav");
 
-
+    SoundClip* clip = soundBank.GetSoundClipStandardFolder("Electro4.wav");
 
     SoundSource speaker;
-    speaker.Play(soundBank.GetSoundClipStandardFolder("JazzAnger.wav"));
+    speaker.Play(clip);
+    speaker.SetPosition(20, 0, 1);
+
+    SetListenerPosition(0, 0, 0);
 
     MusicTrack music;
-    music.Initialize("C:/Users/Gabriel/MinaFiler/lillaspel/src/core/audio/");
-    music.LoadTrackStandardFolder("JazzAnger.wav");
+    music.Initialize("C:/Users/Gabriel/Music/");
+    music.LoadTrackStandardFolder("Electro4.wav");
     music.SetPitch(0.94f);
-    music.Play();
+    //music.Play();
 
     while (msg.message != WM_QUIT)
     {

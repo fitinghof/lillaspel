@@ -19,8 +19,8 @@ public:
 	void Initialize(std::string pathToSoundFolder);
 	void AddSoundClipStandardFolder(const std::string filename); //filename without the path to its folder
 	void AddSoundClip(const std::string relativePath); //full/relative path to soundfile
-	SoundClip GetSoundClipStandardFolder(const std::string filename);
-	SoundClip GetSoundClip(const std::string relativePath);
+	SoundClip* GetSoundClipStandardFolder(const std::string filename);
+	SoundClip* GetSoundClip(const std::string relativePath);
 	bool RemoveSoundClipStandardFolder(const std::string filename);
 	bool RemoveSoundClip(const std::string relativePath);
 

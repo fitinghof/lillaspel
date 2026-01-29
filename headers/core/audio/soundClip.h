@@ -7,4 +7,6 @@ struct SoundClip
 {
 	std::string filepath;
 	ALuint bufferID;
+
+	SoundClip& operator=(SoundClip&) = delete;
 };

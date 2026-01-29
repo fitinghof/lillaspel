@@ -2,6 +2,8 @@
 
 #include <DirectXMath.h>
 
+#include "utilities/logger.h"
+
 class CameraObject : public GameObject3D {
 public:
 	/// <summary>
@@ -21,7 +23,7 @@ public:
 	static CameraObject* mainCamera;
 
 	CameraObject();
-	~CameraObject() = default;
+	virtual ~CameraObject() = default;
 
 	virtual void Tick() override;
 

@@ -20,4 +20,6 @@ void SceneManager::LoadScene()
 	}
 
 	this->mainScene = std::unique_ptr<Scene>(new Scene());
+
+	CameraObject* camera = (CameraObject*)this->mainScene->CreateGameObjectOfType<CameraObject>();
 }

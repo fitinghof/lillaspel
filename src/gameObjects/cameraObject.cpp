@@ -7,6 +7,10 @@ CameraObject::CameraObject() : fieldOfView(80.0f)
 	if (!mainCamera) {
 		mainCamera = this;
 	}
+
+	UpdateCameraMatrix();
+
+	Logger::Log("Created a camera.");
 }
 
 void CameraObject::Tick()

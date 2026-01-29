@@ -7,7 +7,7 @@
 class GameObject {
 public:
 	GameObject();
-	~GameObject() = default;
+	virtual ~GameObject() = default;
 
 	const std::vector<GameObject*>& GetChildren() const;
 	const int& GetChildCount() const;

@@ -3,6 +3,7 @@
 #include <memory>
 #include <scene/scene.h>
 #include <utilities/logger.h>
+#include "gameObjects/cameraObject.h"
 
 class SceneManager {
 public:

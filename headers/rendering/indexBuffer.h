@@ -16,8 +16,8 @@ public:
 	~IndexBuffer() = default;
 	IndexBuffer(const IndexBuffer& other) = delete;
 	IndexBuffer& operator=(const IndexBuffer& other) = delete;
-	IndexBuffer(IndexBuffer&& other) = delete;
-	IndexBuffer& operator=(IndexBuffer&& other) = delete;
+	IndexBuffer(IndexBuffer&& other) noexcept = default;
+	IndexBuffer& operator=(IndexBuffer&& other) = default;
 
 	void Init(ID3D11Device* device, size_t nrOfIndicesInBuffer, uint32_t* indexData);
 

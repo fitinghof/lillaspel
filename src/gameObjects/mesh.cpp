@@ -1,4 +1,4 @@
-#include "objects/mesh.h"
+#include "gameObjects/mesh.h"
 
 Mesh::Mesh(VertexBuffer&& vertexbuffer, IndexBuffer&& indexbuffer, std::vector<SubMesh>&& submeshes) {
 

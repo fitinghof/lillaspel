@@ -10,7 +10,7 @@ CameraObject::CameraObject() : fieldOfView(80.0f)
 
 	UpdateCameraMatrix();
 
-	Logger::Log("Created a camera.");
+	Logger::Log("Successfully created a camera.");
 }
 
 void CameraObject::Tick()

@@ -1,4 +1,4 @@
-#include "objects/transform.h"
+#include "gameObjects/transform.h"
 
 Transform::Transform() : position({}), quaternion(DirectX::XMQuaternionIdentity()), scale({ 1, 1, 1 }) {}
 

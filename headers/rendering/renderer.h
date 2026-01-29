@@ -13,6 +13,7 @@
 #include "rendering/constantBuffer.h"
 #include "rendering/indexBuffer.h"
 #include "rendering/material.h"
+#include "rendering/renderQueue.h"
 
 #include "rendering/tempRenderDefs.h"
 
@@ -61,12 +62,17 @@ private:
 
 	// -- 
 
+	std::unique_ptr<RenderQueue> renderQueue;
+	std::shared_ptr<std::vector<int>> meshRenderQueue;
+
 	void SetViewport(const Window& window);
 	void CreateDeviceAndSwapChain(const Window& window);
 	void CreateRenderTarget();
 	void CreateDepthBuffer(const Window& window);
 	void CreateInputLayout(const std::string& vShaderByteCode);
 	void CreateSampler();
+
+	void CreateRenderQueue();
 
 	void LoadShaders(std::string& vShaderByteCode);
 

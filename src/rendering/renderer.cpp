@@ -12,6 +12,8 @@ void Renderer::Init(const Window& window)
 	std::string vShaderByteCode;
 	LoadShaders(vShaderByteCode);
 	CreateInputLayout(vShaderByteCode);
+
+	CreateRenderQueue();
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -76,6 +78,12 @@ void Renderer::CreateSampler()
 {
 	this->sampler = std::unique_ptr<Sampler>(new Sampler());
 	this->sampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_WRAP);
+}
+
+void Renderer::CreateRenderQueue()
+{
+	this->meshRenderQueue = std::shared_ptr<std::vector<int>>();
+	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue));
 }
 
 void Renderer::LoadShaders(std::string& vShaderByteCode)
@@ -245,6 +253,8 @@ void Renderer::BindMaterial(Material* material)
 {
 	material->vertexShader->BindShader(this->immediateContext.Get());
 	material->pixelShader->BindShader(this->immediateContext.Get());
+
+	// Also bind constant buffers
 }
 
 void Renderer::BindCameraMatrix(ID3D11Buffer* buffer)

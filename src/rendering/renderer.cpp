@@ -1,6 +1,4 @@
 #include "rendering/renderer.h"
-#include "imgui.h"
-#include "imgui_impl_dx11.h"
 
 void Renderer::Init(const Window& window)
 {
@@ -147,11 +145,11 @@ void Renderer::RenderPass()
 	// Temporary logic to create the camera
 	// Will be replaced when there's an actual camera object
 	MatrixContainer* cameraMatrix = nullptr;
-	float pos[3] = {0.0f, 0.0f, 0.0f};
-	float lookPos[3] = {0.0f, 0.0f, 1.0f};
-	float upDir[3] = {0.0f, 1.0f, 0.0f};
+	float pos[3] = { 0.0f, 0.0f, 0.0f };
+	float lookPos[3] = { 0.0f, 0.0f, 1.0f };
+	float upDir[3] = { 0.0f, 1.0f, 0.0f };
 	ConstantBufferViewProjMatrix_Perspective(cameraMatrix, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
-	CameraBufferContainer cameraBufferContainer = { *cameraMatrix, 0.0f, 0.0f, 0.0f, 0};
+	CameraBufferContainer cameraBufferContainer = { *cameraMatrix, 0.0f, 0.0f, 0.0f, 0 };
 
 	std::unique_ptr<ConstantBuffer> camBuffer = std::make_unique<ConstantBuffer>();
 	camBuffer->Init(this->device.Get(), sizeof(cameraBufferContainer), &cameraBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
@@ -196,7 +194,7 @@ void Renderer::RenderPass()
 
 	float meshPos[3] = { 0.0f, 0.0f, 6.0f };
 	static float rot = 0;
-	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f}; // I know this is framerate-dependent. It's a temporary test, ok?
+	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f }; // I know this is framerate-dependent. It's a temporary test, ok?
 	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
 
 	MatrixContainer* worldMatrix = nullptr;

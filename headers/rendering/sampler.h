@@ -6,6 +6,8 @@
 
 #include <d3d11.h>
 
+#include <format>
+
 class Sampler
 {
 private:

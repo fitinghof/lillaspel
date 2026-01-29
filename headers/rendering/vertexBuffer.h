@@ -3,6 +3,7 @@
 #include <d3d11.h>
 #include <iostream>
 #include <wrl/client.h>
+#include <format>
 
 class VertexBuffer
 {
@@ -19,6 +20,13 @@ public:
 	VertexBuffer(VertexBuffer&& other) = delete;
 	VertexBuffer& operator=(VertexBuffer&& other) = delete;
 
+	/// <summary>
+	/// Initializes the vertex buffer with data
+	/// </summary>
+	/// <param name="device"></param>
+	/// <param name="sizeOfVertex">Size of one vertex in bytes</param>
+	/// <param name="nrOfVerticesInBuffer">Number of vertices</param>
+	/// <param name="vertexData">An array of all vertices with correct layout e.g. position, normals, uv</param>
 	void Init(ID3D11Device* device, UINT sizeOfVertex,
 		UINT nrOfVerticesInBuffer, void* vertexData);
 

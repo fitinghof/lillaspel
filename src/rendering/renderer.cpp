@@ -70,7 +70,7 @@ void Renderer::CreateInputLayout(const std::string& vShaderByteCode)
 	this->inputLayout = std::unique_ptr<InputLayout>(new InputLayout());
 	this->inputLayout->AddInputElement("POSITION", DXGI_FORMAT_R32G32B32_FLOAT);
 	this->inputLayout->AddInputElement("NORMAL", DXGI_FORMAT_R32G32B32_FLOAT);
-	this->inputLayout->AddInputElement("TEXCOORD", DXGI_FORMAT_R32G32_FLOAT);
+	this->inputLayout->AddInputElement("UV", DXGI_FORMAT_R32G32_FLOAT);
 	this->inputLayout->FinalizeInputLayout(this->device.Get(), vShaderByteCode.c_str(), vShaderByteCode.length());
 }
 
@@ -82,6 +82,8 @@ void Renderer::CreateSampler()
 
 void Renderer::LoadShaders(std::string& vShaderByteCode)
 {
+	// This shouldn't be directly hardcoded into the renderer
+
 	this->vertexShader = std::unique_ptr<Shader>(new Shader());
 	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
 	vShaderByteCode = this->vertexShader->GetShaderByteCode();
@@ -93,6 +95,10 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 void Renderer::Render()
 {
 	RenderPass();
+}
+
+void Renderer::Present()
+{
 	this->swapChain->Present(0, 0);
 }
 
@@ -104,6 +110,11 @@ ID3D11Device* Renderer::GetDevice() const
 ID3D11DeviceContext* Renderer::GetContext() const
 {
 	return this->immediateContext.Get();
+}
+
+IDXGISwapChain* Renderer::GetSwapChain() const
+{
+	return this->swapChain.Get();
 }
 
 void Renderer::RenderPass()
@@ -130,21 +141,42 @@ void Renderer::RenderPass()
 	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
 	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
 
-	/*MatrixContainer* matData = nullptr;
-	XMMATRIX_ViewMatrix(cameraPos, lookPos, up)* XMMATRIX_ProjMatrix_Perspective(fov, aspectRatio);
-	CameraBufferContainer data = { *matData, 0, 0, 0 };*/
 
 
-	// Vertices - this is very temporary
+
+	// Temporary logic to create the camera
+	// Will be replaced when there's an actual camera object
+	MatrixContainer* cameraMatrix = nullptr;
+	float pos[3] = {0.0f, 0.0f, 0.0f};
+	float lookPos[3] = {0.0f, 0.0f, 1.0f};
+	float upDir[3] = {0.0f, 1.0f, 0.0f};
+	ConstantBufferViewProjMatrix_Perspective(cameraMatrix, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
+	CameraBufferContainer cameraBufferContainer = { *cameraMatrix, 0.0f, 0.0f, 0.0f, 0};
+
+	std::unique_ptr<ConstantBuffer> camBuffer = std::make_unique<ConstantBuffer>();
+	camBuffer->Init(this->device.Get(), sizeof(cameraBufferContainer), &cameraBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	ID3D11Buffer* camBuf = static_cast<ID3D11Buffer*>(camBuffer->GetBuffer());
+	this->immediateContext->VSSetConstantBuffers(0, 1, &camBuf);
+
+	delete cameraMatrix;
+
+
+
+
+
+	// Temporary logic to create a quad
+	// Will be replaced when we can use a mesh class instead
+
 	Vertex vertexData[] = {
-		// Triangle 1
-		{-0.5f, -0.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f, 1.0f},
-		{-0.5f,  0.5f, 0.0f,  0.0f, 1.0f, 0.0f, 1.0f, 1.0f},
-		{ 0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f, 1.0f, 1.0f}
+		{-1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
+		{-1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
+		{ 1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
+		{ 1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f}
 	};
 
-	VertexBuffer* tempVBuffer = new VertexBuffer();
-	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 3, vertexData);
+	std::unique_ptr<VertexBuffer> tempVBuffer = std::unique_ptr<VertexBuffer>(new VertexBuffer());
+	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 4, vertexData);
 
 	UINT stride = tempVBuffer->GetVertexSize();
 	UINT offset = 0;
@@ -152,6 +184,35 @@ void Renderer::RenderPass()
 
 	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
 
-	this->immediateContext->Draw(3, 0);
-	//this->immediateContext->DrawIndexed(mesh->GetIndexBuffer()->GetNrOfIndices(), 0, 0);
+	uint32_t indices[] = {
+		0,1,2,1,3,2
+	};
+
+	std::unique_ptr<IndexBuffer> tempIBuffer = std::unique_ptr<IndexBuffer>(new IndexBuffer());
+	tempIBuffer->Init(this->device.Get(), 6, indices);
+
+	this->immediateContext->IASetIndexBuffer(tempIBuffer->GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+
+	float meshPos[3] = { 0.0f, 0.0f, 6.0f };
+	static float rot = 0;
+	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f}; // I know this is framerate-dependent. It's a temporary test, ok?
+	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
+
+	MatrixContainer* worldMatrix = nullptr;
+	ConstantBufferWorldMatrix(worldMatrix, meshPos, meshRot, meshScale);
+
+	std::unique_ptr<ConstantBuffer> worldMatrixBuffer = std::make_unique<ConstantBuffer>();
+	worldMatrixBuffer->Init(this->device.Get(), sizeof(MatrixContainer), worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	ID3D11Buffer* worldMatrixBuf = static_cast<ID3D11Buffer*>(worldMatrixBuffer->GetBuffer());
+	this->immediateContext->VSSetConstantBuffers(1, 1, &worldMatrixBuf);
+
+	delete worldMatrix;
+
+
+
+
+	// Draw the quad to screen
+	this->immediateContext->DrawIndexed(tempIBuffer->GetNrOfIndices(), 0, 0);
 }

@@ -19,5 +19,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
         }
 
         renderer.Render();
+
+        renderer.Present();
     }
 }

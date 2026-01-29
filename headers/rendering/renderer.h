@@ -10,23 +10,35 @@
 #include "rendering/sampler.h"
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
+#include "rendering/constantBuffer.h"
+#include "rendering/indexBuffer.h"
 
-#include "rendering/temp_render_defs.h"
+#include "rendering/tempRenderDefs.h"
 
 class Renderer {
 public:
 	Renderer() = default;
 	~Renderer() = default;
 
+	/// <summary>
+	/// Initialize the renderer
+	/// </summary>
+	/// <param name="window"></param>
 	void Init(const Window& window);
 
 	/// <summary>
-	/// Render a frame and show it on the window
+	/// Render a frame
 	/// </summary>
 	void Render();
 
+	/// <summary>
+	/// Present the swapchain to the window
+	/// </summary>
+	void Present();
+
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;
+	IDXGISwapChain* GetSwapChain() const;
 private:
 	D3D11_VIEWPORT viewport;
 
@@ -39,9 +51,11 @@ private:
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
 
-	// Temp
+	// Temporary
+
 	std::unique_ptr<Shader> vertexShader;
 	std::unique_ptr<Shader> pixelShader;
+
 	// -- 
 
 	void SetViewport(const Window& window);
@@ -53,5 +67,8 @@ private:
 
 	void LoadShaders(std::string& vShaderByteCode);
 
+	/// <summary>
+	/// This is where the actual rendering logic is done
+	/// </summary>
 	void RenderPass();
 };

@@ -63,7 +63,7 @@ void Shader::Init(ID3D11Device* device, ShaderType shaderType, const char* csoPa
 
 	if (FAILED(hr))
 	{
-		std::cerr << "Failed to create vertex shader!" << std::endl;
+		throw std::exception(std::format("Failed to create shader, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 
 	if (shaderType == ShaderType::VERTEX_SHADER) {

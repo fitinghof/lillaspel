@@ -20,4 +20,7 @@ public:
 
 private:
 
+	void consoleImGui();
+
+
 };

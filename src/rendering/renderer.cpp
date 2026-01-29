@@ -93,8 +93,6 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 void Renderer::Render()
 {
 	RenderPass();
-	ImGui::Render();
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	this->swapChain->Present(0, 0);
 }
 

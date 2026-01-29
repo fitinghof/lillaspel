@@ -14,7 +14,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	// Maybe put some memory leak flags here
 
 	std::unique_ptr<Game> game = std::unique_ptr<Game>(new Game());
-	Logger::Log("Exiting game...");
 	try {
 		game->Run(hInstance, nCmdShow);
 	}

@@ -13,6 +13,7 @@ public:
 	SubMesh(SubMesh& other) = default;
 	~SubMesh();
 
+
 private:
 	size_t startIndex;
 	size_t nrOfIndicies;

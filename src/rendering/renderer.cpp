@@ -82,12 +82,15 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 {
 	// This shouldn't be directly hardcoded into the renderer
 
-	this->vertexShader = std::unique_ptr<Shader>(new Shader());
+	this->vertexShader = std::shared_ptr<Shader>(new Shader());
 	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
 	vShaderByteCode = this->vertexShader->GetShaderByteCode();
 
-	this->pixelShader = std::unique_ptr<Shader>(new Shader());
+	this->pixelShader = std::shared_ptr<Shader>(new Shader());
 	this->pixelShader->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "PSTest.cso");
+
+	this->tempMat = std::unique_ptr<Material>(new Material);
+	this->tempMat->Init(this->vertexShader, this->pixelShader);
 }
 
 void Renderer::Render()
@@ -117,30 +120,14 @@ IDXGISwapChain* Renderer::GetSwapChain() const
 
 void Renderer::RenderPass()
 {
-	// Clear previous frame
-	float clearColor[4] = { 0,0,0.1,0 };
-	this->immediateContext->ClearRenderTargetView(this->renderTarget->GetRenderTargetView(), clearColor);
-	this->immediateContext->ClearDepthStencilView(this->depthBuffer->GetDepthStencilView(0), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+	ClearRenderTargetViewAndDepthStencilView();
 
-	// Sampler
-	ID3D11SamplerState* s = this->sampler->GetSamplerState();
-	immediateContext->PSSetSamplers(0, 1, &s);
+	BindSampler();
+	BindInputLayout();
+	BindRenderTarget();
+	BindViewport();
 
-	// Shaders
-	this->vertexShader->BindShader(this->immediateContext.Get());
-	this->immediateContext->RSSetViewports(1, &this->viewport);
-	this->pixelShader->BindShader(this->immediateContext.Get());
-
-	// Set up inputs
-	this->immediateContext->IASetInputLayout(this->inputLayout->GetInputLayout());
-	this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-	// Render target
-	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
-	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
-
-
-
+	BindMaterial(this->tempMat.get());
 
 	// Temporary logic to create the camera
 	// Will be replaced when there's an actual camera object
@@ -154,8 +141,7 @@ void Renderer::RenderPass()
 	std::unique_ptr<ConstantBuffer> camBuffer = std::make_unique<ConstantBuffer>();
 	camBuffer->Init(this->device.Get(), sizeof(cameraBufferContainer), &cameraBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
-	ID3D11Buffer* camBuf = static_cast<ID3D11Buffer*>(camBuffer->GetBuffer());
-	this->immediateContext->VSSetConstantBuffers(0, 1, &camBuf);
+	BindCameraMatrix(camBuffer->GetBuffer());
 
 	delete cameraMatrix;
 
@@ -200,17 +186,73 @@ void Renderer::RenderPass()
 	MatrixContainer* worldMatrix = nullptr;
 	ConstantBufferWorldMatrix(worldMatrix, meshPos, meshRot, meshScale);
 
-	std::unique_ptr<ConstantBuffer> worldMatrixBuffer = std::make_unique<ConstantBuffer>();
-	worldMatrixBuffer->Init(this->device.Get(), sizeof(MatrixContainer), worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	MatrixContainer* worldMatrixInverseTransposed = nullptr;
+	ConstantBufferWorldMatrix(worldMatrixInverseTransposed, meshPos, meshRot, meshScale, true);
 
-	ID3D11Buffer* worldMatrixBuf = static_cast<ID3D11Buffer*>(worldMatrixBuffer->GetBuffer());
-	this->immediateContext->VSSetConstantBuffers(1, 1, &worldMatrixBuf);
+	WorldMatrixBufferContainer worldMatrixBufferContainer = { *worldMatrix, *worldMatrixInverseTransposed };
+
+	std::unique_ptr<ConstantBuffer> worldMatrixBuffer = std::make_unique<ConstantBuffer>();
+	worldMatrixBuffer->Init(this->device.Get(), sizeof(worldMatrixBufferContainer), &worldMatrixBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	BindWorldMatrix(worldMatrixBuffer->GetBuffer());
 
 	delete worldMatrix;
+	delete worldMatrixInverseTransposed;
+
 
 
 
 
 	// Draw the quad to screen
 	this->immediateContext->DrawIndexed(tempIBuffer->GetNrOfIndices(), 0, 0);
+}
+
+void Renderer::ClearRenderTargetViewAndDepthStencilView()
+{
+	// Clear previous frame
+	float clearColor[4] = { 0,0,0.1,0 };
+	this->immediateContext->ClearRenderTargetView(this->renderTarget->GetRenderTargetView(), clearColor);
+	this->immediateContext->ClearDepthStencilView(this->depthBuffer->GetDepthStencilView(0), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+}
+
+void Renderer::BindSampler()
+{
+	// Sampler
+	ID3D11SamplerState* s = this->sampler->GetSamplerState();
+	immediateContext->PSSetSamplers(0, 1, &s);
+}
+
+void Renderer::BindInputLayout()
+{
+	// Set up inputs
+	this->immediateContext->IASetInputLayout(this->inputLayout->GetInputLayout());
+	this->immediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+}
+
+void Renderer::BindRenderTarget()
+{
+	// Render target
+	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
+	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
+}
+
+void Renderer::BindViewport()
+{
+	this->immediateContext->RSSetViewports(1, &this->viewport);
+}
+
+void Renderer::BindMaterial(Material* material)
+{
+	material->vertexShader->BindShader(this->immediateContext.Get());
+	material->pixelShader->BindShader(this->immediateContext.Get());
+}
+
+void Renderer::BindCameraMatrix(ID3D11Buffer* buffer)
+{
+	this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);
+}
+
+void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
+{
+	this->immediateContext->VSSetConstantBuffers(1, 1, &buffer);
 }

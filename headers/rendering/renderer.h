@@ -12,6 +12,7 @@
 #include "rendering/vertexBuffer.h"
 #include "rendering/constantBuffer.h"
 #include "rendering/indexBuffer.h"
+#include "rendering/material.h"
 
 #include "rendering/tempRenderDefs.h"
 
@@ -53,8 +54,10 @@ private:
 
 	// Temporary
 
-	std::unique_ptr<Shader> vertexShader;
-	std::unique_ptr<Shader> pixelShader;
+	std::unique_ptr<Material> tempMat;
+
+	std::shared_ptr<Shader> vertexShader;
+	std::shared_ptr<Shader> pixelShader;
 
 	// -- 
 
@@ -71,4 +74,19 @@ private:
 	/// This is where the actual rendering logic is done
 	/// </summary>
 	void RenderPass();
+
+	/// <summary>
+	/// Clears last frame with a clear color
+	/// </summary>
+	void ClearRenderTargetViewAndDepthStencilView();
+
+	void BindSampler();
+	void BindInputLayout();
+	void BindRenderTarget();
+	void BindViewport();
+
+	void BindMaterial(Material* material);
+
+	void BindCameraMatrix(ID3D11Buffer* buffer);
+	void BindWorldMatrix(ID3D11Buffer* buffer);
 };

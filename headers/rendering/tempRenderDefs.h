@@ -16,6 +16,11 @@ struct CameraBufferContainer {
 	float camPos[4];
 };
 
+struct WorldMatrixBufferContainer {
+	MatrixContainer worldMatrix;
+	MatrixContainer worldMatrixInversedTransposed;
+};
+
 
 static DirectX::XMMATRIX XMMATRIX_ProjMatrix_Perspective(float fov, float aspectRatio)
 {
@@ -50,12 +55,17 @@ static void ConstantBufferViewProjMatrix_Perspective(MatrixContainer*& data, flo
 }
 
 // SHould maybe use Quaternions in the non-temp version?
-static DirectX::XMMATRIX XMMATRIX_WorldMatrix(float* pos, float* rot, float* scale)
+static DirectX::XMMATRIX XMMATRIX_WorldMatrix(float* pos, float* rot, float* scale, bool inverseTranspose = false)
 {
 	DirectX::XMMATRIX translatedMatrix = DirectX::XMMatrixTranslation(pos[0], pos[1], pos[2]);
 	DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationX(DirectX::XMConvertToRadians(rot[0])) * DirectX::XMMatrixRotationY(DirectX::XMConvertToRadians(rot[1])) * DirectX::XMMatrixRotationZ(DirectX::XMConvertToRadians(rot[2]));
 	DirectX::XMMATRIX scaledMatrix = DirectX::XMMatrixScaling(scale[0], scale[1], scale[2]);
 	DirectX::XMMATRIX worldMatrix = scaledMatrix * rotationMatrix * translatedMatrix;
+
+	if (inverseTranspose) {
+		worldMatrix = DirectX::XMMatrixInverse(nullptr, worldMatrix);
+		worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+	}
 
 	// From row-major to column-major
 	//worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
@@ -63,9 +73,9 @@ static DirectX::XMMATRIX XMMATRIX_WorldMatrix(float* pos, float* rot, float* sca
 	return worldMatrix;
 }
 
-static void ConstantBufferWorldMatrix(MatrixContainer*& data, float* pos, float* rot, float* scale)
+static void ConstantBufferWorldMatrix(MatrixContainer*& data, float* pos, float* rot, float* scale, bool inverseTranspose = false)
 {
-	DirectX::XMMATRIX worldMatrix = XMMATRIX_WorldMatrix(pos, rot, scale);
+	DirectX::XMMATRIX worldMatrix = XMMATRIX_WorldMatrix(pos, rot, scale, inverseTranspose);
 	MatrixContainer* wMat = new MatrixContainer();
 	DirectX::XMStoreFloat4x4(&wMat->matrix, worldMatrix);
 

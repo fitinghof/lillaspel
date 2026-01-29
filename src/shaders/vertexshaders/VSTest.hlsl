@@ -22,6 +22,7 @@ cbuffer ViewProjMatrixBuffer : register(b0)
 cbuffer WorldMatrixBuffer : register(b1)
 {
     row_major float4x4 worldMatrix;
+    row_major float4x4 worldMatrixInversedTransposed;
 };
 
 VertexShaderOutput main(VertexShaderInput input)
@@ -31,7 +32,7 @@ VertexShaderOutput main(VertexShaderInput input)
     float4 pos = float4(input.position, 1.0f);
     output.position = mul(mul(pos, worldMatrix), viewProjectionMatrix);
     output.vertexWorldPosition = mul(pos, worldMatrix);
-    output.normal = mul(input.normal, (float3x3) worldMatrix); // Doesn't scale right
+    output.normal = mul(input.normal, (float3x3) worldMatrixInversedTransposed); 
     output.uv = input.uv;
     
     return output;

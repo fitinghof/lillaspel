@@ -3,6 +3,7 @@
 #include <wrl/client.h>
 #include <d3d11.h>
 #include <iostream>
+#include <format>
 
 class RenderTarget {
 private:
@@ -17,4 +18,5 @@ public:
 	void Init(ID3D11Device* device, IDXGISwapChain* swapChain);
 
 	ID3D11RenderTargetView* GetRenderTargetView();
+	ID3D11ShaderResourceView* GetShaderResourceView() const;
 };

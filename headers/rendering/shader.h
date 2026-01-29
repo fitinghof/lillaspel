@@ -8,6 +8,8 @@
 
 #include <wrl/client.h>
 
+#include <format>
+
 enum class ShaderType
 {
 	VERTEX_SHADER,

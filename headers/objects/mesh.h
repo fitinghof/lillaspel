@@ -22,9 +22,16 @@ private:
 
 class Mesh {
 public:
+	Mesh() = default;
 	Mesh(VertexBuffer&& vertexbuffer, IndexBuffer&& indexbuffer, std::vector<SubMesh>&& submeshes);
 	Mesh(Mesh&&) noexcept = default;
+	Mesh& operator=(Mesh&&) noexcept = default;
 	~Mesh();
+
+	VertexBuffer& GetVertexBuffer();
+	IndexBuffer& GetIndexBuffer();
+	std::string& GetName();
+	std::vector<SubMesh>& GetSubMeshes();
 
 private:
 	std::string name;

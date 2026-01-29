@@ -18,7 +18,7 @@ public:
 	VertexBuffer(const VertexBuffer& other) = delete;
 	VertexBuffer& operator=(const VertexBuffer& other) = delete;
 	VertexBuffer(VertexBuffer&& other) noexcept = default;
-	VertexBuffer& operator=(VertexBuffer&& other) = delete;
+	VertexBuffer& operator=(VertexBuffer&& other) = default;
 
 	/// <summary>
 	/// Initializes the vertex buffer with data

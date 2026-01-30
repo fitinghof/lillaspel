@@ -6,6 +6,8 @@
 
 #include "utilities/logger.h"
 
+#include "imgui.h"
+
 class CameraObject : public GameObject3D {
 public:
 	/// <summary>

@@ -24,6 +24,8 @@ private:
 		error = 2
 	};
 
+	inline static std::string logString = "";
+
 	static constexpr const char* colors[3] = { "\033[0m", "\033[33m", "\033[31m"};
 	static constexpr const char* logTexts[3] = { "", "[WARNING]", "[ERROR] " };
 
@@ -39,6 +41,10 @@ private:
 		//cout << ctime(&timestamp);
 	}
 
+	static std::string readLogFile() {
+
+	}
+
 	template <typename T, typename... Types>
 	static void createLog(std::string logOutput, T info, Types... infos) {
 		std::ostringstream stringToReturn;
@@ -48,6 +54,7 @@ private:
 	}
 
 	static void createLog(std::string logOutput) {
+		logString.append(logOutput + "\n");
 		PrintToFile(logOutput);
 	}
 
@@ -64,5 +71,8 @@ public:
 	static void Error(T info, Types... infos) {
 		createLog(logTexts[LogType::error], info, infos...);
 	}
-
+	
+	static std::string_view getLogStringRef() {
+		return logString;
+	}
 };

@@ -53,6 +53,25 @@ DirectX::XMVECTOR Transform::GetDirectionVector() const {
 
 DirectX::XMVECTOR Transform::GetScale() const { return this->scale; }
 
+DirectX::XMFLOAT4X4 Transform::GetWorldMatrix() const {
+
+    // Create the scaling, rotation, and translation matrices
+    DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScalingFromVector(this->GetScale());
+    DirectX::XMMATRIX rotationMatrix = DirectX::XMMatrixRotationQuaternion(this->GetRotationQuaternion());
+    DirectX::XMMATRIX translationMatrix = DirectX::XMMatrixTranslationFromVector(this->GetPosition());
+    // Combine the matrices to create the world matrix (scale * rotation * translation)
+    DirectX::XMMATRIX worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
+
+    // Transpose the matrix if needed (depends on the target platform/GPU conventions)
+    worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+
+    // Store the result in a XMFLOAT4X4
+    DirectX::XMFLOAT4X4 worldMatrixFloat4x4;
+    DirectX::XMStoreFloat4x4(&worldMatrixFloat4x4, worldMatrix);
+
+    return worldMatrixFloat4x4;
+}
+
 DirectX::XMVECTOR Transform::GetCameraRotationQuaternion(float yawDegrees, float pitchDegrees) {
     // Convert to radians.
     float yawRad = DirectX::XMConvertToRadians(yawDegrees);

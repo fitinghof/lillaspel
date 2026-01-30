@@ -1,5 +1,5 @@
 #include "core/imguiManager.h"
-
+#include "utilities/logger.h"
 ImguiManager::ImguiManager(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* immediateContext) {
 	this->InitalizeImgui(hwnd, device, immediateContext);
 }
@@ -31,6 +31,7 @@ void ImguiManager::imguiAtFrameStart() {
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 	//ImGui::ShowDemoWindow(); // Show demo window! :)
+	this->consoleImGui();
 }
 
 void ImguiManager::imguiAtFrameEnd() {
@@ -39,4 +40,15 @@ void ImguiManager::imguiAtFrameEnd() {
 	ImGui::Render();
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 	// (Your code calls swapchain's Present() function)
+}
+
+void ImguiManager::consoleImGui()
+{	
+	static bool isOpen = true;
+
+	if (!isOpen)return;
+	ImGui::SetNextWindowSize(ImVec2(300.f, 500.f), ImGuiCond_FirstUseEver);
+	ImGui::Begin("console", &isOpen);
+	ImGui::TextWrapped(Logger::getLogStringRef().data());
+	ImGui::End();
 }

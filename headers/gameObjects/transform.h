@@ -94,6 +94,12 @@ public:
     /// <returns></returns>
     DirectX::XMVECTOR GetScale() const;
 
+	/// <summary>
+	/// Makes the world matrix for transform
+	/// </summary>
+	/// <returns>Worldmatrix</returns>
+	DirectX::XMFLOAT4X4 GetWorldMatrix() const;
+
     /// <summary>
     /// Returns a rotation quaternion based on yaw and pitch, making sure up is up
     /// </summary>

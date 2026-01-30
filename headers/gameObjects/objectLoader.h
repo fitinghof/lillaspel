@@ -5,6 +5,8 @@
 #include <filesystem>
 #include "rendering/vertex.h"
 #include "gameObjects/mesh.h"
+#include "rendering/vertexBuffer.h"
+#include "rendering/indexBuffer.h"
 
 
 //struct GltfLoadResult {
@@ -19,7 +21,7 @@ class ObjectLoader
 public:
 	ObjectLoader();
 	~ObjectLoader();
-	Mesh LoadGltf(std::filesystem::path path);
+	Mesh LoadGltf(std::filesystem::path path, ID3D11Device* device);
 
 
 

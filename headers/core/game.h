@@ -1,6 +1,8 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include "utilities/logger.h"
-#include "window.h"
+#include "core/window.h"
 #include "rendering/renderer.h"
 #include "core/imguiManager.h"
 

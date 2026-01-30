@@ -8,34 +8,32 @@
 
 class SubMesh {
 public:
-	SubMesh(size_t startIndex, size_t nrOfIndicies);
+	SubMesh(VertexBuffer vertexbuffer, IndexBuffer indexbuffer);
 	SubMesh(SubMesh&&) noexcept = default;
 	SubMesh(SubMesh& other) = default;
 	~SubMesh();
 
-
+	VertexBuffer& GetVertexBuffer();
+	IndexBuffer& GetIndexBuffer();
 private:
-	size_t startIndex;
-	size_t nrOfIndicies;
-	//Materials?
+
+	VertexBuffer vertexbuffer;
+	IndexBuffer indexbuffer;
+	// material index or something?
 };
 
 class Mesh {
 public:
 	Mesh() = default;
-	Mesh(VertexBuffer&& vertexbuffer, IndexBuffer&& indexbuffer, std::vector<SubMesh>&& submeshes);
+	Mesh(std::vector<SubMesh>&& submeshes);
 	Mesh(Mesh&&) noexcept = default;
 	Mesh& operator=(Mesh&&) noexcept = default;
 	~Mesh();
 
-	VertexBuffer& GetVertexBuffer();
-	IndexBuffer& GetIndexBuffer();
 	std::string& GetName();
 	std::vector<SubMesh>& GetSubMeshes();
 
 private:
 	std::string name;
-	VertexBuffer vertexbuffer;
-	IndexBuffer indexbuffer;
 	std::vector<SubMesh> subMeshes;
 };

@@ -1,6 +1,4 @@
 #pragma once
-#include <fastgltf/core.hpp>
-#include <fastgltf/tools.hpp>
 #include <string>
 #include <filesystem>
 #include "rendering/vertex.h"

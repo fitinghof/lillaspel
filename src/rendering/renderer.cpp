@@ -1,7 +1,9 @@
 #include "rendering/renderer.h"
+#include "gameObjects/objectLoader.h"
 
 void Renderer::Init(const Window& window)
 {
+	ObjectLoader objectLoader;
 	SetViewport(window);
 
 	CreateDeviceAndSwapChain(window);

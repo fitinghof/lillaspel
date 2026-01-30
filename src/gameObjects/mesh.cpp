@@ -1,21 +1,11 @@
 #include "gameObjects/mesh.h"
 
-Mesh::Mesh(VertexBuffer&& vertexbuffer, IndexBuffer&& indexbuffer, std::vector<SubMesh>&& submeshes) {
+Mesh::Mesh(std::vector<SubMesh>&& submeshes) {
 
 }
 
 Mesh::~Mesh() {
 
-}
-
-VertexBuffer& Mesh::GetVertexBuffer()
-{
-    return this->vertexbuffer;
-}
-
-IndexBuffer& Mesh::GetIndexBuffer()
-{
-    return this->indexbuffer;
 }
 
 std::string& Mesh::GetName()
@@ -28,9 +18,19 @@ std::vector<SubMesh>& Mesh::GetSubMeshes()
     return this->subMeshes;
 }
 
-SubMesh::SubMesh(size_t startIndex, size_t nrOfIndicies) {
+SubMesh::SubMesh(VertexBuffer vertexbuffer, IndexBuffer indexbuffer) : vertexbuffer(std::move(vertexbuffer)), indexbuffer(std::move(indexbuffer)) {
 
 }
 SubMesh::~SubMesh() {
 
+}
+
+VertexBuffer& SubMesh::GetVertexBuffer()
+{
+    return this->vertexbuffer;
+}
+
+IndexBuffer& SubMesh::GetIndexBuffer()
+{
+    return this->indexbuffer;
 }

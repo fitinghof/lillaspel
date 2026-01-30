@@ -1,5 +1,6 @@
 #pragma once
-
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <DirectXMath.h>
 
 // This entire file exists only to simplify temporary logic in renderer.cpp

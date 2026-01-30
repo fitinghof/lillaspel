@@ -6,6 +6,9 @@
 #include <iostream>
 #include <string>
 #include <windowsx.h>
+#include <memory>
+
+#include "core/inputManager.h"
 
 class Window {
 private:
@@ -14,6 +17,8 @@ private:
     UINT height;
     HINSTANCE instance;
     bool isFullscreen;
+
+	std::unique_ptr<InputManager> inputManager;
 
     static LRESULT CALLBACK StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -25,5 +30,7 @@ public:
     HWND GetHWND() const;
     UINT GetWidth() const;
     UINT GetHeight() const;
+    InputManager* GetInputManager() const;
+    bool IsFullscreen() const;
     void Show(int nCmdShow) const;
 };

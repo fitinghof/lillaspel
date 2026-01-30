@@ -25,18 +25,11 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
         return true;
     
-    switch (message) {
-    case WM_DESTROY: {
-        PostQuitMessage(0);
-        return 0;
-    }
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
+	return this->inputManager->ReadInput(this, hWnd, message, wParam, lParam);
 }
 
 Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, const UINT width, const UINT height)
-    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false) {
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), inputManager(std::make_unique<InputManager>()) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
 
@@ -75,6 +68,10 @@ UINT Window::GetWidth() const { return this->width; }
 
 UINT Window::GetHeight() const { return this->height; }
 
+InputManager* Window::GetInputManager() const { return this->inputManager.get(); }
+
+bool Window::IsFullscreen() const { return this->isFullscreen; }
+
 void Window::Show(int nCmdShow) const {
     ShowWindow(this->hWnd, nCmdShow);
     UpdateWindow(this->hWnd);
@@ -94,4 +91,5 @@ void Window::Show(int nCmdShow) const {
 //        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
 //        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
 //    }
+//    this->isFullscreen = fullscreen;
 //}

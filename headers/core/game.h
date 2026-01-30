@@ -2,7 +2,7 @@
 #include "utilities/logger.h"
 #include "window.h"
 #include "rendering/renderer.h"
-#include "../headers/core/audio/soundEngine.h"
+#include "core/imguiManager.h"
 
 class Game {
 public:
@@ -11,5 +11,6 @@ public:
 	void Run(HINSTANCE hInstance, int nCmdShow);
 
 private:
-	AudioManager audioManager;
+
+	ImguiManager imguiManager;
 };

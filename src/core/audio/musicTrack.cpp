@@ -1,4 +1,4 @@
-#include "../../../headers/core/audio/musicTrack.h"
+#include "core/audio/musicTrack.h"
 
 MusicTrack::MusicTrack()
 {

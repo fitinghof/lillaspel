@@ -1,4 +1,4 @@
-#include "../../../headers/core/audio/soundBank.h"
+#include "core/audio/soundBank.h"
 
 SoundBank::SoundBank()
 {
@@ -6,6 +6,8 @@ SoundBank::SoundBank()
 
 SoundBank::~SoundBank()
 {
+	//ADD UNIQUE POINTERS LATER, MEMORY WILL BE LOST!
+	this->soundClips.clear();
 }
 
 void SoundBank::Initialize(std::string pathToSoundFolder)
@@ -30,22 +32,22 @@ SoundClip* SoundBank::GetSoundClipStandardFolder(const std::string filename)
 	auto it = this->soundClips.find(fullpath);
 	if (it != this->soundClips.end())
 	{
-		return &this->soundClips[fullpath];
+		return this->soundClips[fullpath];
 	}
 
 	Logger::Log("couldn't find " + fullpath);
 	return nullptr;
 }
 
-SoundClip* SoundBank::GetSoundClip(const std::string relativePath)
+SoundClip* SoundBank::GetSoundClip(const std::string path)
 {
-	auto it = this->soundClips.find(relativePath);
+	auto it = this->soundClips.find(path);
 	if (it != this->soundClips.end())
 	{
-		return &this->soundClips[relativePath];
+		return this->soundClips[path];
 	}
 
-	Logger::Log("couldn't find " + relativePath);
+	Logger::Log("couldn't find " + path);
 	return nullptr;
 }
 
@@ -147,9 +149,9 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 		return;
 	}
 
-	SoundClip newClip;
-	newClip.bufferID = buffer;
-	newClip.filepath = filepath;
+	SoundClip* newClip = new SoundClip();
+	newClip->buffer = buffer;
+	newClip->filepath = filepath;
 
 	this->soundClips.insert(std::make_pair(fullpath, newClip));
 }

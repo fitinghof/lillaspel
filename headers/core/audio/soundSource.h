@@ -13,7 +13,8 @@ class SoundSource
 public:
 	SoundSource();
 	~SoundSource();
-	SoundClip& operator=(SoundClip&) = delete;
+	SoundSource(const SoundSource&) = delete;
+	SoundSource& operator=(const SoundSource&) = delete;
 
 	void Play(SoundClip* soundClip);
 	void SetPosition(float x, float y, float z);
@@ -33,7 +34,7 @@ private:
 	int nrOfSources = 6;
 	int sourceIndex = 0;
 	ALuint* sources;
-	ALuint* currentBuffers;
+	ALuint** currentBuffers;
 	AudioInstruction currentInstructionSet;
 
 	float pitch = 1;

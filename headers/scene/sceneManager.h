@@ -4,6 +4,7 @@
 #include <scene/scene.h>
 #include <utilities/logger.h>
 #include "gameObjects/cameraObject.h"
+#include "core/assetManager.h"
 
 class SceneManager {
 public:
@@ -13,6 +14,8 @@ public:
 	void SceneTick();
 
 	void LoadScene(); // Should be able to take a scene file?
+
+	AssetManager assetManager; //should be private
 
 private:
 	std::unique_ptr<Scene> mainScene;

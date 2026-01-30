@@ -1,4 +1,4 @@
-#include "../../../headers/core/audio/soundSource.h"
+#include "core/audio/soundSource.h"
 
 SoundSource::SoundSource()
 {
@@ -9,9 +9,10 @@ SoundSource::SoundSource()
 	this->currentInstructionSet.loopSound = false;
 	this->currentInstructionSet.loopNrOfTimes = 0;
 
-	this->sources = new ALuint[this->nrOfSources];
-	this->currentBuffers = new ALuint[this->nrOfSources];
+	this->sources = new ALuint[this->nrOfSources]; //owns its own sources
+	this->currentBuffers = new ALuint*[this->nrOfSources]; //does NOT own the buffers
 	alGenSources(this->nrOfSources, this->sources);
+	alGenBuffers(this->nrOfSources, *(this->currentBuffers));
 
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
@@ -32,7 +33,7 @@ SoundSource::~SoundSource()
 	delete[] this->currentBuffers;
 }
 
-void SoundSource::Play(SoundClip* soundClip)
+void SoundSource::Play(SoundClip* soundClip) //pointer referece?
 {
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
@@ -43,8 +44,8 @@ void SoundSource::Play(SoundClip* soundClip)
 
 		if (state != AL_PLAYING)
 		{
-			alSourcei(this->sources[index], AL_BUFFER, (ALint)soundClip->bufferID);
-			this->currentBuffers[index] = soundClip->bufferID;
+			alSourcei(this->sources[index], AL_BUFFER, (ALint)soundClip->buffer); //can a copy occur here?
+			this->currentBuffers[index] = &soundClip->buffer;
 			alSourcePlay(this->sources[index]);
 
 			// Next search will start after this one
@@ -54,8 +55,8 @@ void SoundSource::Play(SoundClip* soundClip)
 	}
 
 	// No free source, overwrite the next
-	alSourcei(this->sources[this->sourceIndex], AL_BUFFER, (ALint)soundClip->bufferID);
-	this->currentBuffers[this->sourceIndex] = soundClip->bufferID;
+	alSourcei(this->sources[this->sourceIndex], AL_BUFFER, (ALint)soundClip->buffer);
+	this->currentBuffers[this->sourceIndex] = &soundClip->buffer;
 	alSourcePlay(this->sources[this->sourceIndex]);
 
 	this->sourceIndex = (this->sourceIndex + 1) % this->nrOfSources;

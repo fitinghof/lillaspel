@@ -1,4 +1,4 @@
-#include "../../../headers/core/audio/soundSourceManager.h"
+#include "core/audio/soundSourceManager.h"
 
 SoundSource* SoundSourceManager::GetSoundSource(int id)
 {

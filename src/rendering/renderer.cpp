@@ -22,7 +22,7 @@ void Renderer::Init(const Window& window)
 	CreateRenderQueue();
 
 	ObjectLoader l;
-	this->mesh = l.LoadGltf("C:/Users/Max/Dev/cube.glb", this->device.Get());
+	//this->mesh = l.LoadGltf("", this->device.Get());
 
 	CameraObject::CameraMatrixContainer camMatrix = {};
 	this->cameraBuffer = std::make_unique<ConstantBuffer>();

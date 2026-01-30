@@ -71,13 +71,26 @@ int SoundSource::GetId()
 	return this->id;
 }
 
+void SoundSource::GetSourceState(int index, ALint& sourceState)
+{
+	return alGetSourcei(this->sources[index], AL_SOURCE_STATE, &sourceState);
+}
+
+void SoundSource::GetCurrentSourcePosition(ALfloat* position)
+{
+	alGetSource3f(sources[this->sourceIndex], AL_POSITION, &position[0], &position[1], &position[2]);
+}
+
 void SoundSource::SetPosition(float x, float y, float z)
 {
 	this->position[0] = x;
 	this->position[1] = y;
 	this->position[2] = z;
 
-	alSource3f(this->sources[this->sourceIndex], AL_POSITION, (ALfloat)this->position[0], (ALfloat)this->position[1], (ALfloat)this->position[2]);
+	for (int i = 0; i < this->nrOfSources; i++)
+	{
+		alSource3f(this->sources[i], AL_POSITION, (ALfloat)this->position[0], (ALfloat)this->position[1], (ALfloat)this->position[2]);
+	}
 }
 
 void SoundSource::SetGain(float gain)

@@ -25,6 +25,9 @@ public:
 	void SetId(int newId);
 	int GetId();
 
+	void GetSourceState(int index, ALint& sourceState); //for debug
+	void GetCurrentSourcePosition(ALfloat* position); //for debug
+
 private:
 	int id = -1;
 	int nrOfSources = 6;

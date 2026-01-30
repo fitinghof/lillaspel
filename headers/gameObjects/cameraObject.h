@@ -1,3 +1,5 @@
+#pragma once
+
 #include "gameObjects/gameObject3D.h"
 
 #include <DirectXMath.h>
@@ -26,6 +28,8 @@ public:
 	virtual ~CameraObject() = default;
 
 	virtual void Tick() override;
+
+	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 
 private:
 	CameraMatrixContainer cameraMatrix;

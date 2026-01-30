@@ -14,8 +14,8 @@ private:
 public:
 	IndexBuffer() = default;
 	~IndexBuffer() = default;
-	IndexBuffer(const IndexBuffer& other) = delete;
-	IndexBuffer& operator=(const IndexBuffer& other) = delete;
+	IndexBuffer(const IndexBuffer& other) = default;
+	IndexBuffer& operator=(const IndexBuffer& other) = default;
 	IndexBuffer(IndexBuffer&& other) noexcept = default;
 	IndexBuffer& operator=(IndexBuffer&& other) = default;
 

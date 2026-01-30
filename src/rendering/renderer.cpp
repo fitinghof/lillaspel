@@ -1,5 +1,9 @@
 #include "rendering/renderer.h"
 
+Renderer::Renderer() : viewport(), mesh()
+{
+}
+
 void Renderer::Init(const Window& window)
 {
 	SetViewport(window);
@@ -13,7 +17,17 @@ void Renderer::Init(const Window& window)
 	LoadShaders(vShaderByteCode);
 	CreateInputLayout(vShaderByteCode);
 
+	CreateStandardRasterizerState();
+
 	CreateRenderQueue();
+
+	ObjectLoader l;
+	this->mesh = l.LoadGltf("C:/Users/Max/Dev/cube.glb", this->device.Get());
+
+	CameraObject::CameraMatrixContainer camMatrix = {};
+	this->cameraBuffer = std::make_unique<ConstantBuffer>();
+	this->cameraBuffer->Init(this->device.Get(), sizeof(CameraObject::CameraMatrixContainer), &camMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -80,6 +94,17 @@ void Renderer::CreateSampler()
 	this->sampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_WRAP);
 }
 
+void Renderer::CreateStandardRasterizerState()
+{
+	D3D11_RASTERIZER_DESC rastDesc;
+	ZeroMemory(&rastDesc, sizeof(rastDesc));
+	rastDesc.CullMode = D3D11_CULL_NONE;
+	rastDesc.DepthClipEnable = TRUE;
+	rastDesc.FillMode = D3D11_FILL_SOLID;
+	this->standardRasterizerState = std::make_unique<RasterizerState>();
+	this->standardRasterizerState->Init(this->device.Get(), &rastDesc);
+}
+
 void Renderer::CreateRenderQueue()
 {
 	this->meshRenderQueue = std::shared_ptr<std::vector<int>>();
@@ -137,23 +162,9 @@ void Renderer::RenderPass()
 
 	BindMaterial(this->tempMat.get());
 
-	// Temporary logic to create the camera
-	// Will be replaced when there's an actual camera object
-	MatrixContainer* cameraMatrix = nullptr;
-	float pos[3] = {0.0f, 0.0f, 0.0f};
-	float lookPos[3] = {0.0f, 0.0f, 1.0f};
-	float upDir[3] = {0.0f, 1.0f, 0.0f};
-	ConstantBufferViewProjMatrix_Perspective(cameraMatrix, 80.0f, 16.0f / 9.0f, pos, lookPos, upDir);
-	CameraBufferContainer cameraBufferContainer = { *cameraMatrix, 0.0f, 0.0f, 0.0f, 0};
+	BindRasterizerState(this->standardRasterizerState.get());
 
-	std::unique_ptr<ConstantBuffer> camBuffer = std::make_unique<ConstantBuffer>();
-	camBuffer->Init(this->device.Get(), sizeof(cameraBufferContainer), &cameraBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
-	BindCameraMatrix(camBuffer->GetBuffer());
-
-	delete cameraMatrix;
-
-
+	BindCameraMatrix();
 
 
 
@@ -185,8 +196,16 @@ void Renderer::RenderPass()
 
 	this->immediateContext->IASetIndexBuffer(tempIBuffer->GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
+	// Testing for actual meshes:
 
-	float meshPos[3] = { 0.0f, 0.0f, 6.0f };
+	//UINT stride = this->mesh.GetVertexBuffer().GetVertexSize();
+	//UINT offset = 0;
+	//ID3D11Buffer* vBuff = this->mesh.GetVertexBuffer().GetBuffer();
+	////Logger::Log(this->mesh.GetVertexBuffer().GetNrOfVertices());
+	//this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
+	//this->immediateContext->IASetIndexBuffer(this->mesh.GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+	float meshPos[3] = { 0.0f, 0.0f, 10.0f };
 	static float rot = 0;
 	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f}; // I know this is framerate-dependent. It's a temporary test, ok?
 	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
@@ -249,6 +268,15 @@ void Renderer::BindViewport()
 	this->immediateContext->RSSetViewports(1, &this->viewport);
 }
 
+void Renderer::BindRasterizerState(RasterizerState* rastState)
+{
+	if (rastState == nullptr) {
+		Logger::Error("RasterizerSate is nullptr");
+	}
+
+	this->immediateContext->RSSetState(rastState->GetRasterizerState());
+}
+
 void Renderer::BindMaterial(Material* material)
 {
 	material->vertexShader->BindShader(this->immediateContext.Get());
@@ -257,8 +285,11 @@ void Renderer::BindMaterial(Material* material)
 	// Also bind constant buffers
 }
 
-void Renderer::BindCameraMatrix(ID3D11Buffer* buffer)
+void Renderer::BindCameraMatrix()
 {
+	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &CameraObject::mainCamera->GetCameraMatrix());
+
+	ID3D11Buffer* buffer = this->cameraBuffer->GetBuffer();
 	this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);
 }
 

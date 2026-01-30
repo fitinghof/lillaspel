@@ -21,8 +21,8 @@ private:
 template<typename T>
 inline GameObject* Scene::CreateGameObjectOfType()
 {
-	static_assert(std::is_base_of_v<GameObject, T>,
-		"T must derive from GameObject");
+	// Make sure it is a gameObject (compiler assert)
+	static_assert(std::is_base_of_v<GameObject, T>, "T must derive from GameObject");
 
 	auto obj = std::make_unique<T>();
 	T* newObject = obj.get();

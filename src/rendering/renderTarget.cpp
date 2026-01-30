@@ -15,11 +15,16 @@ void RenderTarget::Init(ID3D11Device* device, IDXGISwapChain* swapChain)
 	HRESULT hr = device->CreateRenderTargetView(backBuffer, NULL, this->renderTargetView.GetAddressOf());
 	backBuffer->Release();
 	if (FAILED(hr)) {
-		throw std::exception("Error creating render target view!");
+		throw std::exception(std::format("Error creating render target view, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 }
 
 ID3D11RenderTargetView* RenderTarget::GetRenderTargetView()
 {
 	return this->renderTargetView.Get();
+}
+
+ID3D11ShaderResourceView* RenderTarget::GetShaderResourceView() const
+{
+	return this->shaderResourceView.Get();
 }

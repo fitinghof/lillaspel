@@ -12,19 +12,20 @@ enum KeyStateBinMask {
 
 
 class InputManager {
-private:
-	std::array<unsigned char, 256> keyStates;
-
-	std::pair<unsigned int, unsigned int> mousePosition;
-
 public:
-	InputManager() = default;
+	InputManager();
 	~InputManager() = default;
 
 	LRESULT ReadInput(Window* window, HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void SetKeyState(const unsigned char key, const unsigned char state);
-	void setMousePosition(const unsigned int x, const unsigned int y);
+	void SetLMouseKeyState(const unsigned char state);
+	void SetRMouseKeyState(const unsigned char state);
+
+	void Reset();
+
+	std::pair<unsigned int, unsigned int> GetMouseMovement() const;
+	std::pair<int, int> GetMousePosition() const;
 
 	bool IsKeyDown(const unsigned char key) const;
 	bool WasKeyPressed(const unsigned char key) const;
@@ -37,4 +38,12 @@ public:
 	bool IsRMDown() const;
 	bool WasRMPressed() const;
 	bool WasRMReleased() const;
+
+private:
+	std::array<unsigned char, 256> keyStates;
+
+	std::pair<unsigned int, unsigned int> mousePosition;
+	std::pair<int, int> mouseMovement;
+	unsigned char LM;
+	unsigned char RM;
 };

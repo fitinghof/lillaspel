@@ -12,11 +12,14 @@
 
 class SceneManager {
 public:
-	SceneManager(Renderer* rend);
+	SceneManager(Renderer* rend); // The renderer reference is temporary
 	~SceneManager() = default;
 
 	void SceneTick();
 
+	/// <summary>
+	/// For now this serves as a place to build scenes
+	/// </summary>
 	void LoadScene(); // Should be able to take a scene file?
 
 private:
@@ -24,5 +27,5 @@ private:
 
 	Renderer* renderer; // This is temporary
 
-	std::unique_ptr<Mesh> tempMesh; // This is also temporary
+	std::vector<std::unique_ptr<Mesh>> tempMeshes; // This is also temporary
 };

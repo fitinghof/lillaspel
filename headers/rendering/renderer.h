@@ -21,9 +21,8 @@
 #include "gameObjects/cameraObject.h"
 #include "gameObjects/meshObject.h"
 
-#include "rendering/tempRenderDefs.h"
 
-#include "gameObjects/objectLoader.h"
+
 
 class Renderer {
 public:
@@ -50,6 +49,14 @@ public:
 	ID3D11DeviceContext* GetContext() const;
 	IDXGISwapChain* GetSwapChain() const;
 private:
+
+	struct WorldMatrixBufferContainer {
+		DirectX::XMFLOAT4X4 worldMatrix;
+		DirectX::XMFLOAT4X4 worldMatrixInversedTransposed;
+	};
+
+	// DirectX11 specific stuff:
+
 	D3D11_VIEWPORT viewport;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
@@ -62,19 +69,29 @@ private:
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 
-	// Temporary
+
+	// Temporary:
 
 	std::unique_ptr<Material> tempMat;
 
 	std::shared_ptr<Shader> vertexShader;
 	std::shared_ptr<Shader> pixelShader;
 
-	// -- 
+
+	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;
 	std::shared_ptr<std::vector<MeshObject*>> meshRenderQueue;
 
+
+	// Constant buffers:
+	// The renderer keeps these constant buffers since only one is ever required
+	// So it just updates them with data for each object every frame
+
 	std::unique_ptr<ConstantBuffer> cameraBuffer;
+	std::unique_ptr<ConstantBuffer> worldMatrixBuffer;
+
+
 
 	void SetViewport(const Window& window);
 	void CreateDeviceAndSwapChain(const Window& window);
@@ -83,6 +100,11 @@ private:
 	void CreateInputLayout(const std::string& vShaderByteCode);
 	void CreateSampler();
 	void CreateStandardRasterizerState();
+
+	/// <summary>
+	/// Creates required constant buffers. The renderer needs a cameraBuffer and worldMatrixBuffer.
+	/// </summary>
+	void CreateRendererConstantBuffers();
 
 	void CreateRenderQueue();
 
@@ -109,5 +131,9 @@ private:
 	void BindCameraMatrix();
 	void BindWorldMatrix(ID3D11Buffer* buffer);
 
-	Mesh mesh;
+	/// <summary>
+	/// Renders a single MeshObject
+	/// </summary>
+	/// <param name="meshObject"></param>
+	void RenderMeshObject(MeshObject* meshObject);
 };

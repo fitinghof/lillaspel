@@ -17,8 +17,8 @@ struct CameraBufferContainer {
 };
 
 struct WorldMatrixBufferContainer {
-	MatrixContainer worldMatrix;
-	MatrixContainer worldMatrixInversedTransposed;
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMFLOAT4X4 worldMatrixInversedTransposed;
 };
 
 

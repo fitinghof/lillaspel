@@ -11,7 +11,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     this->imguiManager.InitalizeImgui(window.GetHWND(), renderer.GetDevice(), renderer.GetContext());
 
-    std::unique_ptr<SceneManager> sceneMan = std::unique_ptr<SceneManager>(new SceneManager());
+    std::unique_ptr<SceneManager> sceneMan = std::unique_ptr<SceneManager>(new SceneManager(&renderer));
     sceneMan->LoadScene();
 
     MSG msg = {};

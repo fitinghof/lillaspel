@@ -19,6 +19,7 @@
 #include "rendering/renderQueue.h"
 #include "rendering/rasterizerState.h"
 #include "gameObjects/cameraObject.h"
+#include "gameObjects/meshObject.h"
 
 #include "rendering/tempRenderDefs.h"
 
@@ -71,7 +72,7 @@ private:
 	// -- 
 
 	std::unique_ptr<RenderQueue> renderQueue;
-	std::shared_ptr<std::vector<int>> meshRenderQueue;
+	std::shared_ptr<std::vector<MeshObject*>> meshRenderQueue;
 
 	std::unique_ptr<ConstantBuffer> cameraBuffer;
 

@@ -287,7 +287,7 @@ void Renderer::BindMaterial(Material* material)
 
 void Renderer::BindCameraMatrix()
 {
-	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &CameraObject::mainCamera->GetCameraMatrix());
+	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &CameraObject::GetMainCamera().GetCameraMatrix());
 
 	ID3D11Buffer* buffer = this->cameraBuffer->GetBuffer();
 	this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);

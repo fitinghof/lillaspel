@@ -21,5 +21,5 @@ void SceneManager::LoadScene()
 
 	this->mainScene = std::unique_ptr<Scene>(new Scene());
 
-	CameraObject* camera = (CameraObject*)this->mainScene->CreateGameObjectOfType<CameraObject>();
+	std::weak_ptr<CameraObject> camera = this->mainScene->CreateGameObjectOfType<CameraObject>();
 }

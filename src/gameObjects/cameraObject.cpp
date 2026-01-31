@@ -39,6 +39,16 @@ CameraObject::CameraMatrixContainer& CameraObject::GetCameraMatrix()
 	return this->cameraMatrix;
 }
 
+CameraObject& CameraObject::GetMainCamera()
+{
+	if (!CameraObject::mainCamera)
+	{
+		throw std::runtime_error("No active camera!");
+	}
+
+	return *CameraObject::mainCamera;
+}
+
 void CameraObject::UpdateCameraMatrix()
 {
 	// Position

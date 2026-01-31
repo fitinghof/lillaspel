@@ -24,16 +24,17 @@ public:
 		DirectX::XMVECTOR cameraPosition; 
 	};
 
-	static CameraObject* mainCamera;
-
 	CameraObject();
 	virtual ~CameraObject() = default;
 
 	virtual void Tick() override;
 
 	CameraObject::CameraMatrixContainer& GetCameraMatrix();
+	static CameraObject& GetMainCamera();
 
 private:
+	static CameraObject* mainCamera;
+
 	CameraMatrixContainer cameraMatrix;
 
 	/// <summary>

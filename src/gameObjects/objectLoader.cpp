@@ -8,7 +8,7 @@ ObjectLoader::ObjectLoader() {
 ObjectLoader::~ObjectLoader() {
 }
 
-Mesh ObjectLoader::LoadGltf(std::filesystem::path path) {
+Mesh ObjectLoader::LoadGltf(std::filesystem::path path, ID3D11Device* device) {
 	fastgltf::Parser parser;
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
@@ -48,7 +48,7 @@ Mesh ObjectLoader::LoadGltf(std::filesystem::path path) {
 			auto* normalIt = primitive.findAttribute("NORMAL");
 			auto& normalAccessor = asset.accessors[normalIt->accessorIndex];
 
-			if (!positionAccessor.bufferViewIndex.has_value())
+			if (!normalAccessor.bufferViewIndex.has_value())
 				continue;
 
 			size_t idx = 0;
@@ -63,24 +63,26 @@ Mesh ObjectLoader::LoadGltf(std::filesystem::path path) {
 			auto* uvIt = primitive.findAttribute("TEXCOORD_n");
 			auto& uvAccessor = asset.accessors[uvIt->accessorIndex];
 
-			if (!positionAccessor.bufferViewIndex.has_value())
+			if (!uvAccessor.bufferViewIndex.has_value())
 				continue;
 
-			idx = 0;
+			/*idx = 0;
 			fastgltf::iterateAccessor<fastgltf::math::fvec2>(asset, uvAccessor, [&](fastgltf::math::fvec2 t) {
 				verticies[idx].uv[0] = t.data()[0];
 				verticies[idx++].uv[1] = t.data()[1];
-			});
+			});*/
+
 			SubMesh subMesh(0, idx);
 			subMeshes.emplace_back(subMesh);
 
 		}
 	}
+
 	VertexBuffer vertexBuffer;
-	vertexBuffer.Init(nullptr, sizeof(Vertex), verticies.size(), verticies.data());
+	vertexBuffer.Init(device, sizeof(Vertex), verticies.size(), verticies.data());
 
 	IndexBuffer indexBuffer;
-	indexBuffer.Init(nullptr, indicies.size(), indicies.data());
+	indexBuffer.Init(device, indicies.size(), indicies.data());
 
 	Mesh mesh(std::move(vertexBuffer), std::move(indexBuffer), std::move(subMeshes));
 

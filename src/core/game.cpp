@@ -25,6 +25,8 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
             DispatchMessage(&msg);
         }
 
+        sceneMan->SceneTick();
+
         renderer.Render();
         this->imguiManager.imguiAtFrameEnd();
         renderer.Present();

@@ -1,5 +1,8 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 #include "core/window.h"
 #include "d3d11.h"
 #include "wrl/client.h"
@@ -14,12 +17,16 @@
 #include "rendering/indexBuffer.h"
 #include "rendering/material.h"
 #include "rendering/renderQueue.h"
+#include "rendering/rasterizerState.h"
+#include "gameObjects/cameraObject.h"
 
 #include "rendering/tempRenderDefs.h"
 
+#include "gameObjects/objectLoader.h"
+
 class Renderer {
 public:
-	Renderer() = default;
+	Renderer();
 	~Renderer() = default;
 
 	/// <summary>
@@ -52,6 +59,7 @@ private:
 	std::unique_ptr<DepthBuffer> depthBuffer;
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
+	std::unique_ptr<RasterizerState> standardRasterizerState;
 
 	// Temporary
 
@@ -65,12 +73,15 @@ private:
 	std::unique_ptr<RenderQueue> renderQueue;
 	std::shared_ptr<std::vector<int>> meshRenderQueue;
 
+	std::unique_ptr<ConstantBuffer> cameraBuffer;
+
 	void SetViewport(const Window& window);
 	void CreateDeviceAndSwapChain(const Window& window);
 	void CreateRenderTarget();
 	void CreateDepthBuffer(const Window& window);
 	void CreateInputLayout(const std::string& vShaderByteCode);
 	void CreateSampler();
+	void CreateStandardRasterizerState();
 
 	void CreateRenderQueue();
 
@@ -90,9 +101,12 @@ private:
 	void BindInputLayout();
 	void BindRenderTarget();
 	void BindViewport();
+	void BindRasterizerState(RasterizerState* rastState);
 
 	void BindMaterial(Material* material);
 
-	void BindCameraMatrix(ID3D11Buffer* buffer);
+	void BindCameraMatrix();
 	void BindWorldMatrix(ID3D11Buffer* buffer);
+
+	Mesh mesh;
 };

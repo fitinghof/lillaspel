@@ -15,12 +15,12 @@ public:
 
 	void InitalizeImgui(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* immediateContext);
 
-	void imguiAtFrameStart();
-	void imguiAtFrameEnd();
+	void ImguiAtFrameStart();
+	void ImguiAtFrameEnd();
 
 private:
 
-	void consoleImGui();
-
+	void ConsoleImGui();
+	float GetAvrageFrameRate();
 
 };

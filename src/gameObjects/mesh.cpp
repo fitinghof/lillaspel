@@ -1,7 +1,7 @@
 #include "gameObjects/mesh.h"
 
-Mesh::Mesh(std::vector<SubMesh>&& submeshes) {
-
+Mesh::Mesh(VertexBuffer vertexbuffer, IndexBuffer indexbuffer, std::vector<SubMesh>&& submeshes) 
+    : vertexbuffer(std::move(vertexbuffer)), indexbuffer(std::move(indexbuffer)), subMeshes(std::move(submeshes)) {
 }
 
 Mesh::~Mesh() {
@@ -18,23 +18,26 @@ std::vector<SubMesh>& Mesh::GetSubMeshes()
     return this->subMeshes;
 }
 
-SubMesh::SubMesh(VertexBuffer vertexbuffer, IndexBuffer indexbuffer) : vertexbuffer(std::move(vertexbuffer)), indexbuffer(std::move(indexbuffer)) {
+VertexBuffer& Mesh::GetVertexBuffer()
+{
+    return this->vertexbuffer;
+}
+
+IndexBuffer& Mesh::GetIndexBuffer()
+{
+    return this->indexbuffer;
+}
+
+SubMesh::SubMesh(size_t startIndex, size_t nrOfIndices) 
+    : startIndex(startIndex), nrOfIndices(nrOfIndices) {
 
 }
 SubMesh::~SubMesh() {
 
 }
 
-void Mesh::Init(std::vector<SubMesh>&& submeshes) {
+void Mesh::Init(VertexBuffer vertexbuffer, IndexBuffer indexbuffer, std::vector<SubMesh>&& submeshes) {
+    this->vertexbuffer = std::move(vertexbuffer);
+	this->indexbuffer = std::move(indexbuffer);
 	this->subMeshes = std::move(submeshes);
-}
-
-VertexBuffer& SubMesh::GetVertexBuffer()
-{
-    return this->vertexbuffer;
-}
-
-IndexBuffer& SubMesh::GetIndexBuffer()
-{
-    return this->indexbuffer;
 }

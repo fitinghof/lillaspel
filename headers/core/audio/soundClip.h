@@ -8,6 +8,7 @@ struct SoundClip
 	SoundClip();
 	~SoundClip();
 
+    std::string id = "";
 	std::string filepath = "";
 	ALuint buffer = 0;
 

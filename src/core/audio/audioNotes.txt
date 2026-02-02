@@ -1,2 +1,2 @@
-- music is played as it had a position, it should always sound global
-- check sound orientation
+- musicTrack should be put in a music manager
+- musicTrack should have 2 sources so that music can be faded

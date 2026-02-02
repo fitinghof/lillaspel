@@ -15,6 +15,18 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     MSG msg = {};
 
+    MusicTrack track1;
+    track1.Initialize("C:/Users/Gabriel/Music/Testing/");
+    track1.LoadTrackStandardFolder("Sneak16.wav", "sneak");
+    track1.Play();
+
+    track1.SetGain(0.5f);
+
+    MusicTrack track2;
+    track2.Initialize("C:/Users/Gabriel/Music/Testing/");
+    track2.LoadTrackStandardFolder("BloodyFangs16.wav", "fangs");
+    track2.Play();
+
 
     while (msg.message != WM_QUIT)
     {
@@ -24,6 +36,9 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
+
+        track1.UpdateBufferStream();
+        track2.UpdateBufferStream();
 
         Time::GetInstance().Tick();
         this->sceneManager->SceneTick();

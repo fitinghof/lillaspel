@@ -5,14 +5,14 @@ void AssetManager::InitializeSoundBank(std::string pathToSoundFolder)
 	this->soundBank.Initialize(pathToSoundFolder);
 }
 
-void AssetManager::AddSoundClipStandardFolder(std::string standardFolder)
+void AssetManager::AddSoundClipStandardFolder(std::string standardFolder, std::string id)
 {
-	this->soundBank.AddSoundClipStandardFolder(standardFolder);
+	this->soundBank.AddSoundClipStandardFolder(standardFolder, id);
 }
 
-void AssetManager::AddSoundClip(std::string path)
+void AssetManager::AddSoundClip(std::string path, std::string id)
 {
-	this->soundBank.AddSoundClip(path);
+	this->soundBank.AddSoundClip(path, id);
 }
 
 SoundClip* AssetManager::GetSoundClipStandardFolder(std::string filename)

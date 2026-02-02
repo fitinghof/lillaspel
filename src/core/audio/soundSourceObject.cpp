@@ -1,6 +1,6 @@
-#include "core/audio/soundSource.h"
+#include "core/audio/soundSourceObject.h"
 
-SoundSource::SoundSource()
+SoundSourceObject::SoundSourceObject()
 {
 	this->currentInstructionSet.fadeIn = false; //will look at this later
 	this->currentInstructionSet.fadeInTime = 0;
@@ -11,30 +11,41 @@ SoundSource::SoundSource()
 
 	this->sources = new ALuint[this->nrOfSources]; //owns its own sources
 	alGenSources(this->nrOfSources, this->sources);
-	//alGenBuffers(this->nrOfSources, *(this->currentBuffers));
+
+	DirectX::XMVECTOR pos = this->transform.GetPosition();
 
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
 		alSourcef(this->sources[i], AL_PITCH, this->pitch);
 		alSourcef(this->sources[i], AL_GAIN, this->gain);
-		alSource3f(this->sources[i], AL_POSITION, this->position[0], this->position[1], this->position[2]);
+		alSource3f(this->sources[i], AL_POSITION, (ALfloat)pos.m128_f32[0], (ALfloat)pos.m128_f32[1], (ALfloat)pos.m128_f32[2]);
 		alSource3f(this->sources[i], AL_VELOCITY, this->velocity[0], this->velocity[1], this->velocity[2]);
 		alSourcei(this->sources[i], AL_LOOPING, this->currentInstructionSet.loopSound);
 	}
 
-	//alSourcei(source, AL_BUFFER, *this->currentBuffer);
-	ALint state = 0;
-	this->GetSourceState(0, state);
-	Logger::Log("source state: " + std::to_string(state));
+	//ALint state = 0;
+	//this->GetSourceState(0, state);
+	//Logger::Log("source state: " + std::to_string(state));
 }
 
-SoundSource::~SoundSource()
+SoundSourceObject::~SoundSourceObject()
 {
 	alDeleteSources(this->nrOfSources, this->sources);
 	delete[] this->sources;
 }
 
-void SoundSource::Play(SoundClip* soundClip) //pointer referece?
+void SoundSourceObject::Tick()
+{
+	this->GameObject3D::Tick();
+
+	DirectX::XMVECTOR pos = this->transform.GetPosition();
+	for (int i = 0; i < this->nrOfSources; i++)
+	{
+		alSource3f(this->sources[i], AL_POSITION, (ALfloat)pos.m128_f32[0], (ALfloat)pos.m128_f32[1], (ALfloat)pos.m128_f32[2]);
+	}
+}
+
+void SoundSourceObject::Play(SoundClip* soundClip) //pointer referece?
 {
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
@@ -61,39 +72,39 @@ void SoundSource::Play(SoundClip* soundClip) //pointer referece?
 	this->sourceIndex = (this->sourceIndex + 1) % this->nrOfSources;
 }
 
-void SoundSource::SetId(int newId)
+void SoundSourceObject::SetId(int newId)
 {
 	this->id = newId;
 }
 
-int SoundSource::GetId()
+int SoundSourceObject::GetId()
 {
 	return this->id;
 }
 
-void SoundSource::GetSourceState(int index, ALint& sourceState)
+void SoundSourceObject::GetSourceState(int index, ALint& sourceState)
 {
 	return alGetSourcei(this->sources[index], AL_SOURCE_STATE, &sourceState);
 }
 
-void SoundSource::GetCurrentSourcePosition(ALfloat* position)
+void SoundSourceObject::GetCurrentSourcePosition(ALfloat* position)
 {
 	alGetSource3f(sources[this->sourceIndex], AL_POSITION, &position[0], &position[1], &position[2]);
 }
 
-void SoundSource::SetPosition(float x, float y, float z)
+void SoundSourceObject::SetRandomPitch(float minPitch, float maxPitch)
 {
-	this->position[0] = x;
-	this->position[1] = y;
-	this->position[2] = z;
+	srand(time(0)); //this seed sucks, we need to fix this
 
-	for (int i = 0; i < this->nrOfSources; i++)
-	{
-		alSource3f(this->sources[i], AL_POSITION, (ALfloat)this->position[0], (ALfloat)this->position[1], (ALfloat)this->position[2]);
-	}
+	int tempMin = minPitch * 1000;
+	int tempMax = maxPitch * 1000;
+	int tempPitch = tempMin + rand() % (tempMax - tempMin);
+	float pitch = tempPitch / 1000.0f;
+
+	this->SetPitch(pitch);
 }
 
-void SoundSource::SetGain(float gain)
+void SoundSourceObject::SetGain(float gain)
 {
 	this->gain = gain;
 
@@ -103,7 +114,7 @@ void SoundSource::SetGain(float gain)
 	}
 }
 
-void SoundSource::SetPitch(float pitch)
+void SoundSourceObject::SetPitch(float pitch)
 {
 	this->pitch = pitch;
 
@@ -113,7 +124,7 @@ void SoundSource::SetPitch(float pitch)
 	}
 }
 
-void SoundSource::ChangePitch(float pitchChange)
+void SoundSourceObject::ChangePitch(float pitchChange)
 {
 	this->pitch += pitchChange;
 
@@ -123,7 +134,7 @@ void SoundSource::ChangePitch(float pitchChange)
 	}
 }
 
-void SoundSource::ChangeGain(float gainChange)
+void SoundSourceObject::ChangeGain(float gainChange)
 {
 	this->gain += gainChange;
 
@@ -133,7 +144,7 @@ void SoundSource::ChangeGain(float gainChange)
 	}
 }
 
-void SoundSource::SetAudioInstruction(AudioInstruction instructionSet)
+void SoundSourceObject::SetAudioInstruction(AudioInstruction instructionSet)
 {
 	this->currentInstructionSet = instructionSet;
 	for (int i = 0; i < this->nrOfSources; i++)

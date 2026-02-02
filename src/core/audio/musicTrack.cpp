@@ -50,7 +50,7 @@ void MusicTrack::Play()
 		return;
 	}
 
-	alSourceQueueBuffers(this->source, NUM_BUFFERS - 1, this->buffers);
+	alSourceQueueBuffers(this->source, NUM_BUFFERS, this->buffers);
 	alSourcePlay(this->source);
 
 	if (alGetError() != AL_NO_ERROR)
@@ -59,7 +59,7 @@ void MusicTrack::Play()
 	}
 }
 
-void MusicTrack::LoadTrackStandardFolder(std::string filename)
+void MusicTrack::LoadTrackStandardFolder(std::string filename, std::string id)
 {
 	alGenSources(1, &this->source);
 	alGenBuffers(NUM_BUFFERS, this->buffers);
@@ -138,6 +138,12 @@ void MusicTrack::SetPitch(float pitch)
 	alSourcef(this->source, AL_PITCH, this->pitch);
 }
 
+void MusicTrack::SetGain(float gain)
+{
+	this->gain = gain;
+	alSourcef(this->source, AL_GAIN, this->gain);
+}
+
 void MusicTrack::SetAudioInstruction(AudioInstruction audioInstruction)
 {
 	this->audioInstruction = audioInstruction;
@@ -160,10 +166,10 @@ void MusicTrack::UpdateBufferStream()
 
 	while (processed > 0)
 	{
-		ALuint bufferID;
+		ALuint buffer;
 		sf_count_t slen;
 
-		alSourceUnqueueBuffers(this->source, 1, &bufferID);
+		alSourceUnqueueBuffers(this->source, 1, &buffer);
 		processed--;
 
 		//Read next chunk of data and refill the buffer, and then queue it
@@ -171,8 +177,8 @@ void MusicTrack::UpdateBufferStream()
 		if (slen > 0)
 		{
 			slen *= this->sfInfo.channels * (sf_count_t)sizeof(short);
-			alBufferData(bufferID, this->format, this->membuf, (ALsizei)slen, this->sfInfo.samplerate);
-			alSourceQueueBuffers(this->source, 1, &bufferID);
+			alBufferData(buffer, this->format, this->membuf, (ALsizei)slen, this->sfInfo.samplerate);
+			alSourceQueueBuffers(this->source, 1, &buffer);
 		}
 
 		if (alGetError() != AL_NO_ERROR)

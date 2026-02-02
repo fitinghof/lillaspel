@@ -15,14 +15,14 @@ void SoundBank::Initialize(std::string pathToSoundFolder)
 	this->pathToSoundFolder = pathToSoundFolder;
 }
 
-void SoundBank::AddSoundClipStandardFolder(const std::string filename)
+void SoundBank::AddSoundClipStandardFolder(const std::string filename, const std::string id)
 {
-	CreateSoundBuffer(this->pathToSoundFolder + filename);
+	CreateSoundBuffer(this->pathToSoundFolder + filename, id);
 }
 
-void SoundBank::AddSoundClip(const std::string relativePath)
+void SoundBank::AddSoundClip(const std::string path, const std::string id)
 {
-	CreateSoundBuffer(relativePath);
+	CreateSoundBuffer(path, id);
 }
 
 SoundClip* SoundBank::GetSoundClipStandardFolder(const std::string filename)
@@ -77,7 +77,7 @@ bool SoundBank::RemoveSoundClip(const std::string relativePath)
 	return false;
 }
 
-void SoundBank::CreateSoundBuffer(std::string fullpath)
+void SoundBank::CreateSoundBuffer(std::string fullpath, std::string id)
 {
 	ALenum error, format;
 	ALuint buffer = 0;
@@ -150,12 +150,13 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 	}
 
 	SoundClip* newClip = new SoundClip();
+	newClip->id = id;
 	newClip->buffer = buffer;
 	newClip->filepath = filepath;
 
-	this->soundClips.insert(std::make_pair(fullpath, newClip));
+	this->soundClips.insert(std::make_pair(id, newClip));
 }
 
-void SoundBank::DeleteSoundBuffer(std::string filepath)
+void SoundBank::DeleteSoundBuffer(std::string id)
 {
 }

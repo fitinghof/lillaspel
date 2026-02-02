@@ -13,7 +13,8 @@ public:
 	MusicTrack();
 	~MusicTrack();
 
-	std::string pathToMusicFolder;
+	std::string pathToMusicFolder = "";
+	std::string id = "";
 	
 	void Play();
 	void Pause();
@@ -21,9 +22,10 @@ public:
 
 	void Initialize(std::string pathToMusicFolder);
 	void UpdateBufferStream();
-	void LoadTrackStandardFolder(std::string filename);
-	void LoadTrack(std::string filepath);
+	void LoadTrackStandardFolder(std::string filename, std::string id);
+	void LoadTrack(std::string filepath, std::string id);
 	void SetPitch(float pitch);
+	void SetGain(float gain);
 	void SetAudioInstruction(AudioInstruction audioInstruction);
 
 private:

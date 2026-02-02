@@ -14,6 +14,10 @@ public:
 	SubMesh(SubMesh& other) = default;
 	~SubMesh();
 
+	size_t GetStartIndex() const;
+	size_t GetNrOfIndices() const;
+	Texture& GetTexture();
+
 private:
 
 	size_t startIndex;

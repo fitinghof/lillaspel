@@ -36,6 +36,21 @@ SubMesh::~SubMesh() {
 
 }
 
+size_t SubMesh::GetStartIndex() const
+{
+    return this->startIndex;
+}
+
+size_t SubMesh::GetNrOfIndices() const
+{
+    return this->nrOfIndices;
+}
+
+Texture& SubMesh::GetTexture()
+{
+    return this->texture;
+}
+
 void Mesh::Init(VertexBuffer vertexbuffer, IndexBuffer indexbuffer, std::vector<SubMesh>&& submeshes) {
     this->vertexbuffer = std::move(vertexbuffer);
 	this->indexbuffer = std::move(indexbuffer);

@@ -25,6 +25,10 @@ SubMesh::~SubMesh() {
 
 }
 
+void Mesh::Init(std::vector<SubMesh>&& submeshes) {
+	this->subMeshes = std::move(submeshes);
+}
+
 VertexBuffer& SubMesh::GetVertexBuffer()
 {
     return this->vertexbuffer;

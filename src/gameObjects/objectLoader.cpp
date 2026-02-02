@@ -11,7 +11,7 @@ ObjectLoader::ObjectLoader() {
 ObjectLoader::~ObjectLoader() {
 }
 
-Mesh ObjectLoader::LoadGltf(std::filesystem::path path) {
+bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device* device) {
 	fastgltf::Parser parser;
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
@@ -94,10 +94,10 @@ Mesh ObjectLoader::LoadGltf(std::filesystem::path path) {
 			);
 
 		}
-
+		mesh.Init
 	}
 
-	return Mesh();
+	return true;
 	
 	//std::vector<Vertex> verticies;
 	//std::vector<uint32_t> indicies;

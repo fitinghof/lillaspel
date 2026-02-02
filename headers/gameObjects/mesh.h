@@ -30,6 +30,8 @@ public:
 	Mesh& operator=(Mesh&&) noexcept = default;
 	~Mesh();
 
+	void Init(std::vector<SubMesh>&& submeshes);
+
 	std::string& GetName();
 	std::vector<SubMesh>& GetSubMeshes();
 

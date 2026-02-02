@@ -108,12 +108,17 @@ void Renderer::CreateRendererConstantBuffers()
 	Renderer::WorldMatrixBufferContainer worldMatrix = {};
 	this->worldMatrixBuffer = std::make_unique<ConstantBuffer>();
 	worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	SpotlightObject::SpotLightContainer defaultSpotlights[1];
+	this->spotlightBuffer = std::make_unique<StructuredBuffer>();
+	this->spotlightBuffer->Init(this->device.Get(), sizeof(SpotlightObject::SpotLightContainer), 1, defaultSpotlights);
 }
 
 void Renderer::CreateRenderQueue()
 {
 	this->meshRenderQueue = this->meshRenderQueue = std::make_shared<std::vector<MeshObject*>>();
-	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue));
+	this->lightRenderQueue = this->lightRenderQueue = std::make_shared<std::vector<SpotlightObject*>>();
+	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->lightRenderQueue));
 }
 
 void Renderer::LoadShaders(std::string& vShaderByteCode)
@@ -124,11 +129,22 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
 	vShaderByteCode = this->vertexShader->GetShaderByteCode();
 
-	this->pixelShader = std::shared_ptr<Shader>(new Shader());
-	this->pixelShader->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "PSTest.cso");
+	this->pixelShaderLit = std::shared_ptr<Shader>(new Shader());
+	this->pixelShaderLit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psLit.cso");
 
-	this->tempMat = std::unique_ptr<Material>(new Material);
-	this->tempMat->Init(this->vertexShader, this->pixelShader);
+	this->pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
+	this->pixelShaderUnlit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psUnlit.cso");
+
+	this->defaultMat = std::unique_ptr<Material>(new Material);
+	this->defaultMat->Init(this->vertexShader, this->pixelShaderLit);
+
+	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
+	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
+	
+	Material::BasicMaterialStruct defaultMatColor{ {1,1,1,1}, {1,1,1,1}, {1,1,1,1}, 50, {1,1,1} };
+
+	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
+	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get() , sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
 }
 
 void Renderer::Render()
@@ -168,8 +184,9 @@ void Renderer::RenderPass()
 	BindRasterizerState(this->standardRasterizerState.get());
 
 	// Bind frame specific stuff
-	BindMaterial(this->tempMat.get());
+	BindMaterial(this->defaultMat.get());
 	BindCameraMatrix();
+	BindLights();
 
 	// Bind meshes
 	for (size_t i = 0; i < meshRenderQueue->size(); i++)
@@ -232,6 +249,30 @@ void Renderer::BindMaterial(Material* material)
 	material->pixelShader->BindShader(this->immediateContext.Get());
 
 	// Also bind constant buffers
+	for (size_t i = 0; i < material->pixelShaderBuffers.size(); i++)
+	{
+		ID3D11Buffer* buf = material->pixelShaderBuffers[i]->GetBuffer();
+		this->immediateContext->PSSetConstantBuffers(i, 1, &buf);
+	}
+
+	for (size_t i = 0; i < material->vertexShaderBuffers.size(); i++)
+	{
+		ID3D11Buffer* buf = material->vertexShaderBuffers[i]->GetBuffer();
+		this->immediateContext->VSSetConstantBuffers(i + 2, 1, &buf);
+	}
+}
+
+void Renderer::BindLights()
+{
+	if (lightRenderQueue->size() <= 0) {
+		throw std::runtime_error("No light, unable to render. Please add a light to the scene.");
+	}
+
+	SpotlightObject::SpotLightContainer spotlights[1];
+	spotlights[0] = (*this->lightRenderQueue)[0]->data;
+	this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights);
+	ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
+	this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
 }
 
 void Renderer::BindCameraMatrix()

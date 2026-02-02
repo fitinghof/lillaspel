@@ -6,7 +6,16 @@
 #include "utilities/logger.h"
 
 class Material {
+private:
 public:
+	struct BasicMaterialStruct {
+		float ambient[4];
+		float diffuse[4];
+		float specular[4];
+		float shininess;
+		float padding[3];
+	};
+
 	Material() = default;
 	~Material() = default;
 

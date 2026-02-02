@@ -120,4 +120,6 @@ void SceneManager::LoadScene()
 	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
 	thirdMesh.lock()->SetMesh(this->tempMeshes[1].get());
+
+	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 }

@@ -7,15 +7,14 @@
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     Window window(hInstance, nCmdShow, "Game Window");
 
-    Renderer renderer;
-    renderer.Init(window);
+    this->renderer.Init(window);
+    this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
-    this->imguiManager.InitalizeImgui(window.GetHWND(), renderer.GetDevice(), renderer.GetContext());
-
-    std::unique_ptr<SceneManager> sceneMan = std::unique_ptr<SceneManager>(new SceneManager(&renderer));
-    sceneMan->LoadScene();
+    this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
+    this->sceneManager->LoadScene();
 
     MSG msg = {};
+
 
     while (msg.message != WM_QUIT)
     {
@@ -27,9 +26,10 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
         }
 
         Time::GetInstance().Tick();
-        sceneMan->SceneTick();
-        renderer.Render();
+        this->sceneManager->SceneTick();
+
+        this->renderer.Render();
         this->imguiManager.ImguiAtFrameEnd();
-        renderer.Present();
+        this->renderer.Present();
     }
 }

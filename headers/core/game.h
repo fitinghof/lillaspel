@@ -7,6 +7,8 @@
 #include "window.h"
 #include "rendering/renderer.h"
 #include "core/imguiManager.h"
+#include "core/audio/soundEngine.h"
+#include "scene/sceneManager.h"
 
 class Game {
 public:
@@ -15,6 +17,8 @@ public:
 	void Run(HINSTANCE hInstance, int nCmdShow);
 
 private:
-
 	ImguiManager imguiManager;
+	Renderer renderer;
+	AudioManager audioManager;
+	std::unique_ptr<SceneManager> sceneManager;
 };

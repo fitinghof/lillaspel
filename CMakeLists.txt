@@ -112,6 +112,7 @@ if(imgui_SOURCE_DIR)
   )
 endif()
 
+
 # Link libraries. Keep d3d11 for DirectX usage and the fetched libraries.
 # DirectXTK provides a target named "DirectXTK" in its CMake; OpenAL provides OpenAL::OpenAL.
 target_link_libraries(${PROJECT_NAME} PRIVATE

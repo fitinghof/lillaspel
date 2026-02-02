@@ -1,5 +1,7 @@
 #include "core/window.h"
 #include "imgui.h"
+#include "utilities/logger.h"
+
 LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if (message == WM_NCCREATE) {
         CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
@@ -20,16 +22,17 @@ LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 
-LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-   
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-        return true;
-    
-	return this->inputManager->ReadInput(this, hWnd, message, wParam, lParam);
+LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) { 
+
+    if (this->showIMGui) {
+		ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
+    }
+
+	return this->ReadMessage(hWnd, message, wParam, lParam);
 }
 
 Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, const UINT width, const UINT height)
-    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), inputManager(std::make_unique<InputManager>()) {
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), showIMGui(true), cursorVisible(true), inputManager(std::make_unique<InputManager>()) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
 
@@ -62,6 +65,88 @@ Window::~Window() {
     UnregisterClass(L"WINDOW_CLASS", this->instance);
 }
 
+LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	const unsigned char key = static_cast<unsigned char>(wParam);
+	switch (message) {
+
+	/// Handle keyboard events
+	case WM_KEYDOWN: {
+		switch (key) {
+			case VK_ESCAPE: {
+				PostQuitMessage(0);
+				break;
+			}
+			case VK_F11: {
+				//window->SetFullscreen(!window->IsFullscreen());
+				break;
+			}
+			case VK_TAB: {
+				// So far does nothing with the actual IMGui window, but is set up for toggling
+				this->showIMGui = !this->showIMGui;
+				Logger::Log("Toggling IMGui " + std::string(this->showIMGui ? "on" : "off"));
+
+				// Can also be set to its own keybind
+				this->cursorVisible = !this->cursorVisible;
+				ShowCursor(this->cursorVisible);
+				break;
+			}
+
+			default: {
+				const bool wasDown = lParam & (1 << 30);
+				if (!wasDown)
+					this->inputManager->SetKeyState(key, KEY_DOWN | KEY_PRESSED);
+				break;
+			}
+		}
+		return 0;
+	}
+
+	case WM_KEYUP: {
+		this->inputManager->SetKeyState(key, KEY_RELEASED);
+		return 0;
+	}
+
+	/// Handle mouse events
+	case WM_MOUSEMOVE: {
+		const int xPos = GET_X_LPARAM(lParam);
+		const int yPos = GET_Y_LPARAM(lParam);
+		this->inputManager->SetMousePosition(xPos, yPos);
+		return 0;
+	}
+
+	case WM_LBUTTONDOWN: {
+		if (!this->inputManager->IsLMDown())
+			this->inputManager->SetLMouseKeyState(KEY_DOWN | KEY_PRESSED);
+		return 0;
+	}
+
+	case WM_LBUTTONUP: {
+		this->inputManager->SetLMouseKeyState(KEY_RELEASED);
+		return 0;
+	}
+
+	case WM_RBUTTONDOWN: {
+		if (!this->inputManager->IsRMDown())
+			this->inputManager->SetRMouseKeyState(KEY_DOWN | KEY_PRESSED);
+		return 0;
+	}
+
+	case WM_RBUTTONUP: {
+		this->inputManager->SetRMouseKeyState(KEY_RELEASED);
+		return 0;
+	}
+
+	case WM_DESTROY: {
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+}
+
 HWND Window::GetHWND() const { return this->hWnd; }
 
 UINT Window::GetWidth() const { return this->width; }
@@ -76,6 +161,10 @@ void Window::Show(int nCmdShow) const {
     ShowWindow(this->hWnd, nCmdShow);
     UpdateWindow(this->hWnd);
 }
+
+bool Window::IsIMGuiShown() const { return this->showIMGui; }
+
+void Window::SetIMGuiShown(const bool show) { this->showIMGui = show; }
 
 //void Window::SetFullscreen(bool fullscreen) const {
 //    if (fullscreen) {

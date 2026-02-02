@@ -5,8 +5,8 @@
 #include <fastgltf/util.hpp>
 #include <fastgltf/types.hpp>
 #include <unordered_map>
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image/stb_image.h>
+//#define STB_IMAGE_IMPLEMENTATION
+//#include <stb_image/stb_image.h>
 #include <rendering/texture.h>
 #include <WICTextureLoader.h>
 

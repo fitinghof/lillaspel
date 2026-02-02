@@ -16,8 +16,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
 	// Maybe put some memory leak flags here
 
-	ObjectLoader l;
-	//l.LoadGltf("");
 
 	std::unique_ptr<Game> game = std::unique_ptr<Game>(new Game());
 

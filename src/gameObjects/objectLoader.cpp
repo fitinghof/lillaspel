@@ -88,9 +88,21 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 					// Implement normal generation later
 					Logger::Warn("No normals found for mesh primitive!");
 				}
+
+				size_t baseColorTextureCordIndex = 0;
+				auto& material = asset.materials[it->materialIndex.value_or(0)];
+
+				auto& baseColorTexture = material.pbrData.baseColorTexture;
+				if (baseColorTexture.has_value()) {
+					auto& texture = asset.textures[baseColorTexture->textureIndex];
+					if (!texture.imageIndex.has_value()) {
+						Logger::Error("Texture has no image index!");
+						return false;
+					}
+				}
+
 			}
 
-			//Add uv processing
 
 			
 			// Parse Indicies

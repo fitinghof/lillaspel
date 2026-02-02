@@ -17,7 +17,6 @@ private:
 
 	size_t startIndex;
 	size_t nrOfIndices;
-	// material index or something?
 };
 
 class Mesh {

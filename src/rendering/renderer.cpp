@@ -1,7 +1,7 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
 
-Renderer::Renderer() : viewport()
+Renderer::Renderer() : viewport(), maximumSpotlights(16)
 {
 }
 
@@ -113,7 +113,11 @@ void Renderer::CreateRendererConstantBuffers()
 
 	SpotlightObject::SpotLightContainer defaultSpotlights[1];
 	this->spotlightBuffer = std::make_unique<StructuredBuffer>();
-	this->spotlightBuffer->Init(this->device.Get(), sizeof(SpotlightObject::SpotLightContainer), 1, defaultSpotlights);
+	this->spotlightBuffer->Init(this->device.Get(), sizeof(SpotlightObject::SpotLightContainer), this->maximumSpotlights, defaultSpotlights);
+
+	Renderer::LightCountBufferContainer lightCountContainer = {};
+	this->spotlightCountBuffer = std::make_unique<ConstantBuffer>();
+	this->spotlightCountBuffer->Init(this->device.Get(), sizeof(Renderer::LightCountBufferContainer), &lightCountContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 }
 
 void Renderer::CreateRenderQueue()
@@ -142,11 +146,11 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 
 	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
 	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
-	
-	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, {1,1,1} };
+
+	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 0, {1,1} };
 
 	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
-	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get() , sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
+	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get(), sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
 }
 
 void Renderer::Render()
@@ -238,7 +242,8 @@ void Renderer::BindViewport()
 
 void Renderer::BindRasterizerState(RasterizerState* rastState)
 {
-	if (rastState == nullptr) {
+	if (rastState == nullptr)
+	{
 		Logger::Error("RasterizerSate is nullptr");
 	}
 
@@ -247,6 +252,7 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 
 void Renderer::BindMaterial(Material* material)
 {
+	// Bind shaders
 	material->vertexShader->BindShader(this->immediateContext.Get());
 	material->pixelShader->BindShader(this->immediateContext.Get());
 
@@ -254,27 +260,46 @@ void Renderer::BindMaterial(Material* material)
 	for (size_t i = 0; i < material->pixelShaderBuffers.size(); i++)
 	{
 		ID3D11Buffer* buf = material->pixelShaderBuffers[i]->GetBuffer();
-		this->immediateContext->PSSetConstantBuffers(i, 1, &buf);
+		this->immediateContext->PSSetConstantBuffers(i + 1, 1, &buf); // i + 1 because first slot is always occupied
 	}
 
 	for (size_t i = 0; i < material->vertexShaderBuffers.size(); i++)
 	{
 		ID3D11Buffer* buf = material->vertexShaderBuffers[i]->GetBuffer();
-		this->immediateContext->VSSetConstantBuffers(i + 2, 1, &buf);
+		this->immediateContext->VSSetConstantBuffers(i + 2, 1, &buf); // i + 2 because the first two slots are always occupied
 	}
 }
 
 void Renderer::BindLights()
 {
-	if (lightRenderQueue->size() <= 0) {
+	if (lightRenderQueue->size() <= 0)
+	{
 		throw std::runtime_error("No light, unable to render. Please add a light to the scene.");
 	}
 
-	SpotlightObject::SpotLightContainer spotlights[1];
-	spotlights[0] = (*this->lightRenderQueue)[0]->data;
-	this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights);
+	if (this->lightRenderQueue->size() > this->maximumSpotlights)
+	{
+		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
+	}
+
+	const size_t lightCount = std::min<size_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	// Inefficient, should be fixed
+	std::vector<SpotlightObject::SpotLightContainer> spotlights;
+	for (size_t i = 0; i < lightCount; i++)
+	{
+		spotlights.push_back((*this->lightRenderQueue)[i]->data);
+	}
+
+	// Updates and binds buffer
+	this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights.data());
 	ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
 	this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
+
+	// Updates and binds light count constant buffer
+	Renderer::LightCountBufferContainer lightCountContainer = { spotlights.size(), 1, 1, 1 };
+	this->spotlightCountBuffer->UpdateBuffer(this->immediateContext.Get(), &lightCountContainer);
+	ID3D11Buffer* buf = this->spotlightCountBuffer->GetBuffer();
+	this->immediateContext->PSSetConstantBuffers(0, 1, &buf);
 }
 
 void Renderer::BindCameraMatrix()

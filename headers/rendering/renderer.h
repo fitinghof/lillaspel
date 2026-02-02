@@ -22,6 +22,7 @@
 #include "gameObjects/meshObject.h"
 #include "gameObjects/spotlightObject.h"
 #include "rendering/structuredBuffer.h"
+#include <algorithm>
 
 
 
@@ -52,9 +53,16 @@ public:
 	IDXGISwapChain* GetSwapChain() const;
 private:
 
+	const size_t maximumSpotlights;
+
 	struct WorldMatrixBufferContainer {
 		DirectX::XMFLOAT4X4 worldMatrix;
 		DirectX::XMFLOAT4X4 worldMatrixInversedTransposed;
+	};
+
+	struct LightCountBufferContainer {
+		size_t spotlightCount;
+		float padding[3];
 	};
 
 	// DirectX11 specific stuff:
@@ -95,6 +103,7 @@ private:
 
 	std::unique_ptr<ConstantBuffer> cameraBuffer;
 	std::unique_ptr<ConstantBuffer> worldMatrixBuffer;
+	std::unique_ptr<ConstantBuffer> spotlightCountBuffer;
 	std::unique_ptr<StructuredBuffer> spotlightBuffer;
 
 

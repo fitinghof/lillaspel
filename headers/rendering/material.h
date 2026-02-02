@@ -13,7 +13,8 @@ public:
 		float diffuse[4];
 		float specular[4];
 		float shininess;
-		float padding[3];
+		int textureCount;
+		float padding[2];
 	};
 
 	Material() = default;

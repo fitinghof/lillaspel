@@ -11,10 +11,16 @@ struct PixelShaderInput
 
 cbuffer MaterialBuffer : register(b0)
 {
+    int spotlightCount;
+};
+
+cbuffer MaterialBuffer : register(b1)
+{
     float4 ambient;
     float4 diffuse;
     float4 specular;
     float shininess;
+    int textureCount;
 };
 
 struct Spotlight
@@ -38,19 +44,26 @@ float4 main(PixelShaderInput input) : SV_TARGET
 {
     float3 normal = normalize(input.normal);
     
-    float4 ambientCol = ambient;  
-    float4 diffuseCol = 0;
-    float4 specularCol = 0;
+    float4 ambientColor = ambient;  
+    float4 diffuseColor = 0;
+    float4 specularColor = 0;
     
-    // Light falloff on distance
-    float surfaceLightIntensity = CalculateLightFalloff(input.worldPosition.xyz, spotlightBuffer[0].position, spotlightBuffer[0].intensity); // light at surface
+    for (int i = 0; i < spotlightCount; i++)
+    {
+        // Light falloff on distance
+        float surfaceLightIntensity = CalculateLightFalloff(input.worldPosition.xyz, spotlightBuffer[i].position, spotlightBuffer[i].intensity); // light at surface
     
-    // Diffuse component
-    diffuseCol += DiffuseComponent(input.worldPosition.xyz, spotlightBuffer[0].position, normal, diffuse, surfaceLightIntensity, spotlightBuffer[0].color);
+        // Diffuse component
+        diffuseColor += DiffuseComponent(input.worldPosition.xyz, spotlightBuffer[i].position, normal, diffuse, surfaceLightIntensity, spotlightBuffer[i].color);
         
-    // Specular component
-    specularCol += BlinnPhongSpecularComponent(input.worldPosition.xyz, spotlightBuffer[0].position, input.cameraPosition, normal, specular, shininess, surfaceLightIntensity, spotlightBuffer[0].color);
-        
-    float4 textureColor = mainTexture.Sample(mainSampler, float2(input.uv.x, 1 - input.uv.y));
-    return textureColor * (ambientCol + diffuseCol + specularCol);
+        // Specular component
+        specularColor += BlinnPhongSpecularComponent(input.worldPosition.xyz, spotlightBuffer[i].position, input.cameraPosition, normal, specular, shininess, surfaceLightIntensity, spotlightBuffer[i].color);
+    }
+    
+    // Goofy way to allow for textureless materials without using an if-statement
+    float4 textureColor = float4(1, 1, 1, 1);
+    textureColor += min(textureCount, 1) * (mainTexture.Sample(mainSampler, float2(input.uv.x, 1 - input.uv.y)) - float4(1, 1, 1, 1));
+    
+    // Clamp color between 0 and 1
+    return min(textureColor * (ambientColor + diffuseColor) + specularColor, 1);
 }

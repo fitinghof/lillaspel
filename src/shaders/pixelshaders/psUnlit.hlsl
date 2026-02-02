@@ -13,6 +13,7 @@ cbuffer MaterialBuffer : register(b0)
     float4 diffuse;
     float4 specular;
     float shininess;
+    int textureCount;
 };
 
 SamplerState mainSampler : register(s0);

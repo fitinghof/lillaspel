@@ -134,4 +134,8 @@ void SceneManager::LoadScene()
 	thirdMesh.lock()->SetMesh(this->tempMeshes[2].get());
 
 	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
+
+	auto light2 = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
+	light2.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
+	DirectX::XMStoreFloat4(&light2.lock()->data.color, DirectX::XMVectorSet(0, 0, 1, 1));
 }

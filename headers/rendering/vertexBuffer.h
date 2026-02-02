@@ -15,8 +15,8 @@ private:
 public:
 	VertexBuffer() = default;
 	~VertexBuffer() = default;
-	VertexBuffer(const VertexBuffer& other) = delete;
-	VertexBuffer& operator=(const VertexBuffer& other) = delete;
+	VertexBuffer(const VertexBuffer& other) = default;
+	VertexBuffer& operator=(const VertexBuffer& other) = default;
 	VertexBuffer(VertexBuffer&& other) noexcept = default;
 	VertexBuffer& operator=(VertexBuffer&& other) = default;
 

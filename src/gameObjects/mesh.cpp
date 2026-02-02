@@ -1,7 +1,7 @@
 #include "gameObjects/mesh.h"
 
-Mesh::Mesh(VertexBuffer&& vertexbuffer, IndexBuffer&& indexbuffer, std::vector<SubMesh>&& submeshes) {
-
+Mesh::Mesh(VertexBuffer&& vertexbuffer, IndexBuffer&& indexbuffer, std::vector<SubMesh>&& submeshes) : vertexbuffer(vertexbuffer), indexbuffer(indexbuffer) {
+    // submeshes
 }
 
 Mesh::~Mesh() {

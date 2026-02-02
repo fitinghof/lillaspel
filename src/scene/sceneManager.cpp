@@ -1,6 +1,6 @@
 #include "scene/sceneManager.h"
 
-SceneManager::SceneManager() : mainScene(nullptr)
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend)
 {
 }
 
@@ -13,7 +13,10 @@ void SceneManager::SceneTick()
 
 void SceneManager::LoadScene()
 {
-	if (this->mainScene) {
+	// So basically right now this is the temporary place to create scenes, before we can load them from file
+
+	if (this->mainScene)
+	{
 		// TO DO: Delete old scene
 
 		throw std::runtime_error("Tried to load another scene, unsupported.");
@@ -21,5 +24,100 @@ void SceneManager::LoadScene()
 
 	this->mainScene = std::unique_ptr<Scene>(new Scene());
 
-	CameraObject* camera = (CameraObject*)this->mainScene->CreateGameObjectOfType<CameraObject>();
+	std::weak_ptr<CameraObject> camera = this->mainScene->CreateGameObjectOfType<CameraObject>();
+
+
+	// Temporary meshes
+
+	Vertex vertexData[] = {
+	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
+	{-1,  1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 0.0f},
+	{ 1, -1, 0,		0.0f, 0.0f, -1.0f,		1.0f, 1.0f},
+	{ 1,  1, 0,		0.0f, 0.0f, -1.0f,		1.0f, 0.0f}
+	};
+
+	VertexBuffer tempVBuffer;
+	tempVBuffer.Init(renderer->GetDevice(), sizeof(Vertex), 4, vertexData);
+
+	uint32_t indices[] = {
+		0,1,2,1,3,2
+	};
+
+	IndexBuffer tempIBuffer;
+	tempIBuffer.Init(renderer->GetDevice(), 6, indices);
+
+	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::vector<SubMesh>())));
+
+
+
+	Vertex cubeVertexData[] = {
+	// Front
+	{ -1, -1,  1,   0,  0,  1,   0, 1 },
+	{ -1,  1,  1,   0,  0,  1,   0, 0 },
+	{  1, -1,  1,   0,  0,  1,   1, 1 },
+	{  1,  1,  1,   0,  0,  1,   1, 0 },
+	// Back
+	{  1, -1, -1,   0,  0, -1,   0, 1 },
+	{  1,  1, -1,   0,  0, -1,   0, 0 },
+	{ -1, -1, -1,   0,  0, -1,   1, 1 },
+	{ -1,  1, -1,   0,  0, -1,   1, 0 },
+	// Left
+	{ -1, -1, -1,  -1,  0,  0,   0, 1 },
+	{ -1,  1, -1,  -1,  0,  0,   0, 0 },
+	{ -1, -1,  1,  -1,  0,  0,   1, 1 },
+	{ -1,  1,  1,  -1,  0,  0,   1, 0 },
+	// Right
+	{  1, -1,  1,   1,  0,  0,   0, 1 },
+	{  1,  1,  1,   1,  0,  0,   0, 0 },
+	{  1, -1, -1,   1,  0,  0,   1, 1 },
+	{  1,  1, -1,   1,  0,  0,   1, 0 },
+	//Top
+	{ -1,  1,  1,   0,  1,  0,   0, 1 },
+	{ -1,  1, -1,   0,  1,  0,   0, 0 },
+	{  1,  1,  1,   0,  1,  0,   1, 1 },
+	{  1,  1, -1,   0,  1,  0,   1, 0 },
+	//Bottom
+	{ -1, -1, -1,   0, -1,  0,   0, 1 },
+	{ -1, -1,  1,   0, -1,  0,   0, 0 },
+	{  1, -1, -1,   0, -1,  0,   1, 1 },
+	{  1, -1,  1,   0, -1,  0,   1, 0 },
+	};
+
+	VertexBuffer cubeTempVBuffer;
+	cubeTempVBuffer.Init(renderer->GetDevice(), sizeof(Vertex), 24, cubeVertexData);
+
+	uint32_t cubeIndices[] = {
+		// Front
+		0,  1,  2,   2,  1,  3,
+		// Back
+		4,  5,  6,   6,  5,  7,
+		// Left
+		8,  9, 10,  10,  9, 11,
+		// Right
+		12, 13, 14,  14, 13, 15,
+		// Top
+		16, 17, 18,  18, 17, 19,
+		// Bottom
+		20, 21, 22,  22, 21, 23
+	};
+
+	IndexBuffer cubeTempIBuffer;
+	cubeTempIBuffer.Init(renderer->GetDevice(), 36, cubeIndices);
+
+	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(cubeTempVBuffer), std::move(cubeTempIBuffer), std::vector<SubMesh>())));
+
+
+	// Create temporary meshObjects
+
+	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
+	firstMesh.lock()->SetMesh(this->tempMeshes[0].get());
+	
+	auto secondMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
+	secondMesh.lock()->SetMesh(this->tempMeshes[1].get());
+
+	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
+	thirdMesh.lock()->SetMesh(this->tempMeshes[1].get());
 }

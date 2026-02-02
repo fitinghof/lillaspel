@@ -53,7 +53,7 @@ DirectX::XMVECTOR Transform::GetDirectionVector() const {
 
 DirectX::XMVECTOR Transform::GetScale() const { return this->scale; }
 
-DirectX::XMFLOAT4X4 Transform::GetWorldMatrix() const {
+DirectX::XMFLOAT4X4 Transform::GetWorldMatrix(bool inverseTranspose) const {
 
     // Create the scaling, rotation, and translation matrices
     DirectX::XMMATRIX scaleMatrix = DirectX::XMMatrixScalingFromVector(this->GetScale());
@@ -63,7 +63,13 @@ DirectX::XMFLOAT4X4 Transform::GetWorldMatrix() const {
     DirectX::XMMATRIX worldMatrix = scaleMatrix * rotationMatrix * translationMatrix;
 
     // Transpose the matrix if needed (depends on the target platform/GPU conventions)
-    worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+    // worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+
+    if (inverseTranspose)
+    {
+        worldMatrix = DirectX::XMMatrixInverse(nullptr, worldMatrix);
+        worldMatrix = DirectX::XMMatrixTranspose(worldMatrix);
+    }
 
     // Store the result in a XMFLOAT4X4
     DirectX::XMFLOAT4X4 worldMatrixFloat4x4;

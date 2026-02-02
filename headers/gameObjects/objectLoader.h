@@ -3,6 +3,8 @@
 #include <filesystem>
 #include "rendering/vertex.h"
 #include "gameObjects/mesh.h"
+#include "rendering/vertexBuffer.h"
+#include "rendering/indexBuffer.h"
 
 
 //struct GltfLoadResult {

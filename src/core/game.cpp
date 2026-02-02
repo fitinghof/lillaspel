@@ -1,6 +1,7 @@
 #include "core/game.h"
 #include "core/imguiManager.h"
 #include "scene/sceneManager.h"
+#include "utilities/time.h"
 #include <memory>
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
@@ -11,22 +12,24 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     this->imguiManager.InitalizeImgui(window.GetHWND(), renderer.GetDevice(), renderer.GetContext());
 
-    std::unique_ptr<SceneManager> sceneMan = std::unique_ptr<SceneManager>(new SceneManager());
+    std::unique_ptr<SceneManager> sceneMan = std::unique_ptr<SceneManager>(new SceneManager(&renderer));
     sceneMan->LoadScene();
 
     MSG msg = {};
 
     while (msg.message != WM_QUIT)
     {
-        this->imguiManager.imguiAtFrameStart();
+        this->imguiManager.ImguiAtFrameStart();
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
 
+        Time::GetInstance().Tick();
+        sceneMan->SceneTick();
         renderer.Render();
-        this->imguiManager.imguiAtFrameEnd();
+        this->imguiManager.ImguiAtFrameEnd();
         renderer.Present();
     }
 }

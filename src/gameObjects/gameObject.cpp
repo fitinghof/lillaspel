@@ -1,32 +1,47 @@
 #include "gameObjects/gameObject.h"
 
-GameObject::GameObject() : children({}), parent(nullptr)
+GameObject::GameObject() : children(), parent()
 {
+
 }
 
-const std::vector<GameObject*>& GameObject::GetChildren() const
+const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const
 {
 	return this->children;
 }
 
-const int& GameObject::GetChildCount() const
+const int GameObject::GetChildCount() const
 {
 	return this->children.size();
 }
 
-const GameObject* GameObject::GetParent() const
+const std::weak_ptr<GameObject> GameObject::GetParent() const
 {
 	return this->parent;
 }
 
-void GameObject::SetParent(GameObject* newParent)
+void GameObject::SetParent(std::weak_ptr<GameObject> newParent)
 {
+	if (!this->parent.expired())
+	{
+		// Remove from children
+	}
+
+	if (newParent.expired())
+	{
+		Logger::Error("Tried to set expired parent.");
+		return;
+	}
+
 	this->parent = newParent;
-	newParent->AddChild(this);
+	this->parent.lock()->AddChild(this->weakPtr);
 }
 
-void GameObject::AddChild(GameObject* newChild)
+void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 {
+	if (newChild.expired())
+		return;
+
 	this->children.push_back(newChild);
 }
 
@@ -50,5 +65,10 @@ void GameObject::PhysicsTick()
 void GameObject::LatePhysicsTick()
 {
 	// TO DO
+}
+
+void GameObject::SetWeakPtr(std::weak_ptr<GameObject> yourPtr)
+{
+	this->weakPtr = yourPtr;
 }
 

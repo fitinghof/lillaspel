@@ -1,10 +1,10 @@
 #pragma once
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
 
 #include "gameObjects/gameObject3D.h"
 #include <DirectXMath.h>
 #include "utilities/logger.h"
+
+#include "imgui.h"
 
 class CameraObject : public GameObject3D {
 public:
@@ -22,14 +22,17 @@ public:
 		DirectX::XMVECTOR cameraPosition; 
 	};
 
-	static CameraObject* mainCamera;
-
 	CameraObject();
 	virtual ~CameraObject() = default;
 
 	virtual void Tick() override;
 
+	CameraObject::CameraMatrixContainer& GetCameraMatrix();
+	static CameraObject& GetMainCamera();
+
 private:
+	static CameraObject* mainCamera;
+
 	CameraMatrixContainer cameraMatrix;
 
 	/// <summary>

@@ -1,9 +1,7 @@
 #pragma once
 
 #include "gameObjects/gameObject3D.h"
-
 #include <DirectXMath.h>
-
 #include "utilities/logger.h"
 
 #include "imgui.h"

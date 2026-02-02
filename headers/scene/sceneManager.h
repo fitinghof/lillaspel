@@ -7,6 +7,7 @@
 #include <scene/scene.h>
 #include <utilities/logger.h>
 #include "gameObjects/cameraObject.h"
+#include "core/assetManager.h"
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
 
@@ -24,6 +25,7 @@ public:
 
 private:
 	std::unique_ptr<Scene> mainScene;
+	AssetManager assetManager;
 
 	Renderer* renderer; // This is temporary
 

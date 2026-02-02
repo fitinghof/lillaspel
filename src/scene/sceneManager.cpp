@@ -1,4 +1,5 @@
 #include "scene/sceneManager.h"
+#include "gameObjects/objectLoader.h"
 
 SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend)
 {
@@ -29,7 +30,11 @@ void SceneManager::LoadScene()
 
 	// Temporary meshes
 
-	Vertex vertexData[] = {
+	std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
+	ObjectLoader loader;
+	loader.LoadGltf(*mesh.get(), "C:/Users/Simon Nilsson/source/repos/LillaSpel/assests/Box/cube.glb", this->renderer->GetDevice());
+
+	/*Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
 	{-1,  1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 0.0f},
 	{ 1, -1, 0,		0.0f, 0.0f, -1.0f,		1.0f, 1.0f},
@@ -44,9 +49,10 @@ void SceneManager::LoadScene()
 	};
 
 	IndexBuffer tempIBuffer;
-	tempIBuffer.Init(renderer->GetDevice(), 6, indices);
+	tempIBuffer.Init(renderer->GetDevice(), 6, indices);*/
 
-	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::vector<SubMesh>())));
+	//this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::vector<SubMesh>())));
+	this->tempMeshes.push_back(std::move(mesh));
 
 
 

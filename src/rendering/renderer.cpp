@@ -26,8 +26,22 @@ void Renderer::Init(const Window& window)
 
 void Renderer::SetViewport(const Window& window)
 {
-	this->viewport.Width = static_cast<FLOAT>(window.GetWidth());
-	this->viewport.Height = static_cast<FLOAT>(window.GetHeight());
+	RECT rc{};
+	GetClientRect(window.GetHWND(), &rc);
+	UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+	UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = window.GetWidth();
+		clientHeight = window.GetHeight();
+	}
+	if (clientWidth == 0 || clientHeight == 0)
+	{
+		clientWidth = 1;
+		clientHeight = 1;
+	}
+
+	this->viewport.Width = static_cast<FLOAT>(clientWidth);
+	this->viewport.Height = static_cast<FLOAT>(clientHeight);
 	this->viewport.MinDepth = 0.0f;
 	this->viewport.MaxDepth = 1.0f;
 	this->viewport.TopLeftX = 0;
@@ -36,10 +50,19 @@ void Renderer::SetViewport(const Window& window)
 
 void Renderer::CreateDeviceAndSwapChain(const Window& window)
 {
+	RECT rc{};
+	GetClientRect(window.GetHWND(), &rc);
+	UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+	UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = window.GetWidth();
+		clientHeight = window.GetHeight();
+	}
+
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 	swapChainDesc.BufferCount = 2;
-	swapChainDesc.BufferDesc.Width = 0;
-	swapChainDesc.BufferDesc.Height = 0;
+	swapChainDesc.BufferDesc.Width = clientWidth;
+	swapChainDesc.BufferDesc.Height = clientHeight;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -69,8 +92,31 @@ void Renderer::CreateRenderTarget()
 
 void Renderer::CreateDepthBuffer(const Window& window)
 {
+	RECT rc{};
+	GetClientRect(window.GetHWND(), &rc);
+	UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+	UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = window.GetWidth();
+		clientHeight = window.GetHeight();
+	}
+
+	if (clientWidth == 0 || clientHeight == 0) {
+		DXGI_SWAP_CHAIN_DESC desc{};
+		if (SUCCEEDED(this->swapChain->GetDesc(&desc))) {
+			clientWidth = desc.BufferDesc.Width;
+			clientHeight = desc.BufferDesc.Height;
+		}
+	}
+
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = 1;
+		clientHeight = 1;
+	}
+
 	this->depthBuffer = std::unique_ptr<DepthBuffer>(new DepthBuffer());
-	this->depthBuffer->Init(this->device.Get(), window.GetWidth(), window.GetHeight());
+	this->depthBuffer->Init(this->device.Get(), clientWidth, clientHeight);
 }
 
 void Renderer::CreateInputLayout(const std::string& vShaderByteCode)
@@ -141,6 +187,11 @@ void Renderer::Present()
 	this->swapChain->Present(0, 0);
 }
 
+void Renderer::Resize(const Window& window)
+{
+	this->ResizeSwapChain(window);
+}
+
 ID3D11Device* Renderer::GetDevice() const
 {
 	return this->device.Get();
@@ -189,6 +240,36 @@ void Renderer::ClearRenderTargetViewAndDepthStencilView()
 	float clearColor[4] = { 0,0,0.1,0 };
 	this->immediateContext->ClearRenderTargetView(this->renderTarget->GetRenderTargetView(), clearColor);
 	this->immediateContext->ClearDepthStencilView(this->depthBuffer->GetDepthStencilView(0), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+}
+
+void Renderer::ResizeSwapChain(const Window& window)
+{
+	if (window.GetWidth() == 0 || window.GetHeight() == 0) {
+		return;
+	}
+
+	// Unbind any views using the swapchain
+	if (this->immediateContext) {
+		this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
+	}
+
+	// Release old views
+	this->renderTarget.reset();
+	this->depthBuffer.reset();
+
+	// Resize swapchain
+	HRESULT hr = this->swapChain->ResizeBuffers(0, window.GetWidth(), window.GetHeight(), DXGI_FORMAT_UNKNOWN, 0);
+	if (FAILED(hr))
+	{
+		throw std::runtime_error("Failed to resize swapchain buffers, Error: " + hr);
+	}
+
+	// Recreate views
+	CreateRenderTarget();
+	CreateDepthBuffer(window);
+
+	// Update viewport
+	SetViewport(window);
 }
 
 void Renderer::BindSampler()

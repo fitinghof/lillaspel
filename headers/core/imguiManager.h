@@ -5,6 +5,7 @@
 #include "imgui_impl_dx11.h"
 #include <Windows.h>
 #include <d3d11.h>
+#include <functional>
 
 class ImguiManager
 {
@@ -18,9 +19,21 @@ public:
 	void ImguiAtFrameStart();
 	void ImguiAtFrameEnd();
 
+	void SetResolutionChangeCallback(std::function<void(UINT, UINT)> callback);
+	void SetFullscreenChangeCallback(std::function<void(bool)> callback);
+
 private:
 
 	void ConsoleImGui();
+	void OptionsImGui();
+	void MainMenuImGui();
 	float GetAvrageFrameRate();
+
+	bool showOptionsWindow = false;
+	bool showConsoleWindow = false;
+	bool isFullscreen = false;
+
+	std::function<void(UINT, UINT)> resolutionChangeCallback;
+	std::function<void(bool)> fullscreenChangeCallback;
 
 };

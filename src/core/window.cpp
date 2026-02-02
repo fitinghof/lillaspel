@@ -1,5 +1,6 @@
 #include "core/window.h"
 #include "imgui.h"
+
 LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if (message == WM_NCCREATE) {
         CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
@@ -26,12 +27,44 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         return true;
     
     switch (message) {
+    case WM_SIZE: {
+        if (wParam != SIZE_MINIMIZED) {
+            UINT clientWidth = LOWORD(lParam);
+            UINT clientHeight = HIWORD(lParam);
+
+            if (clientWidth > 0 && clientHeight > 0) {
+                if(!this->isFullscreen) {
+                    this->width = clientWidth;
+                    this->height = clientHeight;
+
+                    if (this->resizeCallback) {
+                        this->resizeCallback(this->width, this->height);
+                    }
+				}
+            }
+        }
+        return 0;
+    }
+
     case WM_DESTROY: {
         PostQuitMessage(0);
         return 0;
     }
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
+    }
+}
+
+void Window::UpdateClientSize()
+{
+    RECT rc{};
+    if (GetClientRect(this->hWnd, &rc)) {
+        UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+        UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+        if (clientWidth > 0 && clientHeight > 0) {
+            this->width = clientWidth;
+            this->height = clientHeight;
+        }
     }
 }
 
@@ -75,23 +108,68 @@ UINT Window::GetWidth() const { return this->width; }
 
 UINT Window::GetHeight() const { return this->height; }
 
-void Window::Show(int nCmdShow) const {
+void Window::Show(int nCmdShow) {
     ShowWindow(this->hWnd, nCmdShow);
     UpdateWindow(this->hWnd);
+    this->UpdateClientSize();
 }
 
-//void Window::SetFullscreen(bool fullscreen) const {
-//    if (fullscreen) {
-//        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-//        MONITORINFO mi = { sizeof(mi) };
-//        if (GetMonitorInfo(MonitorFromWindow(this->hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
-//            SetWindowPos(this->hWnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
-//                mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
-//                SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-//        }
-//    }
-//    else {
-//        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
-//        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height, SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
-//    }
-//}
+void Window::Resize(UINT width, UINT height) {
+    if (width == 0 || height == 0) {
+        return;
+    }
+    this->width = width;
+    this->height = height;
+
+    if (this->isFullscreen) {
+        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height,
+            SWP_NOOWNERZORDER | SWP_FRAMECHANGED | SWP_NOMOVE);
+        this->UpdateClientSize();
+
+        if (this->resizeCallback) {
+            this->resizeCallback(this->width, this->height);
+        }
+        return;
+    }
+
+    SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height, SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+}
+
+void Window::ToggleFullscreen(bool fullscreen)
+{
+    if (this->isFullscreen == fullscreen) {
+        return;
+    }
+
+    this->isFullscreen = fullscreen;
+
+    if (fullscreen) {
+        GetWindowRect(this->hWnd, &this->windowedRect);
+        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
+        MONITORINFO mi = { sizeof(mi) };
+        if (GetMonitorInfo(MonitorFromWindow(this->hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+            SetWindowPos(this->hWnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
+                mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
+                SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+        }
+        this->UpdateClientSize();
+        if (this->resizeCallback) {
+            this->resizeCallback(this->width, this->height);
+        }
+    }
+    else {
+        SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
+        SetWindowPos(this->hWnd, HWND_TOP, this->windowedRect.left, this->windowedRect.top,
+            this->windowedRect.right - this->windowedRect.left, this->windowedRect.bottom - this->windowedRect.top,
+            SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+        this->UpdateClientSize();
+        if (this->resizeCallback) {
+            this->resizeCallback(this->width, this->height);
+        }
+    }
+}
+
+void Window::SetResizeCallback(std::function<void(UINT, UINT)> callback)
+{
+    this->resizeCallback = std::move(callback);
+}

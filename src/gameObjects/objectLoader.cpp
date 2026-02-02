@@ -36,10 +36,10 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 		throw std::runtime_error("Failed");
 	}
 	auto& asset = data.get();
-	for (auto& mesh : asset.meshes) {
+	for (auto& gltfmesh : asset.meshes) {
 
-		std::vector<SubMesh> subMeshes;
-		for (auto it = mesh.primitives.begin(); it != mesh.primitives.end(); ++it) {
+		std::vector<SubMesh> submeshes;
+		for (auto it = gltfmesh.primitives.begin(); it != gltfmesh.primitives.end(); ++it) {
 			auto* positionIt = it->findAttribute("POSITION");
 			assert(positionIt != it->attributes.end());
 			assert(it->indicesAccessor.has_value());
@@ -86,76 +86,17 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 			vertexBuffer.Init(nullptr, sizeof(Vertex), static_cast<UINT>(verticies.size()), verticies.data());
 
 			IndexBuffer indexBuffer;
-			indexbuffer.Init(nullptr, indices.size(), indices.data());
+			indexBuffer.Init(nullptr, indices.size(), indices.data());
 
-			subMeshes.emplace_back(
-				vertexBuffer,
-				indexBuffer   
+			submeshes.emplace_back(
+				std::move(vertexBuffer),
+				std::move(indexBuffer)   
 			);
 
 		}
-		mesh.Init
+		mesh.Init(std::move(submeshes));
 	}
 
 	return true;
 	
-	//std::vector<Vertex> verticies;
-	//std::vector<uint32_t> indicies;
-	//std::vector<SubMesh> subMeshes;
-	//for (const auto& mesh : asset.meshes) {
-	//	for (const auto& primitive : mesh.primitives) {
-
-	//		auto* positionIt = primitive.findAttribute("POSITION");
-	//		auto& positionAccessor = asset.accessors[positionIt->accessorIndex];
-
-	//		if (!positionAccessor.bufferViewIndex.has_value())
-	//			continue;
-
-	//		verticies.reserve(positionAccessor.count);
-	//		indicies.reserve(positionAccessor.count);
-	//		fastgltf::iterateAccessor<fastgltf::math::fvec3>(asset, positionAccessor, [&](fastgltf::math::fvec3 p) {
-	//			verticies.emplace_back(Vertex{ {p.data()[0],p.data()[1],p.data()[2]},{},{}});
-	//		});
-
-	//		auto* normalIt = primitive.findAttribute("NORMAL");
-	//		auto& normalAccessor = asset.accessors[normalIt->accessorIndex];
-
-	//		if (!positionAccessor.bufferViewIndex.has_value())
-	//			continue;
-
-	//		size_t idx = 0;
-	//		fastgltf::iterateAccessor<fastgltf::math::fvec3>(asset, normalAccessor, [&](fastgltf::math::fvec3 n) {
-	//			verticies[idx].normal[0] = n.data()[0];
-	//			verticies[idx].normal[1] = n.data()[1];
-	//			verticies[idx++].normal[2] = n.data()[2];
-	//			indicies.emplace_back(idx);
-	//		});
-
-
-	//		auto* uvIt = primitive.findAttribute("TEXCOORD_n");
-	//		auto& uvAccessor = asset.accessors[uvIt->accessorIndex];
-
-	//		if (!positionAccessor.bufferViewIndex.has_value())
-	//			continue;
-
-	//		idx = 0;
-	//		fastgltf::iterateAccessor<fastgltf::math::fvec2>(asset, uvAccessor, [&](fastgltf::math::fvec2 t) {
-	//			verticies[idx].uv[0] = t.data()[0];
-	//			verticies[idx++].uv[1] = t.data()[1];
-	//		});
-	//		SubMesh subMesh(0, idx);
-	//		subMeshes.emplace_back(subMesh);
-
-	//	}
-	//}
-	//VertexBuffer vertexBuffer;
-	//vertexBuffer.Init(nullptr, sizeof(Vertex), verticies.size(), verticies.data());
-
-	//IndexBuffer indexBuffer;
-	//indexBuffer.Init(nullptr, indicies.size(), indicies.data());
-
-	//Mesh mesh(std::move(vertexBuffer), std::move(indexBuffer), std::move(subMeshes));
-
-	//return mesh;
-
 }

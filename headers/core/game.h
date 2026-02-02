@@ -12,11 +12,9 @@ public:
 	~Game() = default;
 	void Run(HINSTANCE hInstance, int nCmdShow);
 
-	SceneManager sceneManager; //should be private
-
 private:
 	ImguiManager imguiManager;
-	AudioManager audioManager;
-
 	Renderer renderer;
+	AudioManager audioManager;
+	SceneManager sceneManager;
 };

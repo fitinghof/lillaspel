@@ -15,8 +15,7 @@ public:
 
 	void LoadScene(); // Should be able to take a scene file?
 
-	AssetManager assetManager; //should be private
-
 private:
 	std::unique_ptr<Scene> mainScene;
+	AssetManager assetManager;
 };

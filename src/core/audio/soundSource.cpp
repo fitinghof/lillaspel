@@ -10,9 +10,8 @@ SoundSource::SoundSource()
 	this->currentInstructionSet.loopNrOfTimes = 0;
 
 	this->sources = new ALuint[this->nrOfSources]; //owns its own sources
-	this->currentBuffers = new ALuint*[this->nrOfSources]; //does NOT own the buffers
 	alGenSources(this->nrOfSources, this->sources);
-	alGenBuffers(this->nrOfSources, *(this->currentBuffers));
+	//alGenBuffers(this->nrOfSources, *(this->currentBuffers));
 
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
@@ -24,13 +23,15 @@ SoundSource::SoundSource()
 	}
 
 	//alSourcei(source, AL_BUFFER, *this->currentBuffer);
+	ALint state = 0;
+	this->GetSourceState(0, state);
+	Logger::Log("source state: " + std::to_string(state));
 }
 
 SoundSource::~SoundSource()
 {
 	alDeleteSources(this->nrOfSources, this->sources);
 	delete[] this->sources;
-	delete[] this->currentBuffers;
 }
 
 void SoundSource::Play(SoundClip* soundClip) //pointer referece?
@@ -45,7 +46,6 @@ void SoundSource::Play(SoundClip* soundClip) //pointer referece?
 		if (state != AL_PLAYING)
 		{
 			alSourcei(this->sources[index], AL_BUFFER, (ALint)soundClip->buffer); //can a copy occur here?
-			this->currentBuffers[index] = &soundClip->buffer;
 			alSourcePlay(this->sources[index]);
 
 			// Next search will start after this one
@@ -56,7 +56,6 @@ void SoundSource::Play(SoundClip* soundClip) //pointer referece?
 
 	// No free source, overwrite the next
 	alSourcei(this->sources[this->sourceIndex], AL_BUFFER, (ALint)soundClip->buffer);
-	this->currentBuffers[this->sourceIndex] = &soundClip->buffer;
 	alSourcePlay(this->sources[this->sourceIndex]);
 
 	this->sourceIndex = (this->sourceIndex + 1) % this->nrOfSources;

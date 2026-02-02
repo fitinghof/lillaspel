@@ -25,7 +25,7 @@ AudioManager::AudioManager()
 
 	alDistanceModel(AL_INVERSE_DISTANCE_CLAMPED); //AL_LINEAR_DISTANCE would also work
 
-	ALfloat listenerOrient[] = { 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f }; // Forward: -Z, Up: Y
+	ALfloat listenerOrient[] = { 0.0f, 0.0f, -1.0f, 0.0f, -1.0f, 0.0f }; // Forward: Z, Up: Y
 	alListenerfv(AL_ORIENTATION, listenerOrient);
 
 }

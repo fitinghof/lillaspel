@@ -17,8 +17,6 @@ public:
 	SoundClip* GetSoundClipStandardFolder(std::string filename);
 	SoundClip* GetSoundClip(std::string path);
 
-	SoundSource soundSource; //remove!
-
 private:
 	MusicTrack currentMusicTrack;
 	SoundBank soundBank;

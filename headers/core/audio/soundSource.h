@@ -34,7 +34,6 @@ private:
 	int nrOfSources = 6;
 	int sourceIndex = 0;
 	ALuint* sources;
-	ALuint** currentBuffers;
 	AudioInstruction currentInstructionSet;
 
 	float pitch = 1;

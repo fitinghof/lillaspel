@@ -13,17 +13,6 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     MSG msg = {};
 
-    this->sceneManager.assetManager.InitializeSoundBank("C:/Users/Gabriel/Music/");
-    this->sceneManager.assetManager.AddSoundClipStandardFolder("TestSound.wav");
-
-    SoundClip* clip = this->sceneManager.assetManager.GetSoundClipStandardFolder("TestSound.wav");
-    SetListenerPosition(-3, 0, 0);
-    this->sceneManager.assetManager.soundSource.SetPosition(-3, 0, 1);
-    this->sceneManager.assetManager.soundSource.Play(clip);
-
-    //SoundSource ss;
-    //ss.SetPosition(-3, 0, 1);
-    //ss.Play(clip);
 
     while (msg.message != WM_QUIT)
     {

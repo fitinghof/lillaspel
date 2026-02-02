@@ -3,7 +3,12 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/tools.hpp>
 #include <fastgltf/util.hpp>
+#include <fastgltf/types.hpp>
 #include <unordered_map>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image/stb_image.h>
+#include <rendering/texture.h>
+#include <WICTextureLoader.h>
 
 
 ObjectLoader::ObjectLoader() {
@@ -50,6 +55,7 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 			auto* positionIt = it->findAttribute("POSITION");
 			assert(positionIt != it->attributes.end());
 			assert(it->indicesAccessor.has_value());
+			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureView(nullptr);
 
 			// If we haven't processed these vertexes yet, do so.
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
@@ -70,7 +76,7 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 
 					verticies[totalOffset + idx].uv[0] = 0;
 					verticies[totalOffset + idx].uv[1] = 0;
-					});
+				});
 
 				totalOffset += static_cast<uint32_t>(positionAccessor.count * sizeof(Vertex));
 
@@ -82,13 +88,15 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 						verticies[bufferOffsets[positionIt->accessorIndex] + idx].normal[0] = normal.x();
 						verticies[bufferOffsets[positionIt->accessorIndex] + idx].normal[1] = normal.y();
 						verticies[bufferOffsets[positionIt->accessorIndex] + idx].normal[2] = normal.z();
-						});
+					});
 				}
 				else {
 					// Implement normal generation later
 					Logger::Warn("No normals found for mesh primitive!");
 				}
 
+
+				// Extract index for texture coordinates
 				size_t baseColorTextureCordIndex = 0;
 				auto& material = asset.materials[it->materialIndex.value_or(0)];
 
@@ -99,6 +107,60 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 						Logger::Error("Texture has no image index!");
 						return false;
 					}
+					auto& textureImage = asset.images[texture.imageIndex.value()];
+					std::visit(fastgltf::visitor {
+						[](auto& arg) {},
+						[&](fastgltf::sources::URI& filePath) {
+							// maybe implement?
+						},
+						[&](fastgltf::sources::Array& vector) {
+							// maybe implement?
+						},
+						[&](fastgltf::sources::BufferView& view) {
+							auto& bufferView = asset.bufferViews[view.bufferViewIndex];
+							auto& buffer = asset.buffers[bufferView.bufferIndex];
+							// Yes, we've already loaded every buffer into some GL buffer. However, with GL it's simpler
+							// to just copy the buffer data again for the texture. Besides, this is just an example.
+							std::visit(fastgltf::visitor {
+								// We only care about VectorWithMime here, because we specify LoadExternalBuffers, meaning
+								// all buffers are already loaded into a vector.
+								[](auto& arg) {},
+								[&](fastgltf::sources::Array& vector) {
+									int width, height, nrChannels;
+									DirectX::CreateWICTextureFromMemory(
+										device,
+										reinterpret_cast<const uint8_t*>(vector.bytes.data() + bufferView.byteOffset),
+										static_cast<size_t>(bufferView.byteLength),
+										nullptr,
+										textureView.GetAddressOf()
+									);
+									
+								}
+							}, buffer.data);
+						},
+					}, textureImage.data);
+
+
+					if (baseColorTexture->transform && baseColorTexture->transform->texCoordIndex.has_value()) {
+						baseColorTextureCordIndex = baseColorTexture->transform->texCoordIndex.value();
+					}
+					else {
+						baseColorTextureCordIndex = material.pbrData.baseColorTexture->texCoordIndex;
+					}
+				}
+
+				auto texCordAttrName = "TEXCORD_" + std::to_string(baseColorTextureCordIndex);
+				if (const auto* texcoord = it->findAttribute(texCordAttrName); texcoord != it->attributes.end()) {
+					
+					// Get texcord accessor
+					auto& texCoordAccessor = asset.accessors[texcoord->accessorIndex];
+					if (!texCoordAccessor.bufferViewIndex.has_value())
+						continue;
+
+					fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, texCoordAccessor, [&](fastgltf::math::fvec2 uv, std::size_t idx) {
+						verticies[idx].uv[0] = uv.x();
+						verticies[idx].uv[1] = uv.y();
+					});
 				}
 
 			}
@@ -136,7 +198,7 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 			}
 
 			// Create the index buffer and copy the indices into it.
-			submeshes.emplace_back(indexOffset, indexAccessor.count);
+			submeshes.emplace_back(indexOffset, indexAccessor.count, std::move(textureView));
 
 			// Increment indexOffset for next submesh
 			indexOffset += static_cast<uint32_t>(indexAccessor.count);

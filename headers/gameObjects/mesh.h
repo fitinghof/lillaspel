@@ -5,10 +5,11 @@
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
 #include "rendering/indexBuffer.h"
+#include "rendering/texture.h"
 
 class SubMesh {
 public:
-	SubMesh(size_t startIndex, size_t nrOfIndices);
+	SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture);
 	SubMesh(SubMesh&&) noexcept = default;
 	SubMesh(SubMesh& other) = default;
 	~SubMesh();
@@ -17,6 +18,7 @@ private:
 
 	size_t startIndex;
 	size_t nrOfIndices;
+	Texture texture;
 };
 
 class Mesh {

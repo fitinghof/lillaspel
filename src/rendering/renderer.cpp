@@ -1,6 +1,6 @@
 #include "rendering/renderer.h"
 
-Renderer::Renderer() : viewport(), mesh()
+Renderer::Renderer() : viewport()
 {
 }
 
@@ -21,13 +21,7 @@ void Renderer::Init(const Window& window)
 
 	CreateRenderQueue();
 
-	ObjectLoader l;
-	//this->mesh = l.LoadGltf("", this->device.Get());
-
-	CameraObject::CameraMatrixContainer camMatrix = {};
-	this->cameraBuffer = std::make_unique<ConstantBuffer>();
-	this->cameraBuffer->Init(this->device.Get(), sizeof(CameraObject::CameraMatrixContainer), &camMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
+	CreateRendererConstantBuffers();
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -105,9 +99,20 @@ void Renderer::CreateStandardRasterizerState()
 	this->standardRasterizerState->Init(this->device.Get(), &rastDesc);
 }
 
+void Renderer::CreateRendererConstantBuffers()
+{
+	CameraObject::CameraMatrixContainer camMatrix = {};
+	this->cameraBuffer = std::make_unique<ConstantBuffer>();
+	this->cameraBuffer->Init(this->device.Get(), sizeof(CameraObject::CameraMatrixContainer), &camMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	Renderer::WorldMatrixBufferContainer worldMatrix = {};
+	this->worldMatrixBuffer = std::make_unique<ConstantBuffer>();
+	worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+}
+
 void Renderer::CreateRenderQueue()
 {
-	this->meshRenderQueue = std::shared_ptr<std::vector<int>>();
+	this->meshRenderQueue = this->meshRenderQueue = std::make_shared<std::vector<MeshObject*>>();
 	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue));
 }
 
@@ -155,83 +160,27 @@ void Renderer::RenderPass()
 {
 	ClearRenderTargetViewAndDepthStencilView();
 
+	// Bind standard stuff (most of it probably doesn't need to be set every frame)
 	BindSampler();
 	BindInputLayout();
 	BindRenderTarget();
 	BindViewport();
-
-	BindMaterial(this->tempMat.get());
-
 	BindRasterizerState(this->standardRasterizerState.get());
 
+	// Bind frame specific stuff
+	BindMaterial(this->tempMat.get());
 	BindCameraMatrix();
 
+	// Bind meshes
+	for (size_t i = 0; i < meshRenderQueue->size(); i++)
+	{
+		if ((*meshRenderQueue)[i] == nullptr)
+		{
+			throw std::runtime_error("nullptr in render queue");
+		}
 
-
-	// Temporary logic to create a quad
-	// Will be replaced when we can use a mesh class instead
-
-	Vertex vertexData[] = {
-		{-1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
-		{-1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
-		{ 1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
-		{ 1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f}
-	};
-
-	std::unique_ptr<VertexBuffer> tempVBuffer = std::unique_ptr<VertexBuffer>(new VertexBuffer());
-	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 4, vertexData);
-
-	UINT stride = tempVBuffer->GetVertexSize();
-	UINT offset = 0;
-	ID3D11Buffer* vBuff = tempVBuffer->GetBuffer();
-
-	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-
-	uint32_t indices[] = {
-		0,1,2,1,3,2
-	};
-
-	std::unique_ptr<IndexBuffer> tempIBuffer = std::unique_ptr<IndexBuffer>(new IndexBuffer());
-	tempIBuffer->Init(this->device.Get(), 6, indices);
-
-	this->immediateContext->IASetIndexBuffer(tempIBuffer->GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-	// Testing for actual meshes:
-
-	//UINT stride = this->mesh.GetVertexBuffer().GetVertexSize();
-	//UINT offset = 0;
-	//ID3D11Buffer* vBuff = this->mesh.GetVertexBuffer().GetBuffer();
-	////Logger::Log(this->mesh.GetVertexBuffer().GetNrOfVertices());
-	//this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-	//this->immediateContext->IASetIndexBuffer(this->mesh.GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-	float meshPos[3] = { 0.0f, 0.0f, 10.0f };
-	static float rot = 0;
-	float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f}; // I know this is framerate-dependent. It's a temporary test, ok?
-	float meshScale[3] = { 1.0f, 1.0f, 1.0f };
-
-	MatrixContainer* worldMatrix = nullptr;
-	ConstantBufferWorldMatrix(worldMatrix, meshPos, meshRot, meshScale);
-
-	MatrixContainer* worldMatrixInverseTransposed = nullptr;
-	ConstantBufferWorldMatrix(worldMatrixInverseTransposed, meshPos, meshRot, meshScale, true);
-
-	WorldMatrixBufferContainer worldMatrixBufferContainer = { *worldMatrix, *worldMatrixInverseTransposed };
-
-	std::unique_ptr<ConstantBuffer> worldMatrixBuffer = std::make_unique<ConstantBuffer>();
-	worldMatrixBuffer->Init(this->device.Get(), sizeof(worldMatrixBufferContainer), &worldMatrixBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
-	BindWorldMatrix(worldMatrixBuffer->GetBuffer());
-
-	delete worldMatrix;
-	delete worldMatrixInverseTransposed;
-
-
-
-
-
-	// Draw the quad to screen
-	this->immediateContext->DrawIndexed(tempIBuffer->GetNrOfIndices(), 0, 0);
+		RenderMeshObject((*meshRenderQueue)[i]);
+	}
 }
 
 void Renderer::ClearRenderTargetViewAndDepthStencilView()
@@ -287,7 +236,7 @@ void Renderer::BindMaterial(Material* material)
 
 void Renderer::BindCameraMatrix()
 {
-	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &CameraObject::mainCamera->GetCameraMatrix());
+	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &CameraObject::GetMainCamera().GetCameraMatrix());
 
 	ID3D11Buffer* buffer = this->cameraBuffer->GetBuffer();
 	this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);
@@ -296,4 +245,32 @@ void Renderer::BindCameraMatrix()
 void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 {
 	this->immediateContext->VSSetConstantBuffers(1, 1, &buffer);
+}
+
+void Renderer::RenderMeshObject(MeshObject* meshObject)
+{
+	// Bind mesh
+	VertexBuffer vBuf = meshObject->GetMesh()->GetVertexBuffer();
+
+	UINT stride = vBuf.GetVertexSize();
+	UINT offset = 0;
+	ID3D11Buffer* vBuff = vBuf.GetBuffer();
+	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
+	this->immediateContext->IASetIndexBuffer(meshObject->GetMesh()->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+
+
+	// Bind worldmatrix
+	DirectX::XMFLOAT4X4 worldMatrix = meshObject->transform.GetWorldMatrix(false);
+	DirectX::XMFLOAT4X4 worldMatrixInverseTransposed = meshObject->transform.GetWorldMatrix(true);
+
+	Renderer::WorldMatrixBufferContainer worldMatrixBufferContainer = { worldMatrix, worldMatrixInverseTransposed };
+
+	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
+	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
+
+
+
+	// Draw to screen
+	this->immediateContext->DrawIndexed(meshObject->GetMesh()->GetIndexBuffer().GetNrOfIndices(), 0, 0);
 }

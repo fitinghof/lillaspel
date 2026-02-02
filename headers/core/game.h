@@ -20,5 +20,5 @@ private:
 	ImguiManager imguiManager;
 	Renderer renderer;
 	AudioManager audioManager;
-	SceneManager sceneManager;
+	std::unique_ptr<SceneManager> sceneManager;
 };

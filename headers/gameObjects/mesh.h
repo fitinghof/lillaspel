@@ -9,7 +9,7 @@
 
 class SubMesh {
 public:
-	SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture);
+	SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture = Texture(nullptr));
 	SubMesh(SubMesh&&) noexcept = default;
 	SubMesh(SubMesh& other) = default;
 	~SubMesh();

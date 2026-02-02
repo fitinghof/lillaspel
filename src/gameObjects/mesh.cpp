@@ -28,7 +28,7 @@ IndexBuffer& Mesh::GetIndexBuffer()
     return this->indexbuffer;
 }
 
-SubMesh::SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture = Texture(nullptr))
+SubMesh::SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture)
     : startIndex(startIndex), nrOfIndices(nrOfIndices), texture(std::move(texture)) {
 
 }

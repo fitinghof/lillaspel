@@ -30,11 +30,11 @@ void SceneManager::LoadScene()
 
 	// Temporary meshes
 
-	std::unique_ptr<Mesh> mesh = std::unique_ptr<Mesh>(new Mesh());
+	std::unique_ptr<Mesh> simonMesh = std::unique_ptr<Mesh>(new Mesh());
 	ObjectLoader loader;
-	loader.LoadGltf(*mesh.get(), "C:/Users/Simon Nilsson/source/repos/LillaSpel/assests/Box/cube.glb", this->renderer->GetDevice());
+	loader.LoadGltf(*simonMesh.get(), "C:/Users/Max/Dev/TextureCube.glb", this->renderer->GetDevice());
 
-	/*Vertex vertexData[] = {
+	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
 	{-1,  1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 0.0f},
 	{ 1, -1, 0,		0.0f, 0.0f, -1.0f,		1.0f, 1.0f},
@@ -49,10 +49,13 @@ void SceneManager::LoadScene()
 	};
 
 	IndexBuffer tempIBuffer;
-	tempIBuffer.Init(renderer->GetDevice(), 6, indices);*/
+	tempIBuffer.Init(renderer->GetDevice(), 6, indices);
 
-	//this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::vector<SubMesh>())));
-	this->tempMeshes.push_back(std::move(mesh));
+	std::vector<SubMesh> quadSubMeshes;
+	quadSubMeshes.push_back(SubMesh(0,6));
+	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::move(quadSubMeshes))));
+
+	this->tempMeshes.push_back(std::move(simonMesh));
 
 
 
@@ -110,7 +113,10 @@ void SceneManager::LoadScene()
 	IndexBuffer cubeTempIBuffer;
 	cubeTempIBuffer.Init(renderer->GetDevice(), 36, cubeIndices);
 
-	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(cubeTempVBuffer), std::move(cubeTempIBuffer), std::vector<SubMesh>())));
+	std::vector<SubMesh> cubeSubMeshes;
+	cubeSubMeshes.push_back(SubMesh(0, 36));
+
+	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(cubeTempVBuffer), std::move(cubeTempIBuffer), std::move(cubeSubMeshes))));
 
 
 	// Create temporary meshObjects
@@ -125,7 +131,7 @@ void SceneManager::LoadScene()
 
 	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
-	thirdMesh.lock()->SetMesh(this->tempMeshes[1].get());
+	thirdMesh.lock()->SetMesh(this->tempMeshes[2].get());
 
 	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 }

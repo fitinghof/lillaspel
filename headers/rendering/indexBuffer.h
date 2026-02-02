@@ -1,5 +1,6 @@
 #pragma once
-
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <cstdint>
 #include <d3d11.h>
 #include <wrl\client.h>

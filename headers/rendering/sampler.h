@@ -1,5 +1,6 @@
 #pragma once
-
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <optional> // Needs C++ 17 or higher
 #include <array>
 #include <wrl/client.h>

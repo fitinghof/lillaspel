@@ -141,7 +141,7 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
 	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
 	
-	Material::BasicMaterialStruct defaultMatColor{ {1,1,1,1}, {1,1,1,1}, {1,1,1,1}, 50, {1,1,1} };
+	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, {1,1,1} };
 
 	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
 	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get() , sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);

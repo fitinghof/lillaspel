@@ -29,7 +29,7 @@ struct Spotlight
 float CalculateLightFalloff(float3 fragPosition, float3 lightPosition, float intensity)
 {
     float3 vecToLightUnnormalized = lightPosition - fragPosition;
-    return intensity * 1 / dot(vecToLightUnnormalized, vecToLightUnnormalized);
+    return intensity * 1 / (dot(vecToLightUnnormalized, vecToLightUnnormalized) * 0.1f); // Reduced light falloff
 }
 
 float4 BlinnPhongSpecularComponent(float3 fragPosition, float3 lightPosition, float3 cameraPosition, float3 normal, float4 specularCol, float shininess, float surfaceLightIntensity, float4 lightColor)
@@ -69,6 +69,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
         
     // Specular component
     specularCol += BlinnPhongSpecularComponent(input.worldPosition.xyz, spotlightBuffer[0].position, input.cameraPosition, normal, specular, shininess, surfaceLightIntensity, spotlightBuffer[0].color);
-    
+        
     return ambientCol + diffuseCol + specularCol;
 }

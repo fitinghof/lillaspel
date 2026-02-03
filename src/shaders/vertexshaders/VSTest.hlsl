@@ -8,9 +8,10 @@ struct VertexShaderInput
 struct VertexShaderOutput
 {
     float4 position : SV_POSITION;
-    float4 vertexWorldPosition : VERTEX_WORLD_POSITION;
+    float4 worldPosition : WORLD_POSITION;
     float3 normal : NORMAL;
     float2 uv : UV;
+    float3 cameraPosition : CAMERA_POSITION;
 };
 
 cbuffer ViewProjMatrixBuffer : register(b0)
@@ -31,9 +32,10 @@ VertexShaderOutput main(VertexShaderInput input)
     
     float4 pos = float4(input.position, 1.0f);
     output.position = mul(mul(pos, worldMatrix), viewProjectionMatrix);
-    output.vertexWorldPosition = mul(pos, worldMatrix);
+    output.worldPosition = mul(pos, worldMatrix);
     output.normal = mul(input.normal, (float3x3) worldMatrixInversedTransposed); 
     output.uv = input.uv;
+    output.cameraPosition = cameraPos.xyz;
     
     return output;
 }

@@ -112,6 +112,7 @@ if(imgui_SOURCE_DIR)
   )
 endif()
 
+
 # Link libraries. Keep d3d11 for DirectX usage and the fetched libraries.
 # DirectXTK provides a target named "DirectXTK" in its CMake; OpenAL provides OpenAL::OpenAL.
 target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -132,11 +133,15 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # Build HLSL shaders
 set(SHADER_PATH "./src/shaders")
 set(PS_SHADER "${SHADER_PATH}/pixelshaders/PSTest.hlsl")
+set(PS_SHADER_UNLIT "${SHADER_PATH}/pixelshaders/psUnlit.hlsl")
+set(PS_SHADER_LIT "${SHADER_PATH}/pixelshaders/psLit.hlsl")
 set(VS_SHADER "${SHADER_PATH}/vertexshaders/VSTest.hlsl")
-set(HLSL_SHADER_FILES ${PS_SHADER} ${VS_SHADER})
+set(HLSL_SHADER_FILES ${PS_SHADER} ${PS_SHADER_UNLIT} ${PS_SHADER_LIT} ${VS_SHADER})
 
 set_source_files_properties(${VS_SHADER} PROPERTIES ShaderType "vs")
 set_source_files_properties(${PS_SHADER} PROPERTIES ShaderType "ps")
+set_source_files_properties(${PS_SHADER_UNLIT} PROPERTIES ShaderType "ps")
+set_source_files_properties(${PS_SHADER_LIT} PROPERTIES ShaderType "ps")
 set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
 foreach(FILE ${HLSL_SHADER_FILES})

@@ -1,0 +1,2 @@
+- music is played as it had a position, it should always sound global
+- check sound orientation

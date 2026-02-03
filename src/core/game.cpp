@@ -1,34 +1,39 @@
 #include "core/game.h"
 #include "core/imguiManager.h"
 #include "scene/sceneManager.h"
+#include "utilities/time.h"
 #include <memory>
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     Window window(hInstance, nCmdShow, "Game Window");
 
-    Renderer renderer;
-    renderer.Init(window);
+    this->renderer.Init(window);
+    this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
-    this->imguiManager.InitalizeImgui(window.GetHWND(), renderer.GetDevice(), renderer.GetContext());
+    this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
+    this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height) { window.Resize(width, height); });
+	this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen) { window.ToggleFullscreen(fullscreen); });
+    window.SetResizeCallback([&](UINT, UINT) { this->renderer.Resize(window); });
 
-    std::unique_ptr<SceneManager> sceneMan = std::unique_ptr<SceneManager>(new SceneManager(&renderer));
-    sceneMan->LoadScene();
+    this->sceneManager->LoadScene();
 
     MSG msg = {};
 
+
     while (msg.message != WM_QUIT)
     {
-        this->imguiManager.imguiAtFrameStart();
+        this->imguiManager.ImguiAtFrameStart();
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);
             DispatchMessage(&msg);
         }
 
-        sceneMan->SceneTick();
+        Time::GetInstance().Tick();
+        this->sceneManager->SceneTick();
 
-        renderer.Render();
-        this->imguiManager.imguiAtFrameEnd();
-        renderer.Present();
+        this->renderer.Render();
+        this->imguiManager.ImguiAtFrameEnd();
+        this->renderer.Present();
     }
 }

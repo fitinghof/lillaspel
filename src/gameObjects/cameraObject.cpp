@@ -20,6 +20,7 @@ void CameraObject::Tick()
 	static float pos[3] = { 0,0,0 };
 	static float rot[3] = { 0,0,0 };
 
+	ImGui::SetNextWindowSize(ImVec2(450.f, 120.f));
 	ImGui::Begin("Camera");
 	ImGui::PushItemWidth(350);
 	ImGui::SliderFloat3("Position", pos, -20, 20);

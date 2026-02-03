@@ -1,11 +1,13 @@
 #include "rendering/renderer.h"
+#include "gameObjects/objectLoader.h"
 
-Renderer::Renderer() : viewport(), mesh()
+Renderer::Renderer() : viewport(), maximumSpotlights(16)
 {
 }
 
 void Renderer::Init(const Window& window)
 {
+	ObjectLoader objectLoader;
 	SetViewport(window);
 
 	CreateDeviceAndSwapChain(window);
@@ -21,19 +23,27 @@ void Renderer::Init(const Window& window)
 
 	CreateRenderQueue();
 
-	ObjectLoader l;
-	//this->mesh = l.LoadGltf("", this->device.Get());
-
-	CameraObject::CameraMatrixContainer camMatrix = {};
-	this->cameraBuffer = std::make_unique<ConstantBuffer>();
-	this->cameraBuffer->Init(this->device.Get(), sizeof(CameraObject::CameraMatrixContainer), &camMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
+	CreateRendererConstantBuffers();
 }
 
 void Renderer::SetViewport(const Window& window)
 {
-	this->viewport.Width = static_cast<FLOAT>(window.GetWidth());
-	this->viewport.Height = static_cast<FLOAT>(window.GetHeight());
+	RECT rc{};
+	GetClientRect(window.GetHWND(), &rc);
+	UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+	UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = window.GetWidth();
+		clientHeight = window.GetHeight();
+	}
+	if (clientWidth == 0 || clientHeight == 0)
+	{
+		clientWidth = 1;
+		clientHeight = 1;
+	}
+
+	this->viewport.Width = static_cast<FLOAT>(clientWidth);
+	this->viewport.Height = static_cast<FLOAT>(clientHeight);
 	this->viewport.MinDepth = 0.0f;
 	this->viewport.MaxDepth = 1.0f;
 	this->viewport.TopLeftX = 0;
@@ -42,10 +52,19 @@ void Renderer::SetViewport(const Window& window)
 
 void Renderer::CreateDeviceAndSwapChain(const Window& window)
 {
+	RECT rc{};
+	GetClientRect(window.GetHWND(), &rc);
+	UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+	UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = window.GetWidth();
+		clientHeight = window.GetHeight();
+	}
+
 	DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
 	swapChainDesc.BufferCount = 2;
-	swapChainDesc.BufferDesc.Width = 0;
-	swapChainDesc.BufferDesc.Height = 0;
+	swapChainDesc.BufferDesc.Width = clientWidth;
+	swapChainDesc.BufferDesc.Height = clientHeight;
 	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	swapChainDesc.BufferDesc.RefreshRate.Numerator = 0;
 	swapChainDesc.BufferDesc.RefreshRate.Denominator = 1;
@@ -75,8 +94,31 @@ void Renderer::CreateRenderTarget()
 
 void Renderer::CreateDepthBuffer(const Window& window)
 {
+	RECT rc{};
+	GetClientRect(window.GetHWND(), &rc);
+	UINT clientWidth = static_cast<UINT>(rc.right - rc.left);
+	UINT clientHeight = static_cast<UINT>(rc.bottom - rc.top);
+
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = window.GetWidth();
+		clientHeight = window.GetHeight();
+	}
+
+	if (clientWidth == 0 || clientHeight == 0) {
+		DXGI_SWAP_CHAIN_DESC desc{};
+		if (SUCCEEDED(this->swapChain->GetDesc(&desc))) {
+			clientWidth = desc.BufferDesc.Width;
+			clientHeight = desc.BufferDesc.Height;
+		}
+	}
+
+	if (clientWidth == 0 || clientHeight == 0) {
+		clientWidth = 1;
+		clientHeight = 1;
+	}
+
 	this->depthBuffer = std::unique_ptr<DepthBuffer>(new DepthBuffer());
-	this->depthBuffer->Init(this->device.Get(), window.GetWidth(), window.GetHeight());
+	this->depthBuffer->Init(this->device.Get(), clientWidth, clientHeight);
 }
 
 void Renderer::CreateInputLayout(const std::string& vShaderByteCode)
@@ -105,10 +147,30 @@ void Renderer::CreateStandardRasterizerState()
 	this->standardRasterizerState->Init(this->device.Get(), &rastDesc);
 }
 
+void Renderer::CreateRendererConstantBuffers()
+{
+	CameraObject::CameraMatrixContainer camMatrix = {};
+	this->cameraBuffer = std::make_unique<ConstantBuffer>();
+	this->cameraBuffer->Init(this->device.Get(), sizeof(CameraObject::CameraMatrixContainer), &camMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	Renderer::WorldMatrixBufferContainer worldMatrix = {};
+	this->worldMatrixBuffer = std::make_unique<ConstantBuffer>();
+	worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+
+	SpotlightObject::SpotLightContainer defaultSpotlights[1];
+	this->spotlightBuffer = std::make_unique<StructuredBuffer>();
+	this->spotlightBuffer->Init(this->device.Get(), sizeof(SpotlightObject::SpotLightContainer), this->maximumSpotlights, defaultSpotlights);
+
+	Renderer::LightCountBufferContainer lightCountContainer = {};
+	this->spotlightCountBuffer = std::make_unique<ConstantBuffer>();
+	this->spotlightCountBuffer->Init(this->device.Get(), sizeof(Renderer::LightCountBufferContainer), &lightCountContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+}
+
 void Renderer::CreateRenderQueue()
 {
 	this->meshRenderQueue = this->meshRenderQueue = std::make_shared<std::vector<MeshObject*>>();
-	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue));
+	this->lightRenderQueue = this->lightRenderQueue = std::make_shared<std::vector<SpotlightObject*>>();
+	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->lightRenderQueue));
 }
 
 void Renderer::LoadShaders(std::string& vShaderByteCode)
@@ -119,11 +181,22 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
 	vShaderByteCode = this->vertexShader->GetShaderByteCode();
 
-	this->pixelShader = std::shared_ptr<Shader>(new Shader());
-	this->pixelShader->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "PSTest.cso");
+	this->pixelShaderLit = std::shared_ptr<Shader>(new Shader());
+	this->pixelShaderLit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psLit.cso");
 
-	this->tempMat = std::unique_ptr<Material>(new Material);
-	this->tempMat->Init(this->vertexShader, this->pixelShader);
+	this->pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
+	this->pixelShaderUnlit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psUnlit.cso");
+
+	this->defaultMat = std::unique_ptr<Material>(new Material);
+	this->defaultMat->Init(this->vertexShader, this->pixelShaderLit);
+
+	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
+	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
+
+	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 0, {1,1} };
+
+	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
+	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get(), sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
 }
 
 void Renderer::Render()
@@ -134,6 +207,11 @@ void Renderer::Render()
 void Renderer::Present()
 {
 	this->swapChain->Present(0, 0);
+}
+
+void Renderer::Resize(const Window& window)
+{
+	this->ResizeSwapChain(window);
 }
 
 ID3D11Device* Renderer::GetDevice() const
@@ -155,67 +233,19 @@ void Renderer::RenderPass()
 {
 	ClearRenderTargetViewAndDepthStencilView();
 
+	// Bind standard stuff (most of it probably doesn't need to be set every frame)
 	BindSampler();
 	BindInputLayout();
 	BindRenderTarget();
 	BindViewport();
-
-	BindMaterial(this->tempMat.get());
-
 	BindRasterizerState(this->standardRasterizerState.get());
 
+	// Bind frame specific stuff
+	BindMaterial(this->defaultMat.get());
 	BindCameraMatrix();
+	BindLights();
 
-
-
-	// Temporary logic to create a quad
-	// Will be replaced when we can use a mesh class instead
-
-	/*Vertex vertexData[] = {
-		{-1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
-		{-1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
-		{ 1, -1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f},
-		{ 1,  1, 0,		0.0f, 0.0f, -1.0f,	1.0f, 1.0f}
-	};
-
-	std::unique_ptr<VertexBuffer> tempVBuffer = std::unique_ptr<VertexBuffer>(new VertexBuffer());
-	tempVBuffer->Init(this->device.Get(), sizeof(Vertex), 4, vertexData);
-
-	UINT stride = tempVBuffer->GetVertexSize();
-	UINT offset = 0;
-	ID3D11Buffer* vBuff = tempVBuffer->GetBuffer();
-
-	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-
-	uint32_t indices[] = {
-		0,1,2,1,3,2
-	};
-
-	std::unique_ptr<IndexBuffer> tempIBuffer = std::unique_ptr<IndexBuffer>(new IndexBuffer());
-	tempIBuffer->Init(this->device.Get(), 6, indices);
-
-	this->immediateContext->IASetIndexBuffer(tempIBuffer->GetBuffer(), DXGI_FORMAT_R32_UINT, 0);*/
-
-	// Testing for actual meshes:
-
-	//UINT stride = this->mesh.GetVertexBuffer().GetVertexSize();
-	//UINT offset = 0;
-	//ID3D11Buffer* vBuff = this->mesh.GetVertexBuffer().GetBuffer();
-	////Logger::Log(this->mesh.GetVertexBuffer().GetNrOfVertices());
-	//this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-	//this->immediateContext->IASetIndexBuffer(this->mesh.GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-	//float meshPos[3] = { 0.0f, 0.0f, 10.0f };
-	//static float rot = 0;
-	//float meshRot[3] = { 0.0f, rot += 0.01f, 0.0f}; // I know this is framerate-dependent. It's a temporary test, ok?
-	//float meshScale[3] = { 1.0f, 1.0f, 1.0f };
-
-	//MatrixContainer* worldMatrix = nullptr;
-	//ConstantBufferWorldMatrix(worldMatrix, meshPos, meshRot, meshScale);
-
-	//MatrixContainer* worldMatrixInverseTransposed = nullptr;
-	//ConstantBufferWorldMatrix(worldMatrixInverseTransposed, meshPos, meshRot, meshScale, true);
-
+	// Bind meshes
 	for (size_t i = 0; i < meshRenderQueue->size(); i++)
 	{
 		if ((*meshRenderQueue)[i] == nullptr)
@@ -223,33 +253,7 @@ void Renderer::RenderPass()
 			throw std::runtime_error("nullptr in render queue");
 		}
 
-		VertexBuffer vBuf = (*meshRenderQueue)[i]->GetMesh()->GetVertexBuffer();
-
-		UINT stride = vBuf.GetVertexSize();
-		UINT offset = 0;
-		ID3D11Buffer* vBuff = vBuf.GetBuffer();
-
-		this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-
-		this->immediateContext->IASetIndexBuffer((*meshRenderQueue)[i]->GetMesh()->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
-
-
-
-
-		DirectX::XMFLOAT4X4 worldMatrix = (*meshRenderQueue)[i]->transform.GetWorldMatrix(false);
-		DirectX::XMFLOAT4X4 worldMatrixInverseTransposed = (*meshRenderQueue)[i]->transform.GetWorldMatrix(true);
-
-		WorldMatrixBufferContainer worldMatrixBufferContainer = { worldMatrix, worldMatrixInverseTransposed };
-
-		std::unique_ptr<ConstantBuffer> worldMatrixBuffer = std::make_unique<ConstantBuffer>();
-		worldMatrixBuffer->Init(this->device.Get(), sizeof(WorldMatrixBufferContainer), &worldMatrixBufferContainer, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
-
-		BindWorldMatrix(worldMatrixBuffer->GetBuffer());
-
-
-
-		// Draw to screen
-		this->immediateContext->DrawIndexed((*meshRenderQueue)[i]->GetMesh()->GetIndexBuffer().GetNrOfIndices(), 0, 0);
+		RenderMeshObject((*meshRenderQueue)[i]);
 	}
 }
 
@@ -259,6 +263,36 @@ void Renderer::ClearRenderTargetViewAndDepthStencilView()
 	float clearColor[4] = { 0,0,0.1,0 };
 	this->immediateContext->ClearRenderTargetView(this->renderTarget->GetRenderTargetView(), clearColor);
 	this->immediateContext->ClearDepthStencilView(this->depthBuffer->GetDepthStencilView(0), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+}
+
+void Renderer::ResizeSwapChain(const Window& window)
+{
+	if (window.GetWidth() == 0 || window.GetHeight() == 0) {
+		return;
+	}
+
+	// Unbind any views using the swapchain
+	if (this->immediateContext) {
+		this->immediateContext->OMSetRenderTargets(0, nullptr, nullptr);
+	}
+
+	// Release old views
+	this->renderTarget.reset();
+	this->depthBuffer.reset();
+
+	// Resize swapchain
+	HRESULT hr = this->swapChain->ResizeBuffers(0, window.GetWidth(), window.GetHeight(), DXGI_FORMAT_UNKNOWN, 0);
+	if (FAILED(hr))
+	{
+		throw std::runtime_error("Failed to resize swapchain buffers, Error: " + hr);
+	}
+
+	// Recreate views
+	CreateRenderTarget();
+	CreateDepthBuffer(window);
+
+	// Update viewport
+	SetViewport(window);
 }
 
 void Renderer::BindSampler()
@@ -289,7 +323,8 @@ void Renderer::BindViewport()
 
 void Renderer::BindRasterizerState(RasterizerState* rastState)
 {
-	if (rastState == nullptr) {
+	if (rastState == nullptr)
+	{
 		Logger::Error("RasterizerSate is nullptr");
 	}
 
@@ -298,10 +333,54 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 
 void Renderer::BindMaterial(Material* material)
 {
+	// Bind shaders
 	material->vertexShader->BindShader(this->immediateContext.Get());
 	material->pixelShader->BindShader(this->immediateContext.Get());
 
 	// Also bind constant buffers
+	for (size_t i = 0; i < material->pixelShaderBuffers.size(); i++)
+	{
+		ID3D11Buffer* buf = material->pixelShaderBuffers[i]->GetBuffer();
+		this->immediateContext->PSSetConstantBuffers(i + 1, 1, &buf); // i + 1 because first slot is always occupied
+	}
+
+	for (size_t i = 0; i < material->vertexShaderBuffers.size(); i++)
+	{
+		ID3D11Buffer* buf = material->vertexShaderBuffers[i]->GetBuffer();
+		this->immediateContext->VSSetConstantBuffers(i + 2, 1, &buf); // i + 2 because the first two slots are always occupied
+	}
+}
+
+void Renderer::BindLights()
+{
+	if (this->lightRenderQueue->size() > this->maximumSpotlights)
+	{
+		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
+	}
+
+	const size_t lightCount = std::min<size_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+
+	if (lightCount > 0) {
+		//Logger::Log("No light. Please add a light to the scene.");
+
+		// Inefficient, should be fixed
+		std::vector<SpotlightObject::SpotLightContainer> spotlights;
+		for (size_t i = 0; i < lightCount; i++)
+		{
+			spotlights.push_back((*this->lightRenderQueue)[i]->data);
+		}
+
+		// Updates and binds buffer
+		this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights.data());
+		ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
+		this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
+	}
+
+	// Updates and binds light count constant buffer
+	Renderer::LightCountBufferContainer lightCountContainer = { lightCount, 1, 1, 1 };
+	this->spotlightCountBuffer->UpdateBuffer(this->immediateContext.Get(), &lightCountContainer);
+	ID3D11Buffer* buf = this->spotlightCountBuffer->GetBuffer();
+	this->immediateContext->PSSetConstantBuffers(0, 1, &buf);
 }
 
 void Renderer::BindCameraMatrix()
@@ -315,4 +394,37 @@ void Renderer::BindCameraMatrix()
 void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 {
 	this->immediateContext->VSSetConstantBuffers(1, 1, &buffer);
+}
+
+void Renderer::RenderMeshObject(MeshObject* meshObject)
+{
+	// Bind mesh
+	VertexBuffer vBuf = meshObject->GetMesh()->GetVertexBuffer();
+
+	UINT stride = vBuf.GetVertexSize();
+	UINT offset = 0;
+	ID3D11Buffer* vBuff = vBuf.GetBuffer();
+	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
+	this->immediateContext->IASetIndexBuffer(meshObject->GetMesh()->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+
+
+
+	// Bind worldmatrix
+	DirectX::XMFLOAT4X4 worldMatrix = meshObject->transform.GetWorldMatrix(false);
+	DirectX::XMFLOAT4X4 worldMatrixInverseTransposed = meshObject->transform.GetWorldMatrix(true);
+
+	Renderer::WorldMatrixBufferContainer worldMatrixBufferContainer = { worldMatrix, worldMatrixInverseTransposed };
+
+	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
+	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
+
+
+	for (auto subMesh : meshObject->GetMesh()->GetSubMeshes())
+	{
+		ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
+		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
+
+		// Draw to screen
+		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
+	}
 }

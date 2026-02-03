@@ -56,4 +56,6 @@ void SceneManager::LoadScene()
 	auto secondMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
 	secondMesh.lock()->SetMesh(this->tempMesh.get());
+
+	secondMesh.lock()->GetGlobalPosition();
 }

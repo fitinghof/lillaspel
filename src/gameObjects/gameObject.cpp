@@ -67,6 +67,18 @@ void GameObject::LatePhysicsTick()
 	// TO DO
 }
 
+DirectX::XMVECTOR GameObject::GetGlobalPosition() const
+{
+	if (this->parent.expired()) {
+		Logger::Log("It works.");
+	}
+	else {
+		Logger::Error("It doesn't work.");
+	}
+
+	return DirectX::XMVECTOR();
+}
+
 void GameObject::SetWeakPtr(std::weak_ptr<GameObject> yourPtr)
 {
 	this->weakPtr = yourPtr;

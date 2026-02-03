@@ -4,6 +4,7 @@
 #include <memory>
 #include <array>
 #include "utilities/logger.h"
+#include <DirectXMath.h>
 
 class Scene;
 
@@ -33,6 +34,11 @@ public:
 	virtual void LateTick();
 	virtual void PhysicsTick();
 	virtual void LatePhysicsTick();
+
+	virtual DirectX::XMVECTOR GetGlobalPosition() const;
+	//virtual DirectX::XMVECTOR GetGlobalRotation() const;
+	//virtual DirectX::XMVECTOR GetGlobalScale() const;
+	//virtual DirectX::XMFLOAT4X4 GetGlobalWorldMatrix(bool inverseTranspose) const;
 
 private:
 	std::vector<std::weak_ptr<GameObject>> children;

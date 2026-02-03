@@ -5,29 +5,30 @@
 #include "gameObjects/mesh.h"
 #include "rendering/vertexBuffer.h"
 #include "rendering/indexBuffer.h"
+#include "gameObjects/meshObjData.h"
+#include "rendering/material.h"
 
 
-//struct GltfLoadResult {
-//public:
-//	GltfLoadResult(Mesh&& m) : mesh(std::move(m)) {};
-//	Mesh mesh;
-//	//std::vector<Material> materials;
-//};
+struct MeshLoadData {
+	Mesh mesh;
+	std::vector<Material> materials;
+	MeshObjData meshData;
+};
 
 
 class ObjectLoader
 {
 public:
-	ObjectLoader();
+	ObjectLoader(std::filesystem::path basePath = "../../assets");
 	~ObjectLoader();
 
 	/// <summary>
 	/// Loads a gltf file 
 	/// </summary>
-	bool LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device* device);
+	bool LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData , ID3D11Device* device);
 
 
 
 private:
-
+	std::filesystem::path basePath;
 };

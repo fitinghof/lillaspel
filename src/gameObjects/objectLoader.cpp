@@ -149,9 +149,8 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 					}
 				}
 
-				auto texCordAttrName = "TEXCORD_" + std::to_string(baseColorTextureCordIndex);
+				auto texCordAttrName = "TEXCOORD_" + std::to_string(baseColorTextureCordIndex);
 				if (const auto* texcoord = it->findAttribute(texCordAttrName); texcoord != it->attributes.end()) {
-					
 					// Get texcord accessor
 					auto& texCoordAccessor = asset.accessors[texcoord->accessorIndex];
 					if (!texCoordAccessor.bufferViewIndex.has_value())

@@ -6,6 +6,7 @@
 #include "../headers/core/audio/soundEngine.h"
 #include "gameObjects/mesh.h"
 #include "rendering/material.h"
+#include "gameObjects/objectLoader.h"
 
 class AssetManager
 {
@@ -17,9 +18,10 @@ public:
 	void AddSoundClipStandardFolder(std::string filename);
 	void AddSoundClip(std::string path);
 
-	std::string AddMesh(Mesh* mesh);
-	std::string AddMaterial(Material* material);
-	std::string AddObjTemplate(meshObjData data);
+	bool GetMaterial(std::string identifier);
+	bool GetMesh(std::string identifier);
+	MeshObjData GetTemplate(std::string identifier);
+
 
 	SoundClip* GetSoundClipStandardFolder(std::string filename);
 	SoundClip* GetSoundClip(std::string path);
@@ -27,5 +29,8 @@ public:
 private:
 	MusicTrack currentMusicTrack;
 	SoundBank soundBank;
+	ObjectLoader objectLoader;
+
+	std::unordered_map<std::string, >
 };
 

@@ -15,6 +15,21 @@ void AssetManager::AddSoundClip(std::string path)
 	this->soundBank.AddSoundClip(path);
 }
 
+bool AssetManager::GetMaterial(std::string identifier)
+{
+	return false;
+}
+
+bool AssetManager::GetMesh(std::string identifier)
+{
+	return false;
+}
+
+MeshObjData AssetManager::GetTemplate(std::string identifier)
+{
+	return MeshObjData();
+}
+
 SoundClip* AssetManager::GetSoundClipStandardFolder(std::string filename)
 {
 	return this->soundBank.GetSoundClipStandardFolder(filename);

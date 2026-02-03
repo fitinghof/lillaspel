@@ -14,6 +14,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height) { window.Resize(width, height); });
 	this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen) { window.ToggleFullscreen(fullscreen); });
     window.SetResizeCallback([&](UINT, UINT) { this->renderer.Resize(window); });
+    this->imguiManager.SetVSyncChangeCallback([&](bool enable) { this->renderer.ToggleVSync(enable); });
 
     this->sceneManager->LoadScene();
 

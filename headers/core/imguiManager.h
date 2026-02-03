@@ -22,6 +22,7 @@ public:
 
 	void SetResolutionChangeCallback(std::function<void(UINT, UINT)> callback);
 	void SetFullscreenChangeCallback(std::function<void(bool)> callback);
+	void SetVSyncChangeCallback(std::function<void(bool)> callback);
 
 private:
 
@@ -33,8 +34,10 @@ private:
 	bool showOptionsWindow = false;
 	bool showConsoleWindow = false;
 	bool isFullscreen = false;
+	bool isVSync = false;
 
 	std::function<void(UINT, UINT)> resolutionChangeCallback;
 	std::function<void(bool)> fullscreenChangeCallback;
+	std::function<void(bool)> vSyncChangeCallback;
 
 };

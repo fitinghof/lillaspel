@@ -16,6 +16,7 @@ struct MeshLoadData {
 };
 
 
+
 class ObjectLoader
 {
 public:
@@ -25,7 +26,7 @@ public:
 	/// <summary>
 	/// Loads a gltf file 
 	/// </summary>
-	bool LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData , ID3D11Device* device);
+	bool LoadGltf(std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData , ID3D11Device* device);
 
 
 

@@ -15,7 +15,7 @@ ObjectLoader::ObjectLoader(std::filesystem::path basePath): basePath(std::move(b
 ObjectLoader::~ObjectLoader() {
 }
 
-bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData, ID3D11Device* device) {
+bool ObjectLoader::LoadGltf(std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData, ID3D11Device* device) {
 	meshLoadData.clear();
 
 	std::filesystem::path path = basePath / path;

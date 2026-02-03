@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <unordered_map>
+#include "d3d11.h"
 #include "gameObjects/meshObjData.h"
 
 #include "../headers/core/audio/soundEngine.h"
@@ -11,12 +12,14 @@
 class AssetManager
 {
 public:
-	AssetManager() = default;
+	AssetManager(ID3D11Device* device);
 	~AssetManager() = default;
 
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename);
 	void AddSoundClip(std::string path);
+
+	void setDevicePointer(ID3D11Device* device);
 
 	bool GetMaterial(std::string identifier);
 	bool GetMesh(std::string identifier);
@@ -31,6 +34,13 @@ private:
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
 
-	std::unordered_map<std::string, >
+	std::unordered_map<std::string, Material> materials;
+	std::unordered_map<std::string, Mesh> meshes;
+	std::unordered_map<std::string, MeshObjData> meshObjDataSets;
+
+	bool loadNewGltf(std::string identifier);
+	
+	ID3D11Device* d3d11Device = nullptr;
+
 };
 

@@ -1,7 +1,7 @@
 #include "scene/sceneManager.h"
 #include "gameObjects/objectLoader.h"
 
-SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend)
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), assetManager(rend->GetDevice())
 {
 }
 

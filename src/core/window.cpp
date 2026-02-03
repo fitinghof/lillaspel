@@ -22,9 +22,8 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-   
     if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-        return true;
+        return 1;
     
     switch (message) {
     case WM_SIZE: {
@@ -72,6 +71,8 @@ Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, c
     : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
+    DWORD style = WS_OVERLAPPEDWINDOW;
+    DWORD exStyle = 0;
 
     WNDCLASSEX wc = { .cbSize = sizeof(WNDCLASSEX),
                      .lpfnWndProc = Window::StaticWindowProc,
@@ -82,11 +83,19 @@ Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, c
         throw std::runtime_error("Failed to register window class, error: " + std::to_string(GetLastError()));
     }
 
+	RECT desiredRect{ 0, 0, static_cast<LONG>(this->width), static_cast<LONG>(this->height) };
+	if (!AdjustWindowRectEx(&desiredRect, style, FALSE, exStyle)) {
+        throw std::runtime_error("Failed to adjust window rect, error: " + std::to_string(GetLastError()));
+    }
+
+	int windowWidth = desiredRect.right - desiredRect.left;
+	int windowHeight = desiredRect.bottom - desiredRect.top;
+
     std::wstring widestr = std::wstring(name.begin(), name.end());
     const wchar_t* winName = widestr.c_str();
 
-    this->hWnd = CreateWindowEx(0, CLASS_NAME, winName, WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, 0, this->width,
-        this->height, nullptr, nullptr, this->instance, this);
+    this->hWnd = CreateWindowEx(0, CLASS_NAME, winName, style, CW_USEDEFAULT, exStyle, windowWidth,
+        windowHeight, nullptr, nullptr, this->instance, this);
 
     if (!hWnd) {
         throw std::runtime_error("Failed to create window, error: " + std::to_string(GetLastError()));
@@ -132,7 +141,26 @@ void Window::Resize(UINT width, UINT height) {
         return;
     }
 
-    SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height, SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+    DWORD style = static_cast<DWORD>(GetWindowLongPtr(this->hWnd, GWL_STYLE));
+    DWORD exStyle = static_cast<DWORD>(GetWindowLongPtr(this->hWnd, GWL_EXSTYLE));
+
+    RECT desiredRect{ 0, 0, static_cast<LONG>(this->width), static_cast<LONG>(this->height) };
+    if (AdjustWindowRectEx(&desiredRect, style, FALSE, exStyle)) {
+        UINT windowWidth = static_cast<UINT>(desiredRect.right - desiredRect.left);
+        UINT windowHeight = static_cast<UINT>(desiredRect.bottom - desiredRect.top);
+
+        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight,
+            SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+    }
+    else {
+        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height,
+            SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_FRAMECHANGED);
+    }
+
+    this->UpdateClientSize();
+    if (this->resizeCallback) {
+        this->resizeCallback(this->width, this->height);
+    }
 }
 
 void Window::ToggleFullscreen(bool fullscreen)

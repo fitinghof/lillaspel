@@ -1,11 +1,8 @@
 #pragma once
 
+// std
 #include <Windows.h>
-
-#include <exception>
-#include <iostream>
 #include <string>
-#include <windowsx.h>
 #include <functional>
 
 class Window {
@@ -17,9 +14,13 @@ private:
     RECT windowedRect{};
     bool isFullscreen;
 
+    DEVMODE originalDisplayMode{};
+    bool hasOriginalDisplayMode;
+
     static LRESULT CALLBACK StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
     void UpdateClientSize();
+    void ApplyFullscreenResolution(UINT width, UINT height);
 
 	std::function<void(UINT, UINT)> resizeCallback;
 

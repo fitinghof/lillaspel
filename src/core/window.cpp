@@ -1,6 +1,10 @@
 #include "core/window.h"
 #include "imgui.h"
 
+// std
+#include <exception>
+#include <iostream>
+
 LRESULT Window::StaticWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
     if (message == WM_NCCREATE) {
         CREATESTRUCT* pCreate = reinterpret_cast<CREATESTRUCT*>(lParam);
@@ -67,8 +71,40 @@ void Window::UpdateClientSize()
     }
 }
 
+void Window::ApplyFullscreenResolution(UINT width, UINT height)
+{
+    if (width == 0 || height == 0) {
+        return;
+    }
+
+    if (!this->hasOriginalDisplayMode) {
+        DEVMODE currentMode{};
+        currentMode.dmSize = sizeof(currentMode);
+        if (EnumDisplaySettings(nullptr, ENUM_CURRENT_SETTINGS, &currentMode)) {
+            this->originalDisplayMode = currentMode;
+            this->hasOriginalDisplayMode = true;
+        }
+    }
+
+    DEVMODE newMode{};
+    newMode.dmSize = sizeof(newMode);
+    newMode.dmPelsWidth = width;
+    newMode.dmPelsHeight = height;
+
+    if (this->hasOriginalDisplayMode) {
+        newMode.dmBitsPerPel = this->originalDisplayMode.dmBitsPerPel;
+        newMode.dmDisplayFrequency = this->originalDisplayMode.dmDisplayFrequency;
+        newMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT | DM_BITSPERPEL | DM_DISPLAYFREQUENCY;
+    }
+    else {
+        newMode.dmFields = DM_PELSWIDTH | DM_PELSHEIGHT;
+    }
+
+    ChangeDisplaySettings(&newMode, CDS_FULLSCREEN);
+}
+
 Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, const UINT width, const UINT height)
-    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false) {
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
     DWORD style = WS_OVERLAPPEDWINDOW;
@@ -131,10 +167,20 @@ void Window::Resize(UINT width, UINT height) {
     this->height = height;
 
     if (this->isFullscreen) {
-        SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height,
-            SWP_NOOWNERZORDER | SWP_FRAMECHANGED | SWP_NOMOVE);
-        this->UpdateClientSize();
+        this->ApplyFullscreenResolution(this->width, this->height);
 
+        MONITORINFO mi{ sizeof(mi) };
+        if (GetMonitorInfo(MonitorFromWindow(this->hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
+            SetWindowPos(this->hWnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
+                mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
+                SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
+        }
+        else {
+            SetWindowPos(this->hWnd, HWND_TOP, 0, 0, this->width, this->height,
+                SWP_NOOWNERZORDER | SWP_FRAMECHANGED | SWP_NOMOVE);
+        }
+
+        this->UpdateClientSize();
         if (this->resizeCallback) {
             this->resizeCallback(this->width, this->height);
         }
@@ -174,18 +220,29 @@ void Window::ToggleFullscreen(bool fullscreen)
     if (fullscreen) {
         GetWindowRect(this->hWnd, &this->windowedRect);
         SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_POPUP | WS_VISIBLE);
-        MONITORINFO mi = { sizeof(mi) };
+
+        this->ApplyFullscreenResolution(this->width, this->height);
+
+        MONITORINFO mi{ sizeof(mi) };
         if (GetMonitorInfo(MonitorFromWindow(this->hWnd, MONITOR_DEFAULTTOPRIMARY), &mi)) {
             SetWindowPos(this->hWnd, HWND_TOP, mi.rcMonitor.left, mi.rcMonitor.top,
                 mi.rcMonitor.right - mi.rcMonitor.left, mi.rcMonitor.bottom - mi.rcMonitor.top,
                 SWP_NOOWNERZORDER | SWP_FRAMECHANGED);
         }
+
         this->UpdateClientSize();
         if (this->resizeCallback) {
             this->resizeCallback(this->width, this->height);
         }
     }
     else {
+        if (this->hasOriginalDisplayMode) {
+            ChangeDisplaySettings(&this->originalDisplayMode, 0);
+        }
+        else {
+            ChangeDisplaySettings(nullptr, 0);
+        }
+
         SetWindowLongPtr(this->hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW | WS_VISIBLE);
         SetWindowPos(this->hWnd, HWND_TOP, this->windowedRect.left, this->windowedRect.top,
             this->windowedRect.right - this->windowedRect.left, this->windowedRect.bottom - this->windowedRect.top,

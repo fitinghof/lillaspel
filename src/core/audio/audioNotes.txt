@@ -1,5 +1,8 @@
 
-- 
+- fix looping
+- add muffle at distance effect
+- add fade out
+- add cross fade
 
     MusicTrackManager mtm;
     mtm.Initialize("C:/Users/Gabriel/Music/Testing/");

@@ -47,6 +47,8 @@ public:
 
 	void Resize(const Window& window);
 
+	void ToggleVSync(bool enable);
+
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;
 	IDXGISwapChain* GetSwapChain() const;
@@ -93,7 +95,9 @@ private:
 	std::unique_ptr<ConstantBuffer> cameraBuffer;
 	std::unique_ptr<ConstantBuffer> worldMatrixBuffer;
 
-
+	// ImGui variables
+	
+	bool isVSyncEnabled = false;
 
 	void SetViewport(const Window& window);
 	void CreateDeviceAndSwapChain(const Window& window);

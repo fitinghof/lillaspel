@@ -24,9 +24,12 @@ MusicTrack::~MusicTrack()
 	alDeleteBuffers(NUM_BUFFERS, this->buffers);
 }
 
-void MusicTrack::Initialize(std::string pathToMusicFolder)
+void MusicTrack::Initialize(std::string filepath, std::string id)
 {
-	this->pathToMusicFolder = pathToMusicFolder;
+	this->filepath = filepath;
+	this->id = id;
+
+	this->LoadTrack();
 }
 
 void MusicTrack::Play()
@@ -34,6 +37,8 @@ void MusicTrack::Play()
 	alGetError();
 	alSourceRewind(this->source);
 	alSourcei(this->source, AL_BUFFER, 0);
+
+	//this->playTime = 0; ???
 
 	for (int i = 0; i < NUM_BUFFERS; i++)
 	{
@@ -59,18 +64,42 @@ void MusicTrack::Play()
 	}
 }
 
-void MusicTrack::LoadTrackStandardFolder(std::string filename, std::string id)
+void MusicTrack::Stop()
+{
+	alSourceStop(this->source);
+
+	if (alGetError() != AL_NO_ERROR)
+	{
+		Logger::Error("error while stopping music track " + this->id);
+	}
+}
+
+void MusicTrack::FadeIn(float startGain, float seconds)
+{
+	this->fadeInTime = seconds;
+	this->currentFadeInTime = 0;
+	this->currentGain = startGain;
+	this->startGain = startGain;
+
+	alSourcef(this->source, AL_GAIN, startGain);
+}
+
+void MusicTrack::FadeOut(float seconds)
+{
+}
+
+void MusicTrack::LoadTrack()
 {
 	alGenSources(1, &this->source);
 	alGenBuffers(NUM_BUFFERS, this->buffers);
 
 	alSourcef(this->source, AL_PITCH, this->pitch);
-	alSourcef(this->source, AL_GAIN, this->gain);
+	alSourcef(this->source, AL_GAIN, this->currentGain);
 	alSource3f(this->source, AL_POSITION, this->position[0], this->position[1], this->position[2]);
 	alSource3f(this->source, AL_VELOCITY, this->velocity[0], this->velocity[1], this->velocity[2]);
 	alSourcei(this->source, AL_LOOPING, this->audioInstruction.loopSound);
 
-	std::string fullpath = this->pathToMusicFolder + filename;
+	std::string fullpath = this->filepath;
 	const char* file = fullpath.c_str();
 	sndfile = sf_open(file, SFM_READ, &this->sfInfo);
 
@@ -103,33 +132,6 @@ void MusicTrack::LoadTrackStandardFolder(std::string filename, std::string id)
 
 	std::size_t frameSize = ((size_t)BUFFER_SAMPLES * (size_t)this->sfInfo.channels) * sizeof(short);
 	this->membuf = static_cast<short*>(malloc(frameSize));
-
-	//numFrames = sf_readf_short(sndfile, membuf, sfInfo.frames);
-	//if (numFrames < 1)
-	//{
-	//	free(membuf);
-	//	sf_close(sndfile);
-
-	//	std::cout << "failed to read samples in " << fullpath << ", " << numFrames << std::endl;
-	//	return;
-	//}
-
-	//numBytes = (ALsizei)(numFrames * sfInfo.channels) * (ALsizei)(sizeof(short));
-	//alGenBuffers(1, &buffer);
-	//alBufferData(buffer, format, membuf, numBytes, sfInfo.samplerate);
-	//free(membuf);
-	//sf_close(sndfile);
-
-	//error = alGetError();
-	//if (error != AL_NO_ERROR)
-	//{
-	//	std::cout << "OpenAL error: " << alGetString(error) << std::endl;
-
-	//	if (buffer && alIsBuffer(buffer)) alDeleteBuffers(1, &buffer);
-	//	return;
-	//}
-
-	//this->soundBuffers.insert(std::make_pair(fullpath, buffer));
 }
 
 void MusicTrack::SetPitch(float pitch)
@@ -140,8 +142,9 @@ void MusicTrack::SetPitch(float pitch)
 
 void MusicTrack::SetGain(float gain)
 {
-	this->gain = gain;
-	alSourcef(this->source, AL_GAIN, this->gain);
+	this->currentGain = gain;
+	this->targetGain = gain;
+	alSourcef(this->source, AL_GAIN, gain);
 }
 
 void MusicTrack::SetAudioInstruction(AudioInstruction audioInstruction)
@@ -149,6 +152,11 @@ void MusicTrack::SetAudioInstruction(AudioInstruction audioInstruction)
 	this->audioInstruction = audioInstruction;
 	alSourcei(this->source, AL_LOOPING, this->audioInstruction.loopSound);
 	//add more stuff later
+}
+
+void MusicTrack::GetSourceState(ALint& sourceState)
+{
+	alGetSourcei(this->source, AL_SOURCE_STATE, &sourceState);
 }
 
 void MusicTrack::UpdateBufferStream()
@@ -202,6 +210,20 @@ void MusicTrack::UpdateBufferStream()
 		if (alGetError() != AL_NO_ERROR)
 		{
 			Logger::Error("error restarting music");
+		}
+	}
+
+	if (state == AL_PLAYING)
+	{
+		float deltaTime = Time::GetInstance().GetDeltaTime();
+		this->playTime += deltaTime;
+
+		if (this->fadeInTime > 0 && this->currentFadeInTime < this->fadeInTime)
+		{
+			this->currentFadeInTime += deltaTime;
+			this->currentGain = (this->targetGain - this->startGain) * (this->currentFadeInTime / this->fadeInTime) + this->startGain;
+
+			alSourcef(this->source, AL_GAIN, this->currentGain);
 		}
 	}
 }

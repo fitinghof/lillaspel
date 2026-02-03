@@ -84,7 +84,13 @@ int SoundSourceObject::GetId()
 
 void SoundSourceObject::GetSourceState(int index, ALint& sourceState)
 {
-	return alGetSourcei(this->sources[index], AL_SOURCE_STATE, &sourceState);
+	if (index > this->nrOfSources - 1)
+	{
+		Logger::Log("soundSource index is out of scope!");
+		return;
+	}
+
+	alGetSourcei(this->sources[index], AL_SOURCE_STATE, &sourceState);
 }
 
 void SoundSourceObject::GetCurrentSourcePosition(ALfloat* position)

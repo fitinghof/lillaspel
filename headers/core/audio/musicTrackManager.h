@@ -2,6 +2,12 @@
 #include <unordered_map>
 #include "core/audio/musicTrack.h"
 
+struct MusicLayer
+{
+	std::string id = "";
+	float time = 0;
+};
+
 class MusicTrackManager
 {
 public:
@@ -17,9 +23,21 @@ public:
 	/// <param name="id"></param>
 	void AddMusicTrackStandardFolder(std::string filename, std::string id);
 	void AddMusicTrack(std::string path, std::string id);
-	void PlayMusicTrack(std::string id);
+
+	void Play(std::string id);
+	void Stop(std::string id);
+	void FadeInPlay(std::string id, float startGain, float seconds);
+	void FadeOut(std::string id, float seconds);
+	void FadeBetween(std::string id1, std::string id2, float seconds);
+
+	void GetMusicTrackSourceState(std::string id, ALint& sourceState);
+	void SetGain(std::string id, float gain);
+	MusicTrack* GetMusicTrack(std::string id);
+
+	void Tick();
 
 private:
 	std::unordered_map<std::string, MusicTrack*> musicTracks;
+	std::vector<MusicTrack*> activeTracks;
 	std::string pathToMusicFolder = "";
 };

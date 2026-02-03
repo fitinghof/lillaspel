@@ -13,8 +13,6 @@ public:
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename, std::string id);
 	void AddSoundClip(std::string path, std::string id);
-
-	SoundClip* GetSoundClipStandardFolder(std::string filename);
 	SoundClip* GetSoundClip(std::string path);
 
 private:

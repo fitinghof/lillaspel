@@ -15,17 +15,27 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     MSG msg = {};
 
-    MusicTrack track1;
-    track1.Initialize("C:/Users/Gabriel/Music/Testing/");
-    track1.LoadTrackStandardFolder("Sneak16.wav", "sneak");
-    track1.Play();
+    MusicTrackManager mtm;
+    mtm.Initialize("C:/Users/Gabriel/Music/Testing/");
+    mtm.AddMusicTrackStandardFolder("Sneak16.wav", "sneak");
+    mtm.AddMusicTrackStandardFolder("BloodyFangs16.wav", "fangs");
 
-    track1.SetGain(0.5f);
+    mtm.SetGain("sneak", 0.8f);
+    mtm.FadeInPlay("sneak", 0, 12);
 
-    MusicTrack track2;
-    track2.Initialize("C:/Users/Gabriel/Music/Testing/");
-    track2.LoadTrackStandardFolder("BloodyFangs16.wav", "fangs");
-    track2.Play();
+    SoundBank sb;
+    sb.Initialize("C:/Users/Gabriel/Music/Testing/");
+    sb.AddSoundClipStandardFolder("TestSound.wav", "scream1");
+
+    SoundClip* clip = sb.GetSoundClip("scream1");
+
+    SoundSourceObject sso;
+    sso.SetRandomPitch(1.2f, 1.8f);
+
+    float time = 3;
+    float timer = time;
+
+    SetListenerPosition(-5, 0, -1);
 
 
     while (msg.message != WM_QUIT)
@@ -37,8 +47,16 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
             DispatchMessage(&msg);
         }
 
-        track1.UpdateBufferStream();
-        track2.UpdateBufferStream();
+        timer -= Time::GetInstance().GetDeltaTime();
+
+        mtm.Tick();
+
+        if (timer <= 0)
+        {
+            timer = time;
+            //mtm.Stop("fangs");
+            sso.Play(clip);
+        }
 
         Time::GetInstance().Tick();
         this->sceneManager->SceneTick();

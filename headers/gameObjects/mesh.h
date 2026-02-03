@@ -5,18 +5,24 @@
 #include "rendering/vertex.h"
 #include "rendering/vertexBuffer.h"
 #include "rendering/indexBuffer.h"
+#include "rendering/texture.h"
 
 class SubMesh {
 public:
-	SubMesh(size_t startIndex, size_t nrOfIndices);
+	SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture = Texture(nullptr));
 	SubMesh(SubMesh&&) noexcept = default;
 	SubMesh(SubMesh& other) = default;
 	~SubMesh();
+
+	size_t GetStartIndex() const;
+	size_t GetNrOfIndices() const;
+	Texture& GetTexture();
 
 private:
 
 	size_t startIndex;
 	size_t nrOfIndices;
+	Texture texture;
 };
 
 class Mesh {

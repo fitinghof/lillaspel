@@ -20,6 +20,9 @@
 #include "rendering/rasterizerState.h"
 #include "gameObjects/cameraObject.h"
 #include "gameObjects/meshObject.h"
+#include "gameObjects/spotlightObject.h"
+#include "rendering/structuredBuffer.h"
+#include <algorithm>
 
 
 
@@ -52,9 +55,16 @@ public:
 	IDXGISwapChain* GetSwapChain() const;
 private:
 
+	const size_t maximumSpotlights;
+
 	struct WorldMatrixBufferContainer {
 		DirectX::XMFLOAT4X4 worldMatrix;
 		DirectX::XMFLOAT4X4 worldMatrixInversedTransposed;
+	};
+
+	struct LightCountBufferContainer {
+		size_t spotlightCount;
+		float padding[3];
 	};
 
 	// DirectX11 specific stuff:
@@ -74,16 +84,19 @@ private:
 
 	// Temporary:
 
-	std::unique_ptr<Material> tempMat;
+	std::unique_ptr<Material> defaultMat;
+	std::unique_ptr<Material> defaultUnlitMat;
 
 	std::shared_ptr<Shader> vertexShader;
-	std::shared_ptr<Shader> pixelShader;
+	std::shared_ptr<Shader> pixelShaderLit;
+	std::shared_ptr<Shader> pixelShaderUnlit;
 
 
 	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;
 	std::shared_ptr<std::vector<MeshObject*>> meshRenderQueue;
+	std::shared_ptr<std::vector<SpotlightObject*>> lightRenderQueue;
 
 
 	// Constant buffers:
@@ -92,7 +105,8 @@ private:
 
 	std::unique_ptr<ConstantBuffer> cameraBuffer;
 	std::unique_ptr<ConstantBuffer> worldMatrixBuffer;
-
+	std::unique_ptr<ConstantBuffer> spotlightCountBuffer;
+	std::unique_ptr<StructuredBuffer> spotlightBuffer;
 
 
 	void SetViewport(const Window& window);
@@ -131,6 +145,7 @@ private:
 	void BindRasterizerState(RasterizerState* rastState);
 
 	void BindMaterial(Material* material);
+	void BindLights();
 
 	void BindCameraMatrix();
 	void BindWorldMatrix(ID3D11Buffer* buffer);

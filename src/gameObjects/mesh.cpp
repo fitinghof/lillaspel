@@ -28,12 +28,27 @@ IndexBuffer& Mesh::GetIndexBuffer()
     return this->indexbuffer;
 }
 
-SubMesh::SubMesh(size_t startIndex, size_t nrOfIndices) 
-    : startIndex(startIndex), nrOfIndices(nrOfIndices) {
+SubMesh::SubMesh(size_t startIndex, size_t nrOfIndices, Texture texture)
+    : startIndex(startIndex), nrOfIndices(nrOfIndices), texture(std::move(texture)) {
 
 }
 SubMesh::~SubMesh() {
 
+}
+
+size_t SubMesh::GetStartIndex() const
+{
+    return this->startIndex;
+}
+
+size_t SubMesh::GetNrOfIndices() const
+{
+    return this->nrOfIndices;
+}
+
+Texture& SubMesh::GetTexture()
+{
+    return this->texture;
 }
 
 void Mesh::Init(VertexBuffer vertexbuffer, IndexBuffer indexbuffer, std::vector<SubMesh>&& submeshes) {

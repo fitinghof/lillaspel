@@ -56,6 +56,11 @@ void ImguiManager::SetFullscreenChangeCallback(std::function<void(bool)> callbac
 	this->fullscreenChangeCallback = std::move(callback);
 }
 
+void ImguiManager::SetVSyncChangeCallback(std::function<void(bool)> callback)
+{
+	this->vSyncChangeCallback = std::move(callback);
+}
+
 void ImguiManager::ConsoleImGui()
 {
 	static bool isOpen = true;
@@ -113,6 +118,7 @@ void ImguiManager::OptionsImGui()
 	}
 
 	bool fullscreenChanged = ImGui::Checkbox("Fullscreen", &this->isFullscreen);
+	bool vSyncChanged = ImGui::Checkbox("V-Sync", &this->isVSync);
 
 	if(selectionChanged && this->resolutionChangeCallback) {
 		this->resolutionChangeCallback(presets[selectedPreset].width, presets[selectedPreset].height);
@@ -120,6 +126,10 @@ void ImguiManager::OptionsImGui()
 
 	if (fullscreenChanged && this->fullscreenChangeCallback) {
 		this->fullscreenChangeCallback(this->isFullscreen);
+	}
+
+	if (vSyncChanged && this->vSyncChangeCallback) {
+		this->vSyncChangeCallback(this->isVSync);
 	}
 
 	ImGui::Text("Selected: %ux%u", presets[selectedPreset].width, presets[selectedPreset].height);

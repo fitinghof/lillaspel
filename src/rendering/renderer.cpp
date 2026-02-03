@@ -206,12 +206,17 @@ void Renderer::Render()
 
 void Renderer::Present()
 {
-	this->swapChain->Present(0, 0);
+	this->swapChain->Present(this->isVSyncEnabled ? 1 : 0, 0);
 }
 
 void Renderer::Resize(const Window& window)
 {
 	this->ResizeSwapChain(window);
+}
+
+void Renderer::ToggleVSync(bool enable)
+{
+	this->isVSyncEnabled = enable;
 }
 
 ID3D11Device* Renderer::GetDevice() const

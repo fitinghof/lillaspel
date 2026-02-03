@@ -10,7 +10,7 @@
 
 class Scene;
 
-class GameObject {
+class GameObject : public std::enable_shared_from_this<GameObject> {
 public:
 	GameObject();
 	virtual ~GameObject() = default;
@@ -49,13 +49,15 @@ public:
 	virtual DirectX::XMVECTOR GetGlobalPosition() const;
 	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;
 
+	std::weak_ptr<GameObject> GetPtr();
+
 private:
 	std::vector<std::weak_ptr<GameObject>> children;
 	std::weak_ptr<GameObject> parent;
-	std::weak_ptr<GameObject> weakPtr;
-	Scene* scene;
-	
-	void SetWeakPtr(std::weak_ptr<GameObject> yourPtr);
-	
+	//std::weak_ptr<GameObject> weakPtr;
+
 	friend Scene;
+		
+protected:
+	Scene* factory;
 };

@@ -2,7 +2,7 @@
 #include <vector>
 #include <unordered_map>
 
-#include "../headers/core/audio/soundEngine.h"
+#include "core/audio/soundEngine.h"
 
 class AssetManager
 {
@@ -16,7 +16,6 @@ public:
 	SoundClip* GetSoundClip(std::string path);
 
 private:
-	MusicTrack currentMusicTrack;
 	SoundBank soundBank;
 };
 

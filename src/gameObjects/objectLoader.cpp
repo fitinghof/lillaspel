@@ -96,20 +96,12 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::ve
 					Logger::Warn("No normals found for mesh primitive!");
 				}
 
+
 				// Extract index for texture coordinates
 				size_t baseColorTextureCordIndex = 0;
 				auto& material = asset.materials[it->materialIndex.value_or(0)];
 
 				auto& baseColorTexture = material.pbrData.baseColorTexture;
-				if (baseColorTexture.has_value()) {
-					if (baseColorTexture->transform && baseColorTexture->transform->texCoordIndex.has_value()) {
-						baseColorTextureCordIndex = baseColorTexture->transform->texCoordIndex.value();
-					}
-					else {
-						baseColorTextureCordIndex = material.pbrData.baseColorTexture->texCoordIndex;
-					}
-				}
-
 				if (baseColorTexture.has_value()) {
 					auto& texture = asset.textures[baseColorTexture->textureIndex];
 					if (!texture.imageIndex.has_value()) {
@@ -117,7 +109,7 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::ve
 						return false;
 					}
 					auto& textureImage = asset.images[texture.imageIndex.value()];
-					std::visit(fastgltf::visitor{
+					std::visit(fastgltf::visitor {
 						[](auto& arg) {},
 						[&](fastgltf::sources::URI& filePath) {
 							// maybe implement?
@@ -141,11 +133,11 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::ve
 										nullptr,
 										textureView.GetAddressOf()
 									);
-
+									
 								}
 							}, buffer.data);
 						},
-						}, textureImage.data);
+					}, textureImage.data);
 
 
 					if (baseColorTexture->transform && baseColorTexture->transform->texCoordIndex.has_value()) {

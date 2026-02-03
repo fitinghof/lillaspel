@@ -18,7 +18,7 @@ public:
 	void AddSoundClip(std::string path);
 
 	std::string AddMesh(Mesh* mesh);
-	std::string AddMaterial(Mesh* mesh);
+	std::string AddMaterial(Material* material);
 	std::string AddObjTemplate(meshObjData data);
 
 	SoundClip* GetSoundClipStandardFolder(std::string filename);

@@ -14,11 +14,16 @@
 //	//std::vector<Material> materials;
 //};
 
+
 class ObjectLoader
 {
 public:
 	ObjectLoader();
 	~ObjectLoader();
+
+	/// <summary>
+	/// Loads a gltf file 
+	/// </summary>
 	bool LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device* device);
 
 

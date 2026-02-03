@@ -4,6 +4,7 @@
 #include "rendering/constantBuffer.h"
 #include <vector>
 #include "utilities/logger.h"
+#include "rendering/texture.h"
 
 class Material {
 private:
@@ -17,6 +18,8 @@ public:
 		float padding[2];
 	};
 
+	bool wireframe = false;
+
 	Material() = default;
 	~Material() = default;
 
@@ -27,4 +30,6 @@ public:
 
 	std::vector<std::unique_ptr<ConstantBuffer>> vertexShaderBuffers;
 	std::vector<std::unique_ptr<ConstantBuffer>> pixelShaderBuffers;
+
+	std::vector<std::shared_ptr<Texture>> textures;
 };

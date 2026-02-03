@@ -5,8 +5,6 @@
 #include <fastgltf/util.hpp>
 #include <fastgltf/types.hpp>
 #include <unordered_map>
-//#define STB_IMAGE_IMPLEMENTATION
-//#include <stb_image/stb_image.h>
 #include <rendering/texture.h>
 #include <WICTextureLoader.h>
 
@@ -95,7 +93,7 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 					Logger::Warn("No normals found for mesh primitive!");
 				}
 
-
+				// basepath/assests/ box/cube.glb:material5
 				// Extract index for texture coordinates
 				size_t baseColorTextureCordIndex = 0;
 				auto& material = asset.materials[it->materialIndex.value_or(0)];

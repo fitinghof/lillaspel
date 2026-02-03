@@ -34,6 +34,8 @@ void SceneManager::LoadScene()
 	ObjectLoader loader;
 	loader.LoadGltf(*glbMesh.get(), "../../assets/Box/cube.glb", this->renderer->GetDevice());
 
+	this->tempMeshes.push_back(std::move(glbMesh));
+
 	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
 	{-1,  1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 0.0f},
@@ -52,10 +54,9 @@ void SceneManager::LoadScene()
 	tempIBuffer.Init(renderer->GetDevice(), 6, indices);
 
 	std::vector<SubMesh> quadSubMeshes;
-	quadSubMeshes.push_back(SubMesh(0,6));
+	quadSubMeshes.push_back(SubMesh(0, 6));
 	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::move(quadSubMeshes))));
 
-	this->tempMeshes.push_back(std::move(glbMesh));
 
 
 
@@ -122,23 +123,26 @@ void SceneManager::LoadScene()
 	// Create temporary meshObjects
 
 	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
-	firstMesh.lock()->SetMesh(this->tempMeshes[0].get());
+	firstMesh.lock()->SetMesh(this->tempMeshes[1].get());
 	
 	auto secondMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
-	secondMesh.lock()->SetMesh(this->tempMeshes[1].get());
+	secondMesh.lock()->SetMesh(this->tempMeshes[0].get());
 
 	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
 	thirdMesh.lock()->SetMesh(this->tempMeshes[2].get());
+
+	auto emptyObj = this->mainScene->CreateGameObjectOfType<GameObject>();
+
+	thirdMesh.lock()->SetParent(secondMesh);
+	emptyObj.lock()->SetParent(thirdMesh);
+	firstMesh.lock()->SetParent(emptyObj);
+	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 5, 1));
+	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 5, 1));
+	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 15, 1));
 
 	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 
 	auto light2 = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 	light2.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
 	DirectX::XMStoreFloat4(&light2.lock()->data.color, DirectX::XMVectorSet(0, 0, 1, 1));
-	secondMesh.lock()->SetMesh(this->tempMesh.get());
-
-	secondMesh.lock()->GetGlobalPosition();
 }

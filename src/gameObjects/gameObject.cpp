@@ -35,6 +35,8 @@ void GameObject::SetParent(std::weak_ptr<GameObject> newParent)
 
 	this->parent = newParent;
 	this->parent.lock()->AddChild(this->weakPtr);
+
+	Logger::Log("Set Parent.");
 }
 
 void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
@@ -70,13 +72,21 @@ void GameObject::LatePhysicsTick()
 DirectX::XMVECTOR GameObject::GetGlobalPosition() const
 {
 	if (this->parent.expired()) {
-		Logger::Log("It works.");
+		return DirectX::XMVectorSet(0,0,0,0);
 	}
 	else {
-		Logger::Error("It doesn't work.");
+		return this->parent.lock()->GetGlobalPosition();
 	}
+}
 
-	return DirectX::XMVECTOR();
+DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
+{
+	if (this->parent.expired()) {
+		return DirectX::XMMatrixIdentity();
+	}
+	else {
+		return this->parent.lock()->GetGlobalWorldMatrix(inverseTranspose);
+	}
 }
 
 void GameObject::SetWeakPtr(std::weak_ptr<GameObject> yourPtr)

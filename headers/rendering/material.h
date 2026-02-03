@@ -18,6 +18,8 @@ public:
 		float padding[2];
 	};
 
+	bool wireframe = false;
+
 	Material() = default;
 	~Material() = default;
 

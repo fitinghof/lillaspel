@@ -8,5 +8,7 @@ public:
 	GameObject3D();
 	virtual ~GameObject3D() = default;
 
+	virtual void Tick() override;
+
 	Transform transform;
 };

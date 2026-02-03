@@ -32,7 +32,7 @@ void SceneManager::LoadScene()
 
 	std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
 	ObjectLoader loader;
-	loader.LoadGltf(*glbMesh.get(), "../../assets/Box/cube.glb", this->renderer->GetDevice());
+	loader.LoadGltf(*glbMesh.get(), "Box/cube.glb", this->renderer->GetDevice());
 
 	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},

@@ -9,13 +9,16 @@
 #include <WICTextureLoader.h>
 
 
-ObjectLoader::ObjectLoader() {
+ObjectLoader::ObjectLoader(std::filesystem::path basePath): basePath(std::move(basePath)) {
 }
 
 ObjectLoader::~ObjectLoader() {
 }
 
-bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device* device) {
+bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData, ID3D11Device* device) {
+	meshLoadData.clear();
+
+	std::filesystem::path path = basePath / path;
 	fastgltf::Parser parser;
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
@@ -93,7 +96,7 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 					Logger::Warn("No normals found for mesh primitive!");
 				}
 
-				// basepath/assests/ box/cube.glb:material5
+
 				// Extract index for texture coordinates
 				size_t baseColorTextureCordIndex = 0;
 				auto& material = asset.materials[it->materialIndex.value_or(0)];
@@ -117,11 +120,9 @@ bool ObjectLoader::LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device
 						[&](fastgltf::sources::BufferView& view) {
 							auto& bufferView = asset.bufferViews[view.bufferViewIndex];
 							auto& buffer = asset.buffers[bufferView.bufferIndex];
-							// Yes, we've already loaded every buffer into some GL buffer. However, with GL it's simpler
-							// to just copy the buffer data again for the texture. Besides, this is just an example.
+
 							std::visit(fastgltf::visitor {
-								// We only care about VectorWithMime here, because we specify LoadExternalBuffers, meaning
-								// all buffers are already loaded into a vector.
+
 								[](auto& arg) {},
 								[&](fastgltf::sources::Array& vector) {
 									int width, height, nrChannels;

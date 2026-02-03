@@ -1,11 +1,15 @@
 #pragma once
 
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+
 // std
 #include <Windows.h>
 #include <string>
 #include <functional>
 
-class Window {
+class Window
+{
 private:
     HWND hWnd;
     UINT width;
@@ -22,7 +26,7 @@ private:
     void UpdateClientSize();
     void ApplyFullscreenResolution(UINT width, UINT height);
 
-	std::function<void(UINT, UINT)> resizeCallback;
+    std::function<void(UINT, UINT)> resizeCallback;
 
 public:
     Window(const HINSTANCE instance, int nCmdShow, const std::string name = "Window", const UINT width = 1024, const UINT height = 576);
@@ -32,8 +36,8 @@ public:
     UINT GetWidth() const;
     UINT GetHeight() const;
     void Show(int nCmdShow);
-	void Resize(UINT width, UINT height);
-	void ToggleFullscreen(bool fullscreen);
+    void Resize(UINT width, UINT height);
+    void ToggleFullscreen(bool fullscreen);
 
     void SetResizeCallback(std::function<void(UINT, UINT)> callback);
 };

@@ -1,4 +1,5 @@
 #include "rendering/renderer.h"
+#include "gameObjects/objectLoader.h"
 
 Renderer::Renderer() : viewport()
 {
@@ -6,6 +7,7 @@ Renderer::Renderer() : viewport()
 
 void Renderer::Init(const Window& window)
 {
+	ObjectLoader objectLoader;
 	SetViewport(window);
 
 	CreateDeviceAndSwapChain(window);

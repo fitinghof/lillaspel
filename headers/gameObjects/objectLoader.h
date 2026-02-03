@@ -1,6 +1,4 @@
 #pragma once
-#include <fastgltf/core.hpp>
-#include <fastgltf/tools.hpp>
 #include <string>
 #include <filesystem>
 #include "rendering/vertex.h"
@@ -21,7 +19,7 @@ class ObjectLoader
 public:
 	ObjectLoader();
 	~ObjectLoader();
-	Mesh LoadGltf(std::filesystem::path path, ID3D11Device* device);
+	bool LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device* device);
 
 
 

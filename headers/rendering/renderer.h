@@ -48,6 +48,8 @@ public:
 	/// </summary>
 	void Present();
 
+	void Resize(const Window& window);
+
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;
 	IDXGISwapChain* GetSwapChain() const;
@@ -133,6 +135,8 @@ private:
 	/// Clears last frame with a clear color
 	/// </summary>
 	void ClearRenderTargetViewAndDepthStencilView();
+
+	void ResizeSwapChain(const Window& window);
 
 	void BindSampler();
 	void BindInputLayout();

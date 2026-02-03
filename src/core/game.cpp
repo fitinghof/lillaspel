@@ -11,6 +11,11 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
     this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
+    this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height) { window.Resize(width, height); });
+	this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen) { window.ToggleFullscreen(fullscreen); });
+    window.SetResizeCallback([&](UINT, UINT) { this->renderer.Resize(window); });
+    this->imguiManager.SetVSyncChangeCallback([&](bool enable) { this->renderer.ToggleVSync(enable); });
+
     this->sceneManager->LoadScene();
 
     MSG msg = {};

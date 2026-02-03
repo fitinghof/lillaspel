@@ -1,5 +1,6 @@
 #pragma once
-
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <vector>
 #include <d3d11.h>
 #include <string>

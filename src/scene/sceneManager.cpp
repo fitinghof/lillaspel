@@ -32,7 +32,7 @@ void SceneManager::LoadScene()
 
 	std::unique_ptr<Mesh> simonMesh = std::unique_ptr<Mesh>(new Mesh());
 	ObjectLoader loader;
-	loader.LoadGltf(*simonMesh.get(), "C:/Users/Max/Dev/TextureCube.glb", this->renderer->GetDevice());
+	loader.LoadGltf(*simonMesh.get(), "../../assests/Box/cube.glb", this->renderer->GetDevice());
 
 	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},

@@ -272,31 +272,31 @@ void Renderer::BindMaterial(Material* material)
 
 void Renderer::BindLights()
 {
-	if (lightRenderQueue->size() <= 0)
-	{
-		throw std::runtime_error("No light, unable to render. Please add a light to the scene.");
-	}
-
 	if (this->lightRenderQueue->size() > this->maximumSpotlights)
 	{
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
 	const size_t lightCount = std::min<size_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
-	// Inefficient, should be fixed
-	std::vector<SpotlightObject::SpotLightContainer> spotlights;
-	for (size_t i = 0; i < lightCount; i++)
-	{
-		spotlights.push_back((*this->lightRenderQueue)[i]->data);
+
+	if (lightCount > 0) {
+		//Logger::Log("No light. Please add a light to the scene.");
+
+		// Inefficient, should be fixed
+		std::vector<SpotlightObject::SpotLightContainer> spotlights;
+		for (size_t i = 0; i < lightCount; i++)
+		{
+			spotlights.push_back((*this->lightRenderQueue)[i]->data);
+		}
+
+		// Updates and binds buffer
+		this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights.data());
+		ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
+		this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
 	}
 
-	// Updates and binds buffer
-	this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights.data());
-	ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
-	this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
-
 	// Updates and binds light count constant buffer
-	Renderer::LightCountBufferContainer lightCountContainer = { spotlights.size(), 1, 1, 1 };
+	Renderer::LightCountBufferContainer lightCountContainer = { lightCount, 1, 1, 1 };
 	this->spotlightCountBuffer->UpdateBuffer(this->immediateContext.Get(), &lightCountContainer);
 	ID3D11Buffer* buf = this->spotlightCountBuffer->GetBuffer();
 	this->immediateContext->PSSetConstantBuffers(0, 1, &buf);

@@ -53,6 +53,7 @@ private:
 	std::vector<std::weak_ptr<GameObject>> children;
 	std::weak_ptr<GameObject> parent;
 	std::weak_ptr<GameObject> weakPtr;
+	Scene* scene;
 	
 	void SetWeakPtr(std::weak_ptr<GameObject> yourPtr);
 	

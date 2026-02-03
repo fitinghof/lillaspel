@@ -15,6 +15,10 @@ public:
 	template <typename T>
 	inline std::weak_ptr<T> CreateGameObjectOfType();
 
+	void Test() {
+		Logger::Log("Works");
+	}
+
 private:
 	std::vector<std::shared_ptr<GameObject>> gameObjects;
 };
@@ -28,6 +32,10 @@ inline std::weak_ptr<T> Scene::CreateGameObjectOfType()
 	auto obj = std::make_shared<T>();
 	std::weak_ptr<T> newObject = obj;
 	obj->SetWeakPtr(newObject);
+	obj->scene = this;
+	obj->Start();
+
 	this->gameObjects.push_back(std::move(obj));
+
 	return newObject;
 }

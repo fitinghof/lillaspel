@@ -1,8 +1,9 @@
 #include "gameObjects/gameObject.h"
+#include "scene/scene.h"
 
-GameObject::GameObject() : children(), parent()
+GameObject::GameObject() : children(), parent(), scene(nullptr)
 {
-
+	
 }
 
 const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const
@@ -49,6 +50,7 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 
 void GameObject::Start()
 {
+	//this->scene->CreateGameObjectOfType<GameObject>();
 }
 
 void GameObject::Tick()

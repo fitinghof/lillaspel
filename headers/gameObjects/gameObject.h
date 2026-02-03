@@ -6,6 +6,7 @@
 #include <memory>
 #include <array>
 #include "utilities/logger.h"
+#include <DirectXMath.h>
 
 class Scene;
 
@@ -18,7 +19,14 @@ public:
 	const int GetChildCount() const;
 
 	const std::weak_ptr<GameObject> GetParent() const;
-	void SetParent(std::weak_ptr<GameObject> newParent);
+	
+	/// <summary>
+	/// When using this function, the object's current localPosition isn't updated to match it's old worldPosition,
+	/// which could lead to unexpected behaviour.
+	/// To get desired results, first set parent/children, THEN set position.
+	/// </summary>
+	/// <param name="newParent"></param>
+	virtual void SetParent(std::weak_ptr<GameObject> newParent);
 
 	/// <summary>
 	/// WARNING: Engine only. Do not use for any in-game logic.
@@ -35,6 +43,11 @@ public:
 	virtual void LateTick();
 	virtual void PhysicsTick();
 	virtual void LatePhysicsTick();
+
+	// These should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D
+
+	virtual DirectX::XMVECTOR GetGlobalPosition() const;
+	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;
 
 private:
 	std::vector<std::weak_ptr<GameObject>> children;

@@ -415,8 +415,10 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 
 
 	// Bind worldmatrix
-	DirectX::XMFLOAT4X4 worldMatrix = meshObject->transform.GetWorldMatrix(false);
-	DirectX::XMFLOAT4X4 worldMatrixInverseTransposed = meshObject->transform.GetWorldMatrix(true);
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMStoreFloat4x4(&worldMatrix, meshObject->GetGlobalWorldMatrix(false));
+	DirectX::XMFLOAT4X4 worldMatrixInverseTransposed;
+	DirectX::XMStoreFloat4x4(&worldMatrixInverseTransposed, meshObject->GetGlobalWorldMatrix(true));
 
 	Renderer::WorldMatrixBufferContainer worldMatrixBufferContainer = { worldMatrix, worldMatrixInverseTransposed };
 

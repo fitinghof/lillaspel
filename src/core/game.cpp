@@ -20,7 +20,6 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     MSG msg = {};
 
-
     while (msg.message != WM_QUIT)
     {
         this->imguiManager.ImguiAtFrameStart();

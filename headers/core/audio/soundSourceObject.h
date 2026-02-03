@@ -7,19 +7,23 @@
 #include "audioInstruction.h"
 #include "soundClip.h"
 #include "utilities/logger.h"
+#include "gameObjects/gameObject3D.h"
+#include <random>
 
-class SoundSource
+class SoundSourceObject : public GameObject3D
 {
 public:
-	SoundSource();
-	~SoundSource();
-	SoundSource(const SoundSource&) = delete;
-	SoundSource& operator=(const SoundSource&) = delete;
+	SoundSourceObject();
+	~SoundSourceObject();
+	SoundSourceObject(const SoundSourceObject&) = delete;
+	SoundSourceObject& operator=(const SoundSourceObject&) = delete;
+
+	virtual void Tick() override;
 
 	void Play(SoundClip* soundClip);
-	void SetPosition(float x, float y, float z);
 	void SetGain(float gain);
 	void SetPitch(float pitch);
+	void SetRandomPitch(float minPitch, float maxPitch);
 	void ChangePitch(float pitchChange);
 	void ChangeGain(float gainChange);
 	void SetAudioInstruction(AudioInstruction instructionSet);
@@ -38,6 +42,5 @@ private:
 
 	float pitch = 1;
 	float gain = 1;
-	float position[3] = { 0, 0, 0 };
 	float velocity[3] = { 0, 0, 0 };
 };

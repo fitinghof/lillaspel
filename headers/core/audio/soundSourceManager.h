@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "soundSource.h"
+#include "soundSourceObject.h"
 
 class SoundSourceManager
 {
@@ -9,11 +9,11 @@ public:
 	SoundSourceManager() = default;
 	~SoundSourceManager() = default;
 
-	SoundSource* GetSoundSource(int id);
-	void AddSoundSource(SoundSource* speaker);
+	SoundSourceObject* GetSoundSource(int id);
+	void AddSoundSource(SoundSourceObject* speaker);
 	void SetListenerPosition(float x, float y, float z);
 
 private:
 	int idCounter = 1;
-	std::vector<SoundSource*> soundSources;
+	std::vector<SoundSourceObject*> soundSources;
 };

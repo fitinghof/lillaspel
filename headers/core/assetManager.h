@@ -1,25 +1,34 @@
 #pragma once
+#include "gameObjects/mesh.h"
 #include <vector>
 #include <unordered_map>
+#include "d3d11.h"
+
 #include "gameObjects/meshObjData.h"
 
 #include "../headers/core/audio/soundEngine.h"
-#include "gameObjects/mesh.h"
 #include "rendering/material.h"
+#include "gameObjects/objectLoader.h"
+#include "rendering/texture.h"
+
 
 class AssetManager
 {
 public:
-	AssetManager() = default;
+	AssetManager(ID3D11Device* device);
 	~AssetManager() = default;
-
+	
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename);
 	void AddSoundClip(std::string path);
 
-	std::string AddMesh(Mesh* mesh);
-	std::string AddMaterial(Material* material);
-	std::string AddObjTemplate(MeshObjData data);
+	void setDevicePointer(ID3D11Device* device);
+
+	bool GetMaterial(std::string identifier);
+	bool GetMesh(std::string identifier);
+	bool GetTexture(std::string identifier);
+	MeshObjData GetMeshObjData(std::string identifier);
+
 
 	SoundClip* GetSoundClipStandardFolder(std::string filename);
 	SoundClip* GetSoundClip(std::string path);
@@ -27,5 +36,16 @@ public:
 private:
 	MusicTrack currentMusicTrack;
 	SoundBank soundBank;
+	ObjectLoader objectLoader;
+
+	std::unordered_map<std::string, Material> materials;
+	std::unordered_map<std::string, Mesh> meshes;
+	std::unordered_map<std::string, Texture> textures;
+	std::unordered_map<std::string, MeshObjData> meshObjDataSets;
+
+	bool LoadNewGltf(std::string identifier);
+	
+	ID3D11Device* d3d11Device = nullptr;
+
 };
 

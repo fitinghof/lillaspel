@@ -1,5 +1,5 @@
 #include "gameObjects/gameObject.h"
-#include "scene/scene.h"
+#include "gameObjects/gameObjectFactory.h"
 
 GameObject::GameObject() : children(), parent(), factory(nullptr)
 {

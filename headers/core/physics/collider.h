@@ -1,10 +1,7 @@
 #pragma once
 #define NOMINMAX //tells windows to not define min/max so I can use algorithm min/max instead
 #include <algorithm>
-#include "Physics.hpp"
-#include "Transform.hpp"
-#include "Shader.h"
-#include "Tools.hpp"
+#include "core/physics/physics.h"
 
 static const DirectX::XMFLOAT3 localBoxCorners[8] =
 {
@@ -47,8 +44,6 @@ public:
 	Collider();
 	~Collider();
 
-	Mesh* visualMesh = nullptr;
-	Shader* pixelShader = nullptr;
 	float shortestExtent = 1;
 
 	void ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance);
@@ -64,8 +59,6 @@ public:
 
 	DirectX::XMFLOAT3 GetPosition();
 	DirectX::XMFLOAT3 GetSize();
-	void MakeDrawable(ID3D11Device* device); //matrix buffers are created in scene for DrawColliders
-	void DrawVisualMesh(ID3D11DeviceContext* immediateContext);
 
 	//DirectX::XMFLOAT3 resolveAxis = {};
 	//float resolveDistance = 0;
@@ -73,12 +66,13 @@ public:
 	ColliderType type = ColliderType::NONE;
 	Tag tag = Tag::OBJECT;
 	PhysicsMaterial physicsMaterial;
-	Transform transform;
 	DirectX::XMFLOAT3 previousPosition = {};
 	bool solid = true;
 	bool dynamic = false;
 	bool hasInitializedPreviousPosition = false;
 
 private:
+	std::weak_ptr<GameObject> meshObjectChild; //reference to the mesh visual representation of the collider
+
 	bool CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance);
 };

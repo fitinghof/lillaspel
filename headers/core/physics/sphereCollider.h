@@ -1,7 +1,7 @@
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "Collider.h"
+#include "core/physics/collider.h"
 
 class BoxCollider;
 
@@ -12,7 +12,6 @@ public:
 	~SphereCollider();
 
 	bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) override;
-	void Physics() override; //physics run when a collision occurs
 
 	void SetPosition(DirectX::XMFLOAT3 newCenter) override;
 	void SetRotation(DirectX::XMFLOAT3 newRotation);

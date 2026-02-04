@@ -1,3 +1,3 @@
 #pragma once
-#include "BoxCollider.h"
-#include "SphereCollider.h"
+#include "core/physics/boxCollider.h"
+#include "core/physics/sphereCollider.h"

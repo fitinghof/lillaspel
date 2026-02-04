@@ -1,7 +1,7 @@
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
-#include "Collider.h"
+#include "core/physics/collider.h"
 
 class SphereCollider;
 
@@ -13,7 +13,6 @@ public:
 
 	//Center and Size is only in the transform
 	bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) override;
-	void Physics() override; //physics that should run when a collision occured
 
 	void Move(DirectX::XMFLOAT3 moveVector, float deltaTime);
 	void Rotate(DirectX::XMFLOAT3 rotationVector, float deltaTime);

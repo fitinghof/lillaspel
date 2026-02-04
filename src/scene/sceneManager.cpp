@@ -1,7 +1,7 @@
 #include "scene/sceneManager.h"
 #include "gameObjects/objectLoader.h"
 
-SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend)
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString()
 {
 }
 
@@ -14,6 +14,8 @@ void SceneManager::SceneTick()
 
 void SceneManager::LoadScene()
 {
+	LoadSceneFromFile("../../assets/scenes/test.json");
+
 	// So basically right now this is the temporary place to create scenes, before we can load them from file
 
 	if (this->mainScene)
@@ -148,4 +150,13 @@ void SceneManager::LoadScene()
 
 	Logger::Log(this->mainScene->GetNumberOfGameObjects());
 	this->mainScene->QueueDeleteGameObject(light2);
+}
+
+void SceneManager::LoadSceneFromFile(const std::string& filePath)
+{
+	std::ifstream file(filePath);
+	nlohmann::json data = nlohmann::json::parse(file);
+	file.close();
+
+	Logger::Log(data.dump(4));
 }

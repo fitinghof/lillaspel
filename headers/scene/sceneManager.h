@@ -10,6 +10,10 @@
 #include "core/assetManager.h"
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
+#include "scene/objectFromStringFactory.h"
+
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 class SceneManager {
 public:
@@ -23,9 +27,12 @@ public:
 	/// </summary>
 	void LoadScene(); // Should be able to take a scene file?
 
+	void LoadSceneFromFile(const std::string& filePath);
+
 private:
 	std::unique_ptr<Scene> mainScene;
 	AssetManager assetManager;
+	ObjectFromStringFactory objectFromString;
 
 	Renderer* renderer; // This is temporary
 

@@ -1,0 +1,14 @@
+{
+    "O1":{
+        "type": "GameObject3D",
+        "transform": {
+            "position": [0,0,10]
+        }
+    },
+    "O2":{
+        "type": "GameObject3D",
+        "transform": {
+            "position": [5,0,10]
+        }
+    }
+}

@@ -1,5 +1,6 @@
 #include "core/window.h"
 #include "imgui.h"
+#include "utilities/logger.h"
 
 // std
 #include <exception>
@@ -26,36 +27,11 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-        return 1;
-    
-    switch (message) {
-    case WM_SIZE: {
-        if (wParam != SIZE_MINIMIZED) {
-            UINT clientWidth = LOWORD(lParam);
-            UINT clientHeight = HIWORD(lParam);
 
-            if (clientWidth > 0 && clientHeight > 0) {
-                if(!this->isFullscreen) {
-                    this->width = clientWidth;
-                    this->height = clientHeight;
-
-                    if (this->resizeCallback) {
-                        this->resizeCallback(this->width, this->height);
-                    }
-				}
-            }
-        }
-        return 0;
+    if (this->showIMGui) {
+        ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
     }
-
-    case WM_DESTROY: {
-        PostQuitMessage(0);
-        return 0;
-    }
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
+	return this->ReadMessage(hWnd, message, wParam, lParam);
 }
 
 void Window::UpdateClientSize()
@@ -104,7 +80,7 @@ void Window::ApplyFullscreenResolution(UINT width, UINT height)
 }
 
 Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, const UINT width, const UINT height)
-    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false) {
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false), showIMGui(true), cursorVisible(true), inputManager(std::make_unique<InputManager>()) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
     DWORD style = WS_OVERLAPPEDWINDOW;
@@ -147,17 +123,127 @@ Window::~Window() {
     UnregisterClass(L"WINDOW_CLASS", this->instance);
 }
 
+LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	const unsigned char key = static_cast<unsigned char>(wParam);
+	switch (message) {
+
+	/// Handle keyboard events
+	case WM_KEYDOWN: {
+		switch (key) {
+			case VK_ESCAPE: {
+				PostQuitMessage(0);
+				break;
+			}
+			case VK_F11: {
+				this->ToggleFullscreen(!this->isFullscreen);
+				break;
+			}
+			case VK_TAB: {
+				// So far does nothing with the actual IMGui window, but is set up for toggling
+				this->showIMGui = !this->showIMGui;
+				Logger::Log("Toggling IMGui " + std::string(this->showIMGui ? "on" : "off"));
+
+				// Can also be set to its own keybind
+				this->cursorVisible = !this->cursorVisible;
+				ShowCursor(this->cursorVisible);
+				break;
+			}
+
+			default: {
+				const bool wasDown = lParam & (1 << 30);
+				if (!wasDown)
+					this->inputManager->SetKeyState(key, KEY_DOWN | KEY_PRESSED);
+				break;
+			}
+		}
+		return 0;
+	}
+
+	case WM_KEYUP: {
+		this->inputManager->SetKeyState(key, KEY_RELEASED);
+		return 0;
+	}
+
+	/// Handle mouse events
+	case WM_MOUSEMOVE: {
+		const int xPos = GET_X_LPARAM(lParam);
+		const int yPos = GET_Y_LPARAM(lParam);
+		this->inputManager->SetMousePosition(xPos, yPos);
+		return 0;
+	}
+
+	case WM_LBUTTONDOWN: {
+		if (!this->inputManager->IsLMDown())
+			this->inputManager->SetLMouseKeyState(KEY_DOWN | KEY_PRESSED);
+		return 0;
+	}
+
+	case WM_LBUTTONUP: {
+		this->inputManager->SetLMouseKeyState(KEY_RELEASED);
+		return 0;
+	}
+
+	case WM_RBUTTONDOWN: {
+		if (!this->inputManager->IsRMDown())
+			this->inputManager->SetRMouseKeyState(KEY_DOWN | KEY_PRESSED);
+		return 0;
+	}
+
+	case WM_RBUTTONUP: {
+		this->inputManager->SetRMouseKeyState(KEY_RELEASED);
+		return 0;
+	}
+
+	/// Handle window events
+    case WM_SIZE: {
+        if (wParam != SIZE_MINIMIZED) {
+            UINT clientWidth = LOWORD(lParam);
+            UINT clientHeight = HIWORD(lParam);
+
+            if (clientWidth > 0 && clientHeight > 0) {
+                if (!this->isFullscreen) {
+                    this->width = clientWidth;
+                    this->height = clientHeight;
+
+                    if (this->resizeCallback) {
+                        this->resizeCallback(this->width, this->height);
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+	case WM_DESTROY: {
+		PostQuitMessage(0);
+		return 0;
+	}
+
+	default:
+		return DefWindowProc(hWnd, message, wParam, lParam);
+	}
+}
+
 HWND Window::GetHWND() const { return this->hWnd; }
 
 UINT Window::GetWidth() const { return this->width; }
 
 UINT Window::GetHeight() const { return this->height; }
 
+InputManager* Window::GetInputManager() const { return this->inputManager.get(); }
+
+bool Window::IsFullscreen() const { return this->isFullscreen; }
+
 void Window::Show(int nCmdShow) {
     ShowWindow(this->hWnd, nCmdShow);
     UpdateWindow(this->hWnd);
     this->UpdateClientSize();
 }
+
+bool Window::IsIMGuiShown() const { return this->showIMGui; }
+
+void Window::SetIMGuiShown(const bool show) { this->showIMGui = show; }
 
 void Window::Resize(UINT width, UINT height) {
     if (width == 0 || height == 0) {

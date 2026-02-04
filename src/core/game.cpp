@@ -3,6 +3,7 @@
 #include "scene/sceneManager.h"
 #include "utilities/time.h"
 #include <memory>
+#include "core/inputManager.h"
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     Window window(hInstance, nCmdShow, "Game Window");
@@ -20,10 +21,11 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
     MSG msg = {};
 
-
     while (msg.message != WM_QUIT)
     {
         this->imguiManager.ImguiAtFrameStart();
+        
+
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {
             TranslateMessage(&msg);

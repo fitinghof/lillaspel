@@ -1,6 +1,6 @@
 #include "core/audio/soundSourceManager.h"
 
-SoundSource* SoundSourceManager::GetSoundSource(int id)
+SoundSourceObject* SoundSourceManager::GetSoundSource(int id)
 {
 	for (int i = 0; i < this->soundSources.size(); i++)
 	{
@@ -14,7 +14,7 @@ SoundSource* SoundSourceManager::GetSoundSource(int id)
 	return nullptr;
 }
 
-void SoundSourceManager::AddSoundSource(SoundSource* speaker)
+void SoundSourceManager::AddSoundSource(SoundSourceObject* speaker)
 {
 	speaker->SetId(this->idCounter);
 	this->idCounter++;

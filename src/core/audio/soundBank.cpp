@@ -6,7 +6,14 @@ SoundBank::SoundBank()
 
 SoundBank::~SoundBank()
 {
-	//ADD UNIQUE POINTERS LATER, MEMORY WILL BE LOST!
+	for (const auto& it : this->soundClips)
+	{
+		if (it.second != nullptr)
+		{
+			delete it.second;
+		}
+	}
+
 	this->soundClips.clear();
 }
 
@@ -15,54 +22,32 @@ void SoundBank::Initialize(std::string pathToSoundFolder)
 	this->pathToSoundFolder = pathToSoundFolder;
 }
 
-void SoundBank::AddSoundClipStandardFolder(const std::string filename)
+void SoundBank::AddSoundClipStandardFolder(const std::string filename, const std::string id)
 {
-	CreateSoundBuffer(this->pathToSoundFolder + filename);
+	this->CreateSoundBuffer(this->pathToSoundFolder + filename, id);
 }
 
-void SoundBank::AddSoundClip(const std::string relativePath)
+void SoundBank::AddSoundClip(const std::string path, const std::string id)
 {
-	CreateSoundBuffer(relativePath);
+	this->CreateSoundBuffer(path, id);
 }
 
-SoundClip* SoundBank::GetSoundClipStandardFolder(const std::string filename)
+std::string SoundBank::GetPathToSoundFolder()
 {
-	std::string fullpath = this->pathToSoundFolder + filename;
+	return this->pathToSoundFolder;
+}
 
-	auto it = this->soundClips.find(fullpath);
-	if (it != this->soundClips.end())
+SoundClip* SoundBank::GetSoundClip(const std::string id)
+{
+	SoundClip* clip = this->soundClips[id];
+
+	if (!clip)
 	{
-		return this->soundClips[fullpath];
+		Logger::Log("couldn't find " + id);
+		return nullptr;
 	}
 
-	Logger::Log("couldn't find " + fullpath);
-	return nullptr;
-}
-
-SoundClip* SoundBank::GetSoundClip(const std::string path)
-{
-	auto it = this->soundClips.find(path);
-	if (it != this->soundClips.end())
-	{
-		return this->soundClips[path];
-	}
-
-	Logger::Log("couldn't find " + path);
-	return nullptr;
-}
-
-bool SoundBank::RemoveSoundClipStandardFolder(const std::string filename)
-{
-	std::string fullpath = this->pathToSoundFolder + filename;
-
-	auto it = this->soundClips.find(fullpath);
-	if (it != this->soundClips.end())
-	{
-		this->soundClips.erase(it);
-		return true;
-	}
-
-	return false;
+	return clip;
 }
 
 bool SoundBank::RemoveSoundClip(const std::string relativePath)
@@ -77,7 +62,7 @@ bool SoundBank::RemoveSoundClip(const std::string relativePath)
 	return false;
 }
 
-void SoundBank::CreateSoundBuffer(std::string fullpath)
+void SoundBank::CreateSoundBuffer(std::string fullpath, std::string id)
 {
 	ALenum error, format;
 	ALuint buffer = 0;
@@ -150,12 +135,13 @@ void SoundBank::CreateSoundBuffer(std::string fullpath)
 	}
 
 	SoundClip* newClip = new SoundClip();
-	newClip->buffer = buffer;
-	newClip->filepath = filepath;
+	newClip->id = id;
+	newClip->buffer = buffer; //is this copy a problem???
+	newClip->filepath = fullpath;
 
-	this->soundClips.insert(std::make_pair(fullpath, newClip));
+	this->soundClips.insert(std::make_pair(id, newClip));
 }
 
-void SoundBank::DeleteSoundBuffer(std::string filepath)
+void SoundBank::DeleteSoundBuffer(std::string id)
 {
 }

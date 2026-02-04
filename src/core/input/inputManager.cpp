@@ -1,7 +1,7 @@
-#include "core/inputManager.h"
-#include "utilities/logger.h"
+#include "core/input/inputManager.h"
 
-InputManager::InputManager() : keyStates{}, mousePosition{ 0, 0 }, mouseMovement{ 0, 0 }, LM{ 0 }, RM{ 0 } {}
+InputManager::InputManager() : keyStates{}, controllers{ { Controller(DWORD(0)), Controller(DWORD(1)), Controller(DWORD(2)), Controller(DWORD(3)) } }, 
+input{}, mousePosition{ 0, 0 }, mouseMovement{ 0, 0 }, LM{ 0 }, RM{ 0 } {}
 
 void InputManager::SetKeyState(const unsigned char key, const unsigned char state) { keyStates[key] = state; }
 
@@ -45,3 +45,43 @@ bool InputManager::IsRMDown() const { return this->RM & KEY_DOWN; }
 bool InputManager::WasRMPressed() const { return this->RM & KEY_PRESSED; }
 
 bool InputManager::WasRMReleased() const { return this->RM & KEY_RELEASED; }
+
+std::vector<Controller> InputManager::GetConnectedControllers() {
+	std::vector<Controller> connectedControllers;
+	for (auto& controller : this->controllers) {
+		if (controller.IsConnected()) {
+			connectedControllers.push_back(controller);
+		}
+	}
+	return connectedControllers;
+}
+
+void InputManager::ReadControllerInputs() {
+	
+	std::vector<Controller> connectedControllers = this->GetConnectedControllers();
+	for (auto& controller : connectedControllers) {
+		if(controller.HasUpdatedState()) {
+			this->input = controller.ReadNewInput();
+		}
+	}
+}
+
+std::array<float, 2> InputManager::GetLeftThumbMovement() const {
+	std::array<float, 2> LT = {};
+	LT[0] = this->input.leftThumb[0];
+	LT[1] = this->input.leftThumb[1];
+	return LT;
+}
+
+std::array<float, 2> InputManager::GetRightThumbMovement() const {
+	std::array<float, 2> RT = {};
+	RT[0] = this->input.rightThumb[0];
+	RT[1] = this->input.rightThumb[1];
+	return RT;
+}
+
+bool InputManager::IsLeftBackTriggerPressed() const { return this->input.leftBackTrigger; }
+
+bool InputManager::IsRightBackTriggerPressed() const { return this->input.rightBackTrigger; }
+
+bool InputManager::IsControllerButtonPressed(const ControllerInputBinMask button) const { return (this->input.buttons & button) != 0; }

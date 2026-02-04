@@ -9,7 +9,7 @@
 #include <windowsx.h>
 #include <memory>
 
-#include "core/inputManager.h"
+#include "core/input/inputManager.h"
 #include <functional>
 
 class Window

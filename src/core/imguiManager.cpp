@@ -156,11 +156,12 @@ void ImguiManager::MainMenuImGui()
 		if (ImGui::BeginMenu("Edit")) {
 			ImGui::MenuItem("Transform", nullptr, &this->showTransformWindow);
 			ImGui::MenuItem("Sound", nullptr, &this->showSoundWindow);
+			ImGui::MenuItem("Music", nullptr, &this->showMusicWindow);
 			ImGui::EndMenu();
 		}
 		if (ImGui::BeginMenu("Scene")) {
 			ImGui::MenuItem("Save", nullptr, &this->saveScene);
-			ImGui::MenuItem("Save As", nullptr, &this->saveSceneAs);
+			ImGui::MenuItem("Save As...", nullptr, &this->saveSceneAs);
 			ImGui::MenuItem("Load", nullptr, &this->loadScene);
 			ImGui::EndMenu();
 		}

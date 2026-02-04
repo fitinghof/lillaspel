@@ -1,14 +1,22 @@
 {
-    "O1":{
-        "type": "GameObject3D",
-        "transform": {
-            "position": [0,0,10]
+    "gameObjects": [
+        {
+            "type": "GameObject3D",
+            "transform": {
+                "position": [0,0,10]
+            }
+        },
+        {
+            "type": "GameObject3D",
+            "transform": {
+                "position": [5,0,10]
+            }
+        },
+        {
+            "type": "MeshObject",
+            "transform": {
+                "position": [0,0,5]
+            }
         }
-    },
-    "O2":{
-        "type": "GameObject3D",
-        "transform": {
-            "position": [5,0,10]
-        }
-    }
+    ]
 }

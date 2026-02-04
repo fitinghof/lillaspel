@@ -100,3 +100,13 @@ std::weak_ptr<GameObject> GameObject::GetPtr()
 	return shared_from_this();
 }
 
+void GameObject::LoadFromJson(const nlohmann::json& data)
+{
+
+}
+
+nlohmann::json GameObject::SaveToJson()
+{
+	return nlohmann::json();
+}
+

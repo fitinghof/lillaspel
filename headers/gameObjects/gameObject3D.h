@@ -14,4 +14,7 @@ public:
 
 	DirectX::XMVECTOR GetGlobalPosition() const override;
 	DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const override;
+
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual nlohmann::json SaveToJson() override;
 };

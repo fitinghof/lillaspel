@@ -7,7 +7,7 @@
 template <class T> void* Constructor() { return (void*)new T(); }
 
 class ObjectFromStringFactory {
-private:
+public:
 	typedef void* (*ConstructorT)();
 	typedef std::unordered_map<std::string, ConstructorT> MapType;
 	MapType classes;

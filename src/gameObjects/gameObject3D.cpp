@@ -31,3 +31,25 @@ DirectX::XMMATRIX GameObject3D::GetGlobalWorldMatrix(bool inverseTranspose) cons
 		return localWorldMatrix * this->GetParent().lock()->GetGlobalWorldMatrix(inverseTranspose);
 	}
 }
+
+void GameObject3D::LoadFromJson(const nlohmann::json& data)
+{
+	auto position = data.at("transform").at("position");
+
+	this->transform.SetPosition(DirectX::XMVectorSet(position[0], position[1], position[2], 1));
+}
+
+nlohmann::json GameObject3D::SaveToJson()
+{
+	auto thisJson = nlohmann::json
+	{
+		{"type", "GameObject3D"},
+		{ "transform",
+			{"position",
+				{ this->transform.GetPosition().m128_f32[0], this->transform.GetPosition().m128_f32[2], this->transform.GetPosition().m128_f32[3]}
+			}
+		}
+	};
+
+	return thisJson;
+}

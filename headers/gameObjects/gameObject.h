@@ -8,6 +8,7 @@
 #include "utilities/logger.h"
 #include <DirectXMath.h>
 #include "gameObjects/gameObjectFactory.h"
+#include <nlohmann/json.hpp>
 
 class Scene;
 class GameObjectFactory;
@@ -47,6 +48,9 @@ public:
 	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;
 
 	std::weak_ptr<GameObject> GetPtr();
+
+	virtual void LoadFromJson(const nlohmann::json& data);
+	virtual nlohmann::json SaveToJson();
 
 private:
 	/// <summary>

@@ -16,15 +16,16 @@ ObjectLoader::~ObjectLoader() {
 }
 
 bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshLoadData, ID3D11Device* device) {
-
 	std::filesystem::path path = basePath / localpath;
 	fastgltf::Parser parser;
+	
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
 	if (gltfFile.error() != fastgltf::Error::None) {
 		Logger::Error("Failed to load gltf file, error: ");
 		return false;
 	}
+	
 
 	constexpr auto gltfOptions =
 		fastgltf::Options::DontRequireValidAssetMember |
@@ -35,15 +36,18 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 	auto data = parser.loadGltf(gltfFile.get(), path.parent_path(), gltfOptions);
 
+	
 	if (data.error() != fastgltf::Error::None) {
 		Logger::Error("Failed to load glTF file, error: ");
 		return false;
 	}
+	
 	auto& asset = data.get();
 
 	std::unordered_map<uint32_t, Texture> loadedTextures;
 	std::unordered_map<std::string, Material> materials;
 	size_t meshIndex = 0;
+	
 	for (auto& gltfmesh : asset.meshes) {
 
 		std::vector<Vertex> verticies;
@@ -56,6 +60,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		Mesh mesh;
 
 		mesh.SetName(path.generic_string() + ":Mesh_" + std::to_string(meshIndex));
+		
 
 		MeshObjData data;
 		data.SetMesh(mesh.GetName());
@@ -68,6 +73,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			
 			Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> textureView(nullptr);
 
+			
 			// If we haven't processed these vertexes yet, do so.
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
 				bufferOffsets.emplace(positionIt->accessorIndex, totalOffset);
@@ -99,6 +105,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			Material materialOut;
 
+			
 			if (baseColorTexture.has_value() && asset.textures[baseColorTexture->textureIndex].imageIndex.has_value()) {
 				auto& texture = asset.textures[baseColorTexture->textureIndex];
 				auto textureNameIt = loadedTextures.find(texture.imageIndex.value());
@@ -117,7 +124,6 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 					materialOut.textures.emplace_back(new Texture(loadedTextures.at(texture.imageIndex.value())));
 				}
 			}
-			Logger::Log("Finished texture check");
 			
 			
 			// Extract more material stuff
@@ -129,7 +135,6 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			materials.emplace(materialIdent, std::move(materialOut));
 
 		}
-
 		VertexBuffer vertexBuffer;
 		vertexBuffer.Init(device, sizeof(Vertex), static_cast<UINT>(verticies.size()), verticies.data());
 
@@ -142,6 +147,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		meshLoadData.meshData.emplace_back(data);
 		meshIndex++;
 	}
+	
 
 	return true;
 	

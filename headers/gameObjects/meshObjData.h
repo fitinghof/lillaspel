@@ -4,6 +4,10 @@
 class MeshObjData {
 public:
 	MeshObjData() = default;
+	MeshObjData(MeshObjData&&) noexcept = default;
+	MeshObjData& operator=(MeshObjData&&) noexcept = default;
+	MeshObjData(MeshObjData&)= default;
+	MeshObjData& operator=(MeshObjData&) = default;
 
 	void SetMesh(std::string meshIdent) { 
 		this->meshIdent = meshIdent;

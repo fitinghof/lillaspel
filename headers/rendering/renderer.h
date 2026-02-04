@@ -23,6 +23,7 @@
 #include "gameObjects/spotlightObject.h"
 #include "rendering/structuredBuffer.h"
 #include <algorithm>
+#include "core/assetManager.h"
 
 
 
@@ -50,9 +51,11 @@ public:
 
 	void Resize(const Window& window);
 
+
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;
 	IDXGISwapChain* GetSwapChain() const;
+	AssetManager assetManager;
 private:
 
 	const size_t maximumSpotlights;

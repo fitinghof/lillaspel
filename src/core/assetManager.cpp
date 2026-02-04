@@ -70,7 +70,7 @@ bool AssetManager::GetTexture(std::string identifier)
 
 bool AssetManager::LoadNewGltf(std::string identifier) {
 	MeshLoadData meshLoadData;
-	
+
 	bool objectLoaded = this->objectLoader.LoadGltf(identifier, meshLoadData, this->d3d11Device);
 	if (!objectLoaded) {
 		return false;
@@ -102,7 +102,7 @@ MeshObjData AssetManager::GetMeshObjData(std::string identifier)
 	}
 	else
 	{
-		this->LoadNewGltf(identifier);
+		Logger::Log(this->LoadNewGltf(identifier));
 		return meshObjDataSets.at(identifier);
 	}
 }

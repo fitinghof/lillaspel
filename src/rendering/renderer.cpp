@@ -23,6 +23,8 @@ void Renderer::Init(const Window& window)
 	CreateRenderQueue();
 
 	CreateRendererConstantBuffers();
+
+	this->assetManager.setDevicePointer(this->GetDevice());
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -398,13 +400,15 @@ void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 void Renderer::RenderMeshObject(MeshObject* meshObject)
 {
 	// Bind mesh
-	VertexBuffer vBuf = meshObject->GetMesh()->GetVertexBuffer();
+	MeshObjData data = meshObject->GetMesh();
+	Mesh* mesh = this->assetManager.GetMeshPtr(data.GetMeshIdent());
+	VertexBuffer vBuf = mesh->GetVertexBuffer();
 
 	UINT stride = vBuf.GetVertexSize();
 	UINT offset = 0;
 	ID3D11Buffer* vBuff = vBuf.GetBuffer();
 	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-	this->immediateContext->IASetIndexBuffer(meshObject->GetMesh()->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	this->immediateContext->IASetIndexBuffer(mesh->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 
 
@@ -417,15 +421,17 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
 	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
 
-
-	for (auto subMesh : meshObject->GetMesh()->GetSubMeshes())
+	size_t index = 0;
+	for (auto& subMesh : mesh->GetSubMeshes())
 	{
 		//ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
 		// Temp
-		ID3D11ShaderResourceView* textureSrv = nullptr;
+		auto material = this->assetManager.GetMaterialPtr(data.GetMaterial(index));
+		ID3D11ShaderResourceView* textureSrv = material->textures.size() > 0 ? material->textures[0].get()->GetSrv() : nullptr;
 		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
 
 		// Draw to screen
 		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
+		index++;
 	}
 }

@@ -34,7 +34,7 @@ void ImguiManager::ImguiAtFrameStart() {
 	ImGui::NewFrame();
 	//ImGui::ShowDemoWindow(); // Show demo window! :)
 	this->MainMenuImGui();
-	this->OptionsImGui();
+	this->WindowOptionsImGui();
 	this->ConsoleImGui();
 }
 
@@ -61,6 +61,11 @@ void ImguiManager::SetVSyncChangeCallback(std::function<void(bool)> callback)
 	this->vSyncChangeCallback = std::move(callback);
 }
 
+void ImguiManager::SetWireframeChangeCallback(std::function<void(bool)> callback)
+{
+	this->wireframeChangeCallback = std::move(callback);
+}
+
 void ImguiManager::ConsoleImGui()
 {
 	static bool isOpen = true;
@@ -78,7 +83,7 @@ void ImguiManager::ConsoleImGui()
 	ImGui::End();
 }
 
-void ImguiManager::OptionsImGui()
+void ImguiManager::WindowOptionsImGui()
 {
 	if (!this->showOptionsWindow) return;
 
@@ -140,11 +145,23 @@ void ImguiManager::MainMenuImGui()
 {
 	if (ImGui::BeginMainMenuBar()) {
 		if (ImGui::BeginMenu("Options")) {
-			ImGui::MenuItem("Show Options Window", nullptr, &this->showOptionsWindow);
+			ImGui::MenuItem("Window Options", nullptr, &this->showOptionsWindow);
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Console")) {
-			ImGui::MenuItem("Show Console Window", nullptr, &this->showConsoleWindow);
+		if (ImGui::BeginMenu("Debug")) {
+			ImGui::MenuItem("Console", nullptr, &this->showConsoleWindow);
+			ImGui::MenuItem("Wireframe", nullptr, &this->showWireframe);
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Edit")) {
+			ImGui::MenuItem("Transform", nullptr, &this->showTransformWindow);
+			ImGui::MenuItem("Sound", nullptr, &this->showSoundWindow);
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Scene")) {
+			ImGui::MenuItem("Save", nullptr, &this->saveScene);
+			ImGui::MenuItem("Save As", nullptr, &this->saveSceneAs);
+			ImGui::MenuItem("Load", nullptr, &this->loadScene);
 			ImGui::EndMenu();
 		}
 

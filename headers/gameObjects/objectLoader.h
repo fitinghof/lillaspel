@@ -11,9 +11,10 @@
 
 
 struct MeshLoadData {
-	Mesh mesh;
+	std::vector<Mesh> meshes;
 	std::vector<Material> materials;
-	MeshObjData meshData;
+	std::vector<MeshObjData> meshData;
+	std::vector<Texture> textures;
 };
 
 
@@ -26,7 +27,7 @@ public:
 	/// <summary>
 	/// Loads a gltf file 
 	/// </summary>
-	bool LoadGltf(std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData , ID3D11Device* device);
+	bool LoadGltf(std::filesystem::path localpath, MeshLoadData& meshLoadData , ID3D11Device* device);
 
 
 

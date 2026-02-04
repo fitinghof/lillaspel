@@ -16,10 +16,9 @@ ObjectLoader::ObjectLoader(std::filesystem::path basePath): basePath(std::move(b
 ObjectLoader::~ObjectLoader() {
 }
 
-bool ObjectLoader::LoadGltf(std::filesystem::path localpath, std::vector<MeshLoadData>& meshLoadData, ID3D11Device* device) {
-	meshLoadData.clear();
+bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshLoadData, ID3D11Device* device) {
 
-	std::filesystem::path path = basePath / path;
+	std::filesystem::path path = basePath / localpath;
 	fastgltf::Parser parser;
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
@@ -43,6 +42,9 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, std::vector<MeshLoa
 	}
 	auto& asset = data.get();
 
+	std::unordered_map<uint32_t, Texture> loadedTextures;
+	std::unordered_map<std::string, Material> materials;
+	size_t meshIndex = 0;
 	for (auto& gltfmesh : asset.meshes) {
 
 		std::vector<Vertex> verticies;
@@ -50,10 +52,15 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, std::vector<MeshLoa
 		std::vector<uint32_t> indices;
 		uint32_t indexOffset = 0;
 		std::unordered_map<uint32_t, uint32_t> bufferOffsets;
-		MeshLoadData meshData;
 		std::vector<SubMesh> submeshes;
 
-		std::unordered_map<uint32_t, std::string> loadedTextures;
+		Mesh mesh;
+
+		mesh.SetName(path.generic_string() + ":Mesh_" + std::to_string(meshIndex));
+
+		MeshObjData data;
+		data.SetMesh(mesh.GetName());
+
 		for (auto it = gltfmesh.primitives.begin(); it != gltfmesh.primitives.end(); ++it) {
 
 			auto* positionIt = it->findAttribute("POSITION");
@@ -80,29 +87,40 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, std::vector<MeshLoa
 			auto& material = asset.materials[it->materialIndex.value_or(0)];
 			auto& baseColorTexture = material.pbrData.baseColorTexture;
 
-			Material material;
+			Material materialOut;
 
 			// should be checked, isnt right now;
 			auto& texture = asset.textures[baseColorTexture->textureIndex];
 
+			// Do note that if a mesh lacks a texture, currently stuff will just die
+			// Should add some default texture or something
 			auto textureNameIt = loadedTextures.find(texture.imageIndex.value_or(-1));
-			std::string textureName;
 			if (textureNameIt == loadedTextures.end()) {
-				material.textures.emplace_back(this->LoadTexture(asset, *it, device));
-				textureName = "Tex" + std::to_string(loadedTextures.size());
+				auto* textureRaw = this->LoadTexture(asset, * it, device);
+				if (textureRaw == nullptr) {
+					return false;
+				}
+				std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
+				Texture tex(textureRaw,  texIdent);
+
+				loadedTextures[texture.imageIndex.value() ] = tex;
+				materialOut.textures.emplace_back(tex);
 			}
 			else {
-				textureName = textureNameIt->second;
+				materialOut.textures.emplace_back(loadedTextures.at(texture.imageIndex.value()));
 			}
+			
 			
 			// Extract more material stuff
 
-			meshData.materials.emplace_back(material);
+			std::string materialIdent = path.generic_string() + ":Mat_" + std::to_string(materials.size());
+			materialOut.identifier = materialIdent;
 
-			// if (texture loaded)
-			// auto* text = this->LoadTexture(asset, *it, device);
-			// meshdata.materials.push_back(Material{ text  });
-			// meshdata.meshdata.setmaterial(meshdata.materials.size() - 1, Some name);
+			data.SetMaterial()
+
+			meshLoadData.materials.emplace_back(materialOut);
+
+			materials[materialIdent] = materialOut;
 		}
 
 
@@ -113,6 +131,9 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, std::vector<MeshLoa
 		indexBuffer.Init(device, indices.size(), indices.data());
 
 		mesh.Init(std::move(vertexBuffer), std::move(indexBuffer), std::move(submeshes));
+
+		meshLoadData.meshes.emplace_back(std::move(mesh));
+		meshIndex++;
 	}
 
 	return true;
@@ -237,7 +258,7 @@ ID3D11ShaderResourceView* ObjectLoader::LoadTexture(const fastgltf::Asset& asset
 		auto& texture = asset.textures[baseColorTexture->textureIndex];
 		if (!texture.imageIndex.has_value()) {
 			Logger::Error("Texture has no image index!");
-			return false;
+			return nullptr;
 		}
 		auto& textureImage = asset.images[texture.imageIndex.value()];
 		std::visit(fastgltf::visitor{

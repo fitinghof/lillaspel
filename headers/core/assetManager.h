@@ -19,7 +19,7 @@ public:
 
 	std::string AddMesh(Mesh* mesh);
 	std::string AddMaterial(Material* material);
-	std::string AddObjTemplate(meshObjData data);
+	std::string AddObjTemplate(MeshObjData data);
 
 	SoundClip* GetSoundClipStandardFolder(std::string filename);
 	SoundClip* GetSoundClip(std::string path);

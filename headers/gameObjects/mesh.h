@@ -38,6 +38,8 @@ public:
 	VertexBuffer& GetVertexBuffer();
 	IndexBuffer& GetIndexBuffer();
 
+	void SetName(std::string name);
+
 private:
 	std::string name;
 	std::vector<SubMesh> subMeshes;

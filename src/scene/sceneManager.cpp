@@ -30,9 +30,12 @@ void SceneManager::LoadScene()
 
 	// Temporary meshes
 
-	//std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
-	//ObjectLoader loader;
-	//loader.LoadGltf(*glbMesh.get(), "Box/cube.glb", this->renderer->GetDevice());
+	// <HIGHLY TEMPORARY>
+	std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
+	ObjectLoader loader;
+	MeshLoadData data;
+	loader.LoadGltf("Box/cube.glb", data, this->renderer->GetDevice());
+	// </HIGHLY TEMPORARY>
 
 	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
@@ -120,18 +123,18 @@ void SceneManager::LoadScene()
 
 
 	// Create temporary meshObjects
+	size_t temp = 0;
 
 	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
 	firstMesh.lock()->SetMesh(this->tempMeshes[0].get());
-	
 	auto secondMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
 	secondMesh.lock()->SetMesh(this->tempMeshes[1].get());
 
-	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
-	thirdMesh.lock()->SetMesh(this->tempMeshes[2].get());
+	//auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	//thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
+	//thirdMesh.lock()->SetMesh(this->tempMeshes[2].get());
 
 	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 

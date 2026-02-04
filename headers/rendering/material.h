@@ -22,6 +22,7 @@ public:
 
 	Material() = default;
 	~Material() = default;
+	Material(Material&&) = default;
 
 	void Init(std::shared_ptr<Shader>& vShader, std::shared_ptr<Shader>& pShader);
 

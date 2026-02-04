@@ -73,12 +73,16 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
 				bufferOffsets.emplace(positionIt->accessorIndex, totalOffset);
 
+				this->LoadUV(asset, *it, verticies, totalOffset)
 				this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
+
 
 			}
 
 			uint32_t indexStart = indexOffset;
-			this->LoadIndices(asset, *it, indices, indexOffset);
+			if (!this->LoadIndices(asset, *it, indices, indexOffset))
+				return false;
+
 			submeshes.emplace_back(indexStart, indexOffset - indexStart);
 			
 
@@ -115,10 +119,9 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			materialOut.identifier = materialIdent;
 
 			data.SetMaterial(materials.size(), materialIdent);
-			//materials.emplace(materialIdent, std::move(materialOut));
+			materials.emplace(materialIdent, std::move(materialOut));
 
 		}
-
 
 		VertexBuffer vertexBuffer;
 		vertexBuffer.Init(device, sizeof(Vertex), static_cast<UINT>(verticies.size()), verticies.data());
@@ -129,6 +132,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		mesh.Init(std::move(vertexBuffer), std::move(indexBuffer), std::move(submeshes));
 
 		meshLoadData.meshes.emplace_back(std::move(mesh));
+		meshLoadData.meshData.emplace_back(data);
 		meshIndex++;
 	}
 
@@ -206,6 +210,7 @@ bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive
 		fastgltf::copyFromAccessor<std::uint32_t>(asset, indexAccessor, dest.data() + offset);
 	}
 	offset += static_cast<uint32_t>(indexAccessor.count);
+	return true;
 }
 
 bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex> dest, size_t offset, size_t uvIndex)
@@ -241,11 +246,12 @@ bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitiv
 			dest[offset + idx].uv[1] = uv.y();
 		});
 	}
+	return true;
 }
 
 ID3D11ShaderResourceView* ObjectLoader::LoadTexture(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, ID3D11Device* device)
 {
-	ID3D11ShaderResourceView* textureView;
+	ID3D11ShaderResourceView* textureView = nullptr;
 	size_t baseColorTextureCordIndex = 0;
 	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
 

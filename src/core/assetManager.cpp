@@ -30,24 +30,59 @@ bool AssetManager::GetMaterial(std::string identifier)
 	if (this->materials.find(identifier) != materials.end()) {
 		return true;
 	}
-
-	return false;
+	else
+	{
+		if (!this->loadNewGltf(identifier)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 bool AssetManager::GetMesh(std::string identifier)
 {
-	return false;
+	if (this->meshes.find(identifier) != meshes.end()) {
+		return true;
+	}
+	else
+	{
+		if (!this->loadNewGltf(identifier)) {
+			return false;
+		}
+	}
+	return true;
+}
+
+bool AssetManager::GetTexture(std::string identifier)
+{
+	if (this->textures.find(identifier) != textures.end()) {
+		return true;
+	}
+	else
+	{
+		if (!this->loadNewGltf(identifier)) {
+			return false;
+		}
+	}
+	return true;
 }
 
 bool AssetManager::loadNewGltf(std::string identifier) {
 	std::vector<MeshLoadData> meshLoadData;
 	
-	this->objectLoader.LoadGltf(identifier, meshLoadData, this->d3d11Device);
+	bool objectLoaded = this->objectLoader.LoadGltf(identifier, meshLoadData, this->d3d11Device);
 	
+	if (!objectLoaded) {
+		return false;
+	}
+
 	for (MeshLoadData& data : meshLoadData) 
 	{
-		this->meshes.insert({ data.mesh.GetName(), std::move(data.mesh)});
+		/*this->meshes.insert({ data.mesh.GetName(), std::move(data.mesh)});
+		this->meshObjDataSets.insert({data.meshData})*/
 	}
+
+	return true;
 }
 
 MeshObjData AssetManager::GetTemplate(std::string identifier)

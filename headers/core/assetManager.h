@@ -8,6 +8,7 @@
 #include "gameObjects/mesh.h"
 #include "rendering/material.h"
 #include "gameObjects/objectLoader.h"
+#include "rendering/texture.h"
 
 class AssetManager
 {
@@ -23,6 +24,7 @@ public:
 
 	bool GetMaterial(std::string identifier);
 	bool GetMesh(std::string identifier);
+	bool GetTexture(std::string identifier);
 	MeshObjData GetTemplate(std::string identifier);
 
 
@@ -36,6 +38,7 @@ private:
 
 	std::unordered_map<std::string, Material> materials;
 	std::unordered_map<std::string, Mesh> meshes;
+	std::unordered_map<std::string, Texture> textures;
 	std::unordered_map<std::string, MeshObjData> meshObjDataSets;
 
 	bool loadNewGltf(std::string identifier);

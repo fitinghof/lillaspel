@@ -19,7 +19,7 @@ public:
 	void AddSoundClip(const std::string path, const std::string id); //full/relative path to soundfile
 	std::string GetPathToSoundFolder();
 	SoundClip* GetSoundClip(const std::string id);
-	bool RemoveSoundClip(const std::string relativePath);
+	bool RemoveSoundClip(const std::string path);
 
 private:
 	std::unordered_map<std::string, SoundClip*> soundClips;

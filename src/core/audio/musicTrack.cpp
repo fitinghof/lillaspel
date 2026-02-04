@@ -20,16 +20,16 @@ MusicTrack::~MusicTrack()
 		this->sndfile = nullptr;
 	}
 
-	free(this->membuf);
-	alDeleteBuffers(NUM_BUFFERS, this->buffers);
+	if (this->membuf) free(this->membuf);
+	if (this->buffers) alDeleteBuffers(NUM_BUFFERS, this->buffers);
 }
 
-void MusicTrack::Initialize(std::string filepath, std::string id)
+bool MusicTrack::Initialize(std::string filepath, std::string id)
 {
 	this->filepath = filepath;
 	this->id = id;
 
-	this->LoadTrack();
+	return this->LoadTrack();
 }
 
 void MusicTrack::Play()
@@ -86,9 +86,11 @@ void MusicTrack::FadeIn(float startGain, float seconds)
 
 void MusicTrack::FadeOut(float seconds)
 {
+	this->fadeOutTime = seconds;
+	this->currentFadeOutTime = 0;
 }
 
-void MusicTrack::LoadTrack()
+bool MusicTrack::LoadTrack()
 {
 	alGenSources(1, &this->source);
 	alGenBuffers(NUM_BUFFERS, this->buffers);
@@ -101,12 +103,12 @@ void MusicTrack::LoadTrack()
 
 	std::string fullpath = this->filepath;
 	const char* file = fullpath.c_str();
+
 	sndfile = sf_open(file, SFM_READ, &this->sfInfo);
 
 	if (!sndfile)
 	{
-		Logger::Error("could not open " + fullpath);
-		return;
+		return false;
 	}
 
 	this->format = AL_NONE;
@@ -127,11 +129,13 @@ void MusicTrack::LoadTrack()
 		//std::cout << "unsupported channel count: " << sfInfo.channels << std::endl;
 		Logger::Error("unsupported channel count: ");
 		sf_close(sndfile);
-		return;
+		return false;
 	}
 
 	std::size_t frameSize = ((size_t)BUFFER_SAMPLES * (size_t)this->sfInfo.channels) * sizeof(short);
 	this->membuf = static_cast<short*>(malloc(frameSize));
+
+	return true;
 }
 
 void MusicTrack::SetPitch(float pitch)
@@ -222,6 +226,20 @@ void MusicTrack::UpdateBufferStream()
 		{
 			this->currentFadeInTime += deltaTime;
 			this->currentGain = (this->targetGain - this->startGain) * (this->currentFadeInTime / this->fadeInTime) + this->startGain;
+
+			alSourcef(this->source, AL_GAIN, this->currentGain);
+		}
+
+		if (this->fadeOutTime > 0 && this->currentFadeOutTime < this->fadeOutTime)
+		{
+			this->currentFadeOutTime += deltaTime;
+			this->currentGain = ((this->fadeOutTime - this->currentFadeOutTime) / this->fadeOutTime) * this->targetGain;
+
+			if (this->currentGain <= 0.01f)
+			{
+				this->currentGain = 0;
+				this->Stop();
+			}
 
 			alSourcef(this->source, AL_GAIN, this->currentGain);
 		}

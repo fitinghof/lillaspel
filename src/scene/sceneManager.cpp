@@ -146,3 +146,28 @@ void SceneManager::LoadScene()
 	light2.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
 	DirectX::XMStoreFloat4(&light2.lock()->data.color, DirectX::XMVectorSet(0, 0, 1, 1));
 }
+
+void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)
+{
+	this->assetManager.InitializeSoundBank(pathToSoundFolder);
+}
+
+void SceneManager::AddSoundClipStandardFolder(std::string filename, std::string id)
+{
+	this->assetManager.AddSoundClipStandardFolder(filename, id);
+}
+
+void SceneManager::AddSoundClip(std::string path, std::string id)
+{
+	this->assetManager.AddSoundClip(path, id);
+}
+
+std::string SceneManager::GetPathToSoundFolder()
+{
+	return this->assetManager.GetPathToSoundFolder();
+}
+
+SoundClip* SceneManager::GetSoundClip(std::string id)
+{
+	return this->assetManager.GetSoundClip(id);
+}

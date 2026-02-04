@@ -1,5 +1,8 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 #include "core/window.h"
 #include "d3d11.h"
 #include "wrl/client.h"
@@ -14,19 +17,24 @@
 #include "rendering/indexBuffer.h"
 #include "rendering/material.h"
 #include "rendering/renderQueue.h"
+#include "rendering/rasterizerState.h"
+#include "gameObjects/cameraObject.h"
+#include "gameObjects/meshObject.h"
+#include "gameObjects/spotlightObject.h"
+#include "rendering/structuredBuffer.h"
+#include <algorithm>
 
-#include "rendering/tempRenderDefs.h"
-
-class Renderer {
+class Renderer
+{
 public:
-	Renderer() = default;
+	Renderer();
 	~Renderer() = default;
 
 	/// <summary>
 	/// Initialize the renderer
 	/// </summary>
 	/// <param name="window"></param>
-	void Init(const Window& window);
+	void Init(const Window &window);
 
 	/// <summary>
 	/// Render a frame
@@ -38,10 +46,31 @@ public:
 	/// </summary>
 	void Present();
 
-	ID3D11Device* GetDevice() const;
-	ID3D11DeviceContext* GetContext() const;
-	IDXGISwapChain* GetSwapChain() const;
+	void Resize(const Window &window);
+
+	void ToggleVSync(bool enable);
+
+	ID3D11Device *GetDevice() const;
+	ID3D11DeviceContext *GetContext() const;
+	IDXGISwapChain *GetSwapChain() const;
+
 private:
+	const size_t maximumSpotlights;
+
+	struct WorldMatrixBufferContainer
+	{
+		DirectX::XMFLOAT4X4 worldMatrix;
+		DirectX::XMFLOAT4X4 worldMatrixInversedTransposed;
+	};
+
+	struct LightCountBufferContainer
+	{
+		size_t spotlightCount;
+		float padding[3];
+	};
+
+	// DirectX11 specific stuff:
+
 	D3D11_VIEWPORT viewport;
 
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
@@ -52,29 +81,53 @@ private:
 	std::unique_ptr<DepthBuffer> depthBuffer;
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
+	std::unique_ptr<RasterizerState> standardRasterizerState;
 
-	// Temporary
+	// Temporary:
 
-	std::unique_ptr<Material> tempMat;
+	std::unique_ptr<Material> defaultMat;
+	std::unique_ptr<Material> defaultUnlitMat;
 
 	std::shared_ptr<Shader> vertexShader;
-	std::shared_ptr<Shader> pixelShader;
+	std::shared_ptr<Shader> pixelShaderLit;
+	std::shared_ptr<Shader> pixelShaderUnlit;
 
-	// -- 
+	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;
-	std::shared_ptr<std::vector<int>> meshRenderQueue;
+	std::shared_ptr<std::vector<MeshObject *>> meshRenderQueue;
+	std::shared_ptr<std::vector<SpotlightObject *>> lightRenderQueue;
 
-	void SetViewport(const Window& window);
-	void CreateDeviceAndSwapChain(const Window& window);
+	// Constant buffers:
+	// The renderer keeps these constant buffers since only one is ever required
+	// So it just updates them with data for each object every frame
+
+	std::unique_ptr<ConstantBuffer> cameraBuffer;
+	std::unique_ptr<ConstantBuffer> worldMatrixBuffer;
+
+	std::unique_ptr<ConstantBuffer> spotlightCountBuffer;
+	std::unique_ptr<StructuredBuffer> spotlightBuffer;
+
+	// ImGui variables
+
+	bool isVSyncEnabled = false;
+
+	void SetViewport(const Window &window);
+	void CreateDeviceAndSwapChain(const Window &window);
 	void CreateRenderTarget();
-	void CreateDepthBuffer(const Window& window);
-	void CreateInputLayout(const std::string& vShaderByteCode);
+	void CreateDepthBuffer(const Window &window);
+	void CreateInputLayout(const std::string &vShaderByteCode);
 	void CreateSampler();
+	void CreateStandardRasterizerState();
+
+	/// <summary>
+	/// Creates required constant buffers. The renderer needs a cameraBuffer and worldMatrixBuffer.
+	/// </summary>
+	void CreateRendererConstantBuffers();
 
 	void CreateRenderQueue();
 
-	void LoadShaders(std::string& vShaderByteCode);
+	void LoadShaders(std::string &vShaderByteCode);
 
 	/// <summary>
 	/// This is where the actual rendering logic is done
@@ -86,13 +139,23 @@ private:
 	/// </summary>
 	void ClearRenderTargetViewAndDepthStencilView();
 
+	void ResizeSwapChain(const Window &window);
+
 	void BindSampler();
 	void BindInputLayout();
 	void BindRenderTarget();
 	void BindViewport();
+	void BindRasterizerState(RasterizerState *rastState);
 
-	void BindMaterial(Material* material);
+	void BindMaterial(Material *material);
+	void BindLights();
 
-	void BindCameraMatrix(ID3D11Buffer* buffer);
-	void BindWorldMatrix(ID3D11Buffer* buffer);
+	void BindCameraMatrix();
+	void BindWorldMatrix(ID3D11Buffer *buffer);
+
+	/// <summary>
+	/// Renders a single MeshObject
+	/// </summary>
+	/// <param name="meshObject"></param>
+	void RenderMeshObject(MeshObject *meshObject);
 };

@@ -1,10 +1,10 @@
 #pragma once
-#include <fastgltf/core.hpp>
-#include <fastgltf/tools.hpp>
 #include <string>
 #include <filesystem>
 #include "rendering/vertex.h"
 #include "gameObjects/mesh.h"
+#include "rendering/vertexBuffer.h"
+#include "rendering/indexBuffer.h"
 
 
 //struct GltfLoadResult {
@@ -19,7 +19,7 @@ class ObjectLoader
 public:
 	ObjectLoader();
 	~ObjectLoader();
-	Mesh LoadGltf(std::filesystem::path path);
+	bool LoadGltf(Mesh& mesh, std::filesystem::path path, ID3D11Device* device);
 
 
 

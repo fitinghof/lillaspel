@@ -1,5 +1,6 @@
 #pragma once
-
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <cstdint>
 #include <d3d11.h>
 #include <wrl\client.h>
@@ -14,8 +15,8 @@ private:
 public:
 	IndexBuffer() = default;
 	~IndexBuffer() = default;
-	IndexBuffer(const IndexBuffer& other) = delete;
-	IndexBuffer& operator=(const IndexBuffer& other) = delete;
+	IndexBuffer(const IndexBuffer& other) = default;
+	IndexBuffer& operator=(const IndexBuffer& other) = default;
 	IndexBuffer(IndexBuffer&& other) noexcept = default;
 	IndexBuffer& operator=(IndexBuffer&& other) = default;
 

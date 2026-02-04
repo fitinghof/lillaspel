@@ -1,8 +1,12 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include "utilities/logger.h"
-#include "window.h"
+#include "core/window.h"
 #include "rendering/renderer.h"
 #include "core/imguiManager.h"
+#include "core/audio/soundEngine.h"
+#include "scene/sceneManager.h"
 
 class Game {
 public:
@@ -11,6 +15,8 @@ public:
 	void Run(HINSTANCE hInstance, int nCmdShow);
 
 private:
-
 	ImguiManager imguiManager;
+	Renderer renderer;
+	AudioManager audioManager;
+	std::unique_ptr<SceneManager> sceneManager;
 };

@@ -1,4 +1,6 @@
 #pragma once
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
 #include <DirectXMath.h>
 
 
@@ -98,7 +100,7 @@ public:
 	/// Makes the world matrix for transform
 	/// </summary>
 	/// <returns>Worldmatrix</returns>
-	DirectX::XMFLOAT4X4 GetWorldMatrix() const;
+	DirectX::XMFLOAT4X4 GetWorldMatrix(bool inverseTranspose) const;
 
     /// <summary>
     /// Returns a rotation quaternion based on yaw and pitch, making sure up is up

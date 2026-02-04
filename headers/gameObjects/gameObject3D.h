@@ -8,5 +8,10 @@ public:
 	GameObject3D();
 	virtual ~GameObject3D() = default;
 
+	virtual void Tick() override;
+
 	Transform transform;
+
+	DirectX::XMVECTOR GetGlobalPosition() const override;
+	DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const override;
 };

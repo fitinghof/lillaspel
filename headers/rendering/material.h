@@ -32,4 +32,6 @@ public:
 	std::vector<std::unique_ptr<ConstantBuffer>> pixelShaderBuffers;
 
 	std::vector<std::shared_ptr<Texture>> textures;
+
+	std::string identifier;
 };

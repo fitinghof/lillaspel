@@ -421,8 +421,8 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 
 	for (auto subMesh : meshObject->GetMesh()->GetSubMeshes())
 	{
-		ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
-		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
+		//ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
+		//this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
 
 		// Draw to screen
 		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);

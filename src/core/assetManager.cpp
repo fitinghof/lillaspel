@@ -1,4 +1,5 @@
 #include "core/assetManager.h"
+#include "gameObjects/mesh.h"
 
 AssetManager::AssetManager(ID3D11Device* device)
 {
@@ -32,7 +33,7 @@ bool AssetManager::GetMaterial(std::string identifier)
 	}
 	else
 	{
-		if (!this->loadNewGltf(identifier)) {
+		if (!this->LoadNewGltf(identifier)) {
 			return false;
 		}
 	}
@@ -46,7 +47,7 @@ bool AssetManager::GetMesh(std::string identifier)
 	}
 	else
 	{
-		if (!this->loadNewGltf(identifier)) {
+		if (!this->LoadNewGltf(identifier)) {
 			return false;
 		}
 	}
@@ -60,34 +61,52 @@ bool AssetManager::GetTexture(std::string identifier)
 	}
 	else
 	{
-		if (!this->loadNewGltf(identifier)) {
+		if (!this->LoadNewGltf(identifier)) {
 			return false;
 		}
 	}
 	return true;
 }
 
-bool AssetManager::loadNewGltf(std::string identifier) {
-	std::vector<MeshLoadData> meshLoadData;
+bool AssetManager::LoadNewGltf(std::string identifier) {
+	MeshLoadData meshLoadData;
 	
 	bool objectLoaded = this->objectLoader.LoadGltf(identifier, meshLoadData, this->d3d11Device);
 	
 	if (!objectLoaded) {
 		return false;
 	}
-
-	for (MeshLoadData& data : meshLoadData) 
+	
+	for (Mesh& data : meshLoadData.meshes) 
 	{
-		/*this->meshes.insert({ data.mesh.GetName(), std::move(data.mesh)});
-		this->meshObjDataSets.insert({data.meshData})*/
+		this->meshes.emplace(data.GetName(), std::move(data));
+	}
+	for (Material& data : meshLoadData.materials) 
+	{
+		this->materials.emplace(data.identifier, std::move(data));
+	}
+	for (Texture& data : meshLoadData.textures) 
+	{
+		this->textures.emplace(data.GetIdentifier(), std::move(data));
+	}
+	for (MeshObjData& data : meshLoadData.meshData) 
+	{
+		this->meshObjDataSets.emplace(identifier, std::move(data));
 	}
 
 	return true;
 }
 
-MeshObjData AssetManager::GetTemplate(std::string identifier)
+MeshObjData AssetManager::GetMeshObjData(std::string identifier)
 {
-	return MeshObjData();
+	if (this->meshObjDataSets.find(identifier) != meshObjDataSets.end()) {
+		return meshObjDataSets.at(identifier);
+	}
+	else
+	{
+		this->LoadNewGltf(identifier);
+		return meshObjDataSets.at(identifier);
+	}
 }
 
 SoundClip* AssetManager::GetSoundClipStandardFolder(std::string filename)

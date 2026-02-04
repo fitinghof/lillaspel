@@ -3,7 +3,6 @@
 #include <fastgltf/core.hpp>
 #include <fastgltf/tools.hpp>
 #include <fastgltf/util.hpp>
-#include <fastgltf/types.hpp>
 #include <unordered_map>
 #include <rendering/texture.h>
 #include <WICTextureLoader.h>

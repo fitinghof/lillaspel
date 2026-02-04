@@ -7,6 +7,7 @@
 #include <array>
 #include "utilities/logger.h"
 #include <DirectXMath.h>
+#include "gameObjects/gameObjectFactory.h"
 
 class Scene;
 class GameObjectFactory;

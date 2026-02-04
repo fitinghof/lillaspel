@@ -7,15 +7,31 @@ class GameObject;
 
 class GameObjectFactory {
 public:
+
+    /// <summary>
+    /// Creates a new GameObject and registers it in the scene.
+    /// T is any type derived from GameObject.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
     template <typename T>
     std::weak_ptr<T> CreateGameObjectOfType();
     
+    /// <summary>
+    /// Delete the GameObject after all game logic is done, but before the game renders.
+    /// </summary>
+    /// <param name="gameObject"></param>
     virtual void QueueDeleteGameObject(std::weak_ptr<GameObject> gameObject) = 0;
-    // FindObjectOfType etc
+    
+    // FindObjectOfType() etc
 
     virtual ~GameObjectFactory() = default;
 
 private:
+    /// <summary>
+    /// Add GameObject to game engine logic
+    /// </summary>
+    /// <param name="gameObject"></param>
     virtual void RegisterGameObject(std::shared_ptr<GameObject> gameObject) = 0;
 };
 

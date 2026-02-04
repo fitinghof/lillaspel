@@ -1,5 +1,4 @@
 #include "gameObjects/gameObject.h"
-#include "gameObjects/gameObjectFactory.h"
 
 GameObject::GameObject() : children(), parent(), factory(nullptr)
 {
@@ -50,8 +49,6 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 
 void GameObject::Start()
 {
-	Logger::Log("It works?");
-
 	static bool created = false;
 	if (!created)
 	{

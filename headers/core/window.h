@@ -6,6 +6,10 @@
 // std
 #include <Windows.h>
 #include <string>
+#include <windowsx.h>
+#include <memory>
+
+#include "core/inputManager.h"
 #include <functional>
 
 class Window
@@ -17,6 +21,10 @@ private:
     HINSTANCE instance;
     RECT windowedRect{};
     bool isFullscreen;
+    bool showIMGui;
+	bool cursorVisible;
+
+	std::unique_ptr<InputManager> inputManager;
 
     DEVMODE originalDisplayMode{};
     bool hasOriginalDisplayMode;
@@ -28,13 +36,21 @@ private:
 
     std::function<void(UINT, UINT)> resizeCallback;
 
+	LRESULT ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 public:
     Window(const HINSTANCE instance, int nCmdShow, const std::string name = "Window", const UINT width = 1024, const UINT height = 576);
     ~Window();
 
+
     HWND GetHWND() const;
     UINT GetWidth() const;
     UINT GetHeight() const;
+    InputManager* GetInputManager() const;
+    bool IsFullscreen() const;
+    void Show(int nCmdShow) const;
+
+    bool IsIMGuiShown() const;
+    void SetIMGuiShown(const bool show);
     void Show(int nCmdShow);
     void Resize(UINT width, UINT height);
     void ToggleFullscreen(bool fullscreen);

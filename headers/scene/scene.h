@@ -4,30 +4,24 @@
 #include "gameObjects/gameObject.h"
 #include "utilities/logger.h"
 #include <memory>
+#include "gameObjects/gameObjectFactory.h"
+#include <algorithm>
 
-class Scene {
+class Scene : public GameObjectFactory {
 public:
 	Scene();
 	~Scene() = default;
 
 	void SceneTick();
 
-	template <typename T>
-	inline std::weak_ptr<T> CreateGameObjectOfType();
+	virtual void RegisterGameObject(std::shared_ptr<GameObject> gameObject) override;
+	virtual void QueueDeleteGameObject(std::weak_ptr<GameObject> gameObject) override;
+
+	size_t GetNumberOfGameObjects();
 
 private:
+	void DeleteDeleteQueue();
+
 	std::vector<std::shared_ptr<GameObject>> gameObjects;
+	std::vector<std::weak_ptr<GameObject>> deleteQueue;
 };
-
-template<typename T>
-inline std::weak_ptr<T> Scene::CreateGameObjectOfType()
-{
-	// Make sure it is a gameObject (compiler assert)
-	static_assert(std::is_base_of_v<GameObject, T>, "T must derive from GameObject");
-
-	auto obj = std::make_shared<T>();
-	std::weak_ptr<T> newObject = obj;
-	obj->SetWeakPtr(newObject);
-	this->gameObjects.push_back(std::move(obj));
-	return newObject;
-}

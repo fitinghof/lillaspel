@@ -145,6 +145,9 @@ void SceneManager::LoadScene()
 	auto light2 = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 	light2.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
 	DirectX::XMStoreFloat4(&light2.lock()->data.color, DirectX::XMVectorSet(0, 0, 1, 1));
+
+	Logger::Log(this->mainScene->GetNumberOfGameObjects());
+	this->mainScene->QueueDeleteGameObject(light2);
 }
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)

@@ -30,9 +30,9 @@ void SceneManager::LoadScene()
 
 	// Temporary meshes
 
-	std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
-	ObjectLoader loader;
-	loader.LoadGltf(*glbMesh.get(), "Box/cube.glb", this->renderer->GetDevice());
+	//std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
+	//ObjectLoader loader;
+	//loader.LoadGltf(*glbMesh.get(), "Box/cube.glb", this->renderer->GetDevice());
 
 	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
@@ -55,7 +55,7 @@ void SceneManager::LoadScene()
 	quadSubMeshes.push_back(SubMesh(0,6));
 	this->tempMeshes.push_back(std::unique_ptr<Mesh>(new Mesh(std::move(tempVBuffer), std::move(tempIBuffer), std::move(quadSubMeshes))));
 
-	this->tempMeshes.push_back(std::move(glbMesh));
+	//this->tempMeshes.push_back(std::move(glbMesh));
 
 
 

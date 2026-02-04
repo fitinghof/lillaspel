@@ -71,17 +71,15 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			// If we haven't processed these vertexes yet, do so.
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
-				bufferOffsets[positionIt->accessorIndex] = totalOffset;
+				bufferOffsets.emplace(positionIt->accessorIndex, totalOffset);
 
 				this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
-
-				
 
 			}
 
 			uint32_t indexStart = indexOffset;
 			this->LoadIndices(asset, *it, indices, indexOffset);
-			submeshes.emplace_back(indexStart, indexOffset - indexStart, std::move(textureView));
+			submeshes.emplace_back(indexStart, indexOffset - indexStart);
 			
 
 			auto& material = asset.materials[it->materialIndex.value_or(0)];
@@ -103,11 +101,11 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 				std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
 				Texture tex(textureRaw,  texIdent);
 
-				loadedTextures[texture.imageIndex.value() ] = tex;
-				materialOut.textures.emplace_back(tex);
+				loadedTextures.emplace(texture.imageIndex.value(), tex);
+				materialOut.textures.emplace_back(new Texture(tex));
 			}
 			else {
-				materialOut.textures.emplace_back(loadedTextures.at(texture.imageIndex.value()));
+				materialOut.textures.emplace_back(new Texture(loadedTextures.at(texture.imageIndex.value())));
 			}
 			
 			
@@ -116,11 +114,9 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			std::string materialIdent = path.generic_string() + ":Mat_" + std::to_string(materials.size());
 			materialOut.identifier = materialIdent;
 
-			data.SetMaterial()
+			data.SetMaterial(materials.size(), materialIdent);
+			//materials.emplace(materialIdent, std::move(materialOut));
 
-			meshLoadData.materials.emplace_back(materialOut);
-
-			materials[materialIdent] = materialOut;
 		}
 
 

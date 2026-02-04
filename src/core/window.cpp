@@ -27,37 +27,10 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-        return 1;
-    
-    switch (message) {
-    case WM_SIZE: {
-        if (wParam != SIZE_MINIMIZED) {
-            UINT clientWidth = LOWORD(lParam);
-            UINT clientHeight = HIWORD(lParam);
 
-            if (clientWidth > 0 && clientHeight > 0) {
-                if(!this->isFullscreen) {
-                    this->width = clientWidth;
-                    this->height = clientHeight;
-
-                    if (this->resizeCallback) {
-                        this->resizeCallback(this->width, this->height);
-                    }
-				}
-            }
-        }
-        return 0;
+    if (this->showIMGui) {
+        ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
     }
-
-    case WM_DESTROY: {
-        PostQuitMessage(0);
-        return 0;
-    }
-    default:
-        return DefWindowProc(hWnd, message, wParam, lParam);
-    }
-
 	return this->ReadMessage(hWnd, message, wParam, lParam);
 }
 
@@ -163,7 +136,7 @@ LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				break;
 			}
 			case VK_F11: {
-				//window->SetFullscreen(!window->IsFullscreen());
+				this->ToggleFullscreen(!this->isFullscreen);
 				break;
 			}
 			case VK_TAB: {
@@ -221,6 +194,26 @@ LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		this->inputManager->SetRMouseKeyState(KEY_RELEASED);
 		return 0;
 	}
+
+	/// Handle window events
+    case WM_SIZE: {
+        if (wParam != SIZE_MINIMIZED) {
+            UINT clientWidth = LOWORD(lParam);
+            UINT clientHeight = HIWORD(lParam);
+
+            if (clientWidth > 0 && clientHeight > 0) {
+                if (!this->isFullscreen) {
+                    this->width = clientWidth;
+                    this->height = clientHeight;
+
+                    if (this->resizeCallback) {
+                        this->resizeCallback(this->width, this->height);
+                    }
+                }
+            }
+        }
+        return 0;
+    }
 
 	case WM_DESTROY: {
 		PostQuitMessage(0);

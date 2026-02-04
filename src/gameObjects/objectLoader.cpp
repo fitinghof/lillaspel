@@ -72,44 +72,52 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
 				bufferOffsets.emplace(positionIt->accessorIndex, totalOffset);
 
-				this->LoadUV(asset, *it, verticies, totalOffset)
+				size_t oldOffset = totalOffset;
+				
 				this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
+				
+				this->LoadUV(asset, *it, verticies, oldOffset);
 
 
 			}
 
+			size_t logit = 0;
+
+
 			uint32_t indexStart = indexOffset;
-			if (!this->LoadIndices(asset, *it, indices, indexOffset))
+			if (!this->LoadIndices(asset, *it, indices, indexOffset)) {
+				Logger::Error("Loading indices failed");
 				return false;
+			}				
 
 			submeshes.emplace_back(indexStart, indexOffset - indexStart);
 			
 
 			auto& material = asset.materials[it->materialIndex.value_or(0)];
+
 			auto& baseColorTexture = material.pbrData.baseColorTexture;
 
 			Material materialOut;
 
-			// should be checked, isnt right now;
-			auto& texture = asset.textures[baseColorTexture->textureIndex];
+			if (baseColorTexture.has_value() && asset.textures[baseColorTexture->textureIndex].imageIndex.has_value()) {
+				auto& texture = asset.textures[baseColorTexture->textureIndex];
+				auto textureNameIt = loadedTextures.find(texture.imageIndex.value());
+				if (textureNameIt == loadedTextures.end()) {
+					auto* textureRaw = this->LoadTexture(asset, * it, device);
+					if (textureRaw == nullptr) {
+						return false;
+					}
+					std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
+					Texture tex(textureRaw,  texIdent);
 
-			// Do note that if a mesh lacks a texture, currently stuff will just die
-			// Should add some default texture or something
-			auto textureNameIt = loadedTextures.find(texture.imageIndex.value_or(-1));
-			if (textureNameIt == loadedTextures.end()) {
-				auto* textureRaw = this->LoadTexture(asset, * it, device);
-				if (textureRaw == nullptr) {
-					return false;
+					loadedTextures.emplace(texture.imageIndex.value(), tex);
+					materialOut.textures.emplace_back(new Texture(tex));
 				}
-				std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
-				Texture tex(textureRaw,  texIdent);
-
-				loadedTextures.emplace(texture.imageIndex.value(), tex);
-				materialOut.textures.emplace_back(new Texture(tex));
+				else {
+					materialOut.textures.emplace_back(new Texture(loadedTextures.at(texture.imageIndex.value())));
+				}
 			}
-			else {
-				materialOut.textures.emplace_back(new Texture(loadedTextures.at(texture.imageIndex.value())));
-			}
+			Logger::Log("Finished texture check");
 			
 			
 			// Extract more material stuff
@@ -139,7 +147,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 	
 }
 
-void ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex> dest, uint32_t& offset)
+void ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex>& dest, uint32_t& offset)
 {
 	auto* positionIt = primitive.findAttribute("POSITION");
 	assert(positionIt != primitive.attributes.end());
@@ -148,7 +156,6 @@ void ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const f
 	auto& positionAccessor = asset.accessors[positionIt->accessorIndex];
 
 	dest.reserve(dest.size() + positionAccessor.count);
-	Logger::Log("Number of positions: ", positionAccessor.count);
 
 	// Wacky for loop
 	fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec3>(asset, positionAccessor, [&](fastgltf::math::fvec3 pos, std::size_t idx) {
@@ -178,11 +185,12 @@ void ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const f
 		// Implement normal generation later maybe
 		Logger::Warn("No normals found for mesh primitive!");
 	}
-	offset += static_cast<uint32_t>(positionAccessor.count * sizeof(Vertex));
+	offset += static_cast<uint32_t>(positionAccessor.count);
 }
 
-bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t> dest, uint32_t& offset)
+bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset)
 {
+	Logger::Log("Loading indices");
 	// Parse Indicies
 	fastgltf::Accessor& indexAccessor = asset.accessors[primitive.indicesAccessor.value()];
 
@@ -209,10 +217,11 @@ bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive
 		fastgltf::copyFromAccessor<std::uint32_t>(asset, indexAccessor, dest.data() + offset);
 	}
 	offset += static_cast<uint32_t>(indexAccessor.count);
+	Logger::Log("Loaded indices");
 	return true;
 }
 
-bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex> dest, size_t offset, size_t uvIndex)
+bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex>& dest, size_t offset)
 {
 	size_t baseColorTextureCordIndex = 0;
 	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
@@ -250,6 +259,7 @@ bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitiv
 
 ID3D11ShaderResourceView* ObjectLoader::LoadTexture(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, ID3D11Device* device)
 {
+	Logger::Log("Loading textures");
 	ID3D11ShaderResourceView* textureView = nullptr;
 	size_t baseColorTextureCordIndex = 0;
 	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
@@ -292,5 +302,6 @@ ID3D11ShaderResourceView* ObjectLoader::LoadTexture(const fastgltf::Asset& asset
 			},
 		}, textureImage.data);
 	}
+	Logger::Log("Loaded texture");
 	return textureView;
 }

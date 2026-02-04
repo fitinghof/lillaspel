@@ -72,11 +72,9 @@ bool AssetManager::LoadNewGltf(std::string identifier) {
 	MeshLoadData meshLoadData;
 	
 	bool objectLoaded = this->objectLoader.LoadGltf(identifier, meshLoadData, this->d3d11Device);
-	
 	if (!objectLoaded) {
 		return false;
 	}
-	
 	for (Mesh& data : meshLoadData.meshes) 
 	{
 		this->meshes.emplace(data.GetName(), std::move(data));

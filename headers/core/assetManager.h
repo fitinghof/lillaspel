@@ -16,8 +16,12 @@ class AssetManager
 {
 public:
 	AssetManager(ID3D11Device* device);
+	AssetManager() = default;
 	~AssetManager() = default;
-	
+
+	Mesh* GetMeshPtr(std::string ident) { return &this->meshes.at(ident); }
+	Material* GetMaterialPtr(std::string ident) { return &this->materials.at(ident); }
+
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename);
 	void AddSoundClip(std::string path);

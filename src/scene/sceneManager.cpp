@@ -30,13 +30,6 @@ void SceneManager::LoadScene()
 
 	// Temporary meshes
 
-	// <HIGHLY TEMPORARY>
-	std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
-	ObjectLoader loader;
-	MeshLoadData data;
-	loader.LoadGltf("Box/cube.glb", data, this->renderer->GetDevice());
-	// </HIGHLY TEMPORARY>
-
 	Vertex vertexData[] = {
 	{-1, -1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 1.0f},
 	{-1,  1, 0,		0.0f, 0.0f, -1.0f,		0.0f, 0.0f},

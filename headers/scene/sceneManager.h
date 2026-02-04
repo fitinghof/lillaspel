@@ -23,6 +23,13 @@ public:
 	/// </summary>
 	void LoadScene(); // Should be able to take a scene file?
 
+	//Audio
+	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
+	void AddSoundClipStandardFolder(std::string filename, std::string id);
+	void AddSoundClip(std::string path, std::string id);
+	std::string GetPathToSoundFolder();
+	SoundClip* GetSoundClip(std::string id);
+
 private:
 	std::unique_ptr<Scene> mainScene;
 	AssetManager assetManager;

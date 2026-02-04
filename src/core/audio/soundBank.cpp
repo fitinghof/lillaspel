@@ -79,6 +79,8 @@ void SoundBank::CreateSoundBuffer(std::string fullpath, std::string id)
 	{
 		Logger::Error("Libsndfile error: " + std::string(sf_strerror(NULL)));
 		Logger::Log("could not open " + fullpath);
+
+		return;
 	}
 	if (sfInfo.frames < 1 || sfInfo.frames >(sf_count_t)(INT_MAX / sizeof(short)) / sfInfo.channels)
 	{
@@ -136,7 +138,7 @@ void SoundBank::CreateSoundBuffer(std::string fullpath, std::string id)
 
 	SoundClip* newClip = new SoundClip();
 	newClip->id = id;
-	newClip->buffer = buffer; //is this copy a problem???
+	newClip->buffer = buffer;
 	newClip->filepath = fullpath;
 
 	this->soundClips.insert(std::make_pair(id, newClip));

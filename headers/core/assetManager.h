@@ -10,10 +10,17 @@ public:
 	AssetManager() = default;
 	~AssetManager() = default;
 
+	//Meshes
+	//Materials
+	//Textures
+	//Shaders
+
+	//Audio
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename, std::string id);
 	void AddSoundClip(std::string path, std::string id);
-	SoundClip* GetSoundClip(std::string path);
+	std::string GetPathToSoundFolder();
+	SoundClip* GetSoundClip(std::string id);
 
 private:
 	SoundBank soundBank;

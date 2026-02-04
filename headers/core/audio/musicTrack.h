@@ -23,9 +23,9 @@ public:
 	void FadeOut(float seconds);
 	void Restart();
 
-	void Initialize(std::string filepath, std::string id);
+	bool Initialize(std::string filepath, std::string id);
 	void UpdateBufferStream();
-	void LoadTrack();
+	bool LoadTrack();
 	void SetPitch(float pitch);
 	void SetGain(float gain);
 	void SetAudioInstruction(AudioInstruction audioInstruction);
@@ -51,9 +51,9 @@ private:
 	static const int BUFFER_SAMPLES = 8192;
 	static const int NUM_BUFFERS = 4;
 	ALuint buffers[NUM_BUFFERS];
-	SNDFILE* sndfile;
+	SNDFILE* sndfile = nullptr;
 	SF_INFO sfInfo;
-	short* membuf;
+	short* membuf = nullptr;
 	ALenum format;
 
 	void SetTargetGain(float gain);

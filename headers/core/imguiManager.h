@@ -32,17 +32,28 @@ private:
 	void MainMenuImGui();
 	float GetAvrageFrameRate();
 
+	// Options
 	bool showOptionsWindow = false;
+
+		// Window
+	bool isFullscreen = false;
+	bool isVSync = false;
+
+	// Debug
 	bool showConsoleWindow = false;
+	bool showWireframe = false;
+
+	// Edit
 	bool showTransformWindow = false;
 	bool showSoundWindow = false;
-	bool showWireframe = false;
+	bool showMusicWindow = false;
+
+	// Scene
 	bool saveScene = false;
 	bool saveSceneAs = false;
 	bool loadScene = false;
 
-	bool isFullscreen = false;
-	bool isVSync = false;
+
 
 	std::function<void(UINT, UINT)> resolutionChangeCallback;
 	std::function<void(bool)> fullscreenChangeCallback;

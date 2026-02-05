@@ -45,7 +45,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 	auto& asset = data.get();
 
 	std::unordered_map<uint32_t, std::shared_ptr<Texture>> loadedTextures;
-	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+	std::unordered_map<std::string, std::shared_ptr<GenericMaterial>> materials;
 	size_t meshIndex = 0;
 	
 	for (auto& gltfmesh : asset.meshes) {
@@ -60,7 +60,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		MeshObjData data;
 
 		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
-		std::vector<std::shared_ptr<Material>> current_materials;
+		std::vector<std::shared_ptr<GenericMaterial>> current_materials;
 
 		for (auto it = gltfmesh.primitives.begin(); it != gltfmesh.primitives.end(); ++it) {
 
@@ -101,7 +101,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			auto& baseColorTexture = material.pbrData.baseColorTexture;
 
-			std::shared_ptr<Material> materialOut = std::make_shared<Material>();
+			std::shared_ptr<GenericMaterial> materialOut = std::make_shared<GenericMaterial>();
 			
 			if (baseColorTexture.has_value() && asset.textures[baseColorTexture->textureIndex].imageIndex.has_value()) {
 				auto& texture = asset.textures[baseColorTexture->textureIndex];
@@ -115,18 +115,57 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 					std::shared_ptr<Texture> tex = std::make_shared<Texture>(textureRaw,  texIdent);
 
 					loadedTextures.emplace(texture.imageIndex.value(), tex);
-					materialOut->textures.emplace_back(tex);
+					materialOut->diffuseTexture = tex;
 				}
 				else {
-					materialOut->textures.emplace_back((*textureNameIt).second);
+					materialOut->diffuseTexture = (*textureNameIt).second;
 				}
 			}
 			
 			
 			// Extract more material stuff
+			GenericMaterial::BasicMaterialStruct basicData{
+
+				// Either ambient or diffuse must be missmapped
+				.ambient {
+					material.pbrData.baseColorFactor[0],
+					material.pbrData.baseColorFactor[1],
+					material.pbrData.baseColorFactor[2],
+					material.pbrData.baseColorFactor[3],
+				},
+				// Either ambient or diffuse must be missmapped
+				.diffuse {
+					material.pbrData.baseColorFactor[0],
+					material.pbrData.baseColorFactor[1],
+					material.pbrData.baseColorFactor[2],
+					material.pbrData.baseColorFactor[3],
+				},
+
+				.specular {
+					// pointer scary, make null check before assigning
+				},
+
+				.shininess {
+					// pointer scary, make null check before assigning (belongs with specular)
+				},
+
+				.padding {80085, 10101010, 0},
+			};
+
+			if (material.specular) {
+				basicData.specular[0] = material.specular->specularColorFactor[0];
+				basicData.specular[1] = material.specular->specularColorFactor[1];
+				basicData.specular[2] = material.specular->specularColorFactor[2];
+
+				basicData.shininess = material.specular->specularFactor;
+			}
+			
+			if (material.normalTexture) {
+				materialOut->normalTexture = nullptr; // Do;
+			}
 
 			std::string materialIdent = path.generic_string() + ":Mat_" + std::to_string(materials.size());
-			materialOut->identifier = materialIdent;
+			materialOut->BaseMaterial::identifier = materialIdent;
 
 			current_materials.emplace_back(materialOut);
 			materials.emplace(materialIdent, std::move(materialOut));

@@ -6,13 +6,13 @@
 #include "rendering/vertexBuffer.h"
 #include "rendering/indexBuffer.h"
 #include "gameObjects/meshObjData.h"
-#include "rendering/material.h"
+#include "rendering/genericMaterial.h"
 #include <fastgltf/core.hpp>
 
 
 struct MeshLoadData {
 	std::vector<std::shared_ptr<Mesh>> meshes;
-	std::vector<std::shared_ptr<Material>> materials;
+	std::vector<std::shared_ptr<GenericMaterial>> materials;
 	std::vector<std::shared_ptr<Texture>> textures;
 	std::vector<MeshObjData> meshData;
 };

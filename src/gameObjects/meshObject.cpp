@@ -30,6 +30,10 @@ void MeshObject::Tick()
 void MeshObject::LoadFromJson(const nlohmann::json& data)
 {
 	this->GameObject3D::LoadFromJson(data);
+
+	if (data.contains("meshIdentifier")) {
+		SetMesh(AssetManager::GetInstance(data["meshIdentifier"]));
+	}
 }
 
 void MeshObject::SaveToJson(nlohmann::json& data)
@@ -37,4 +41,6 @@ void MeshObject::SaveToJson(nlohmann::json& data)
 	this->GameObject3D::SaveToJson(data);
 
 	data["type"] = "MeshObject";
+
+	data["meshIdentifier"] = GetMesh().GetMeshIdent();
 }

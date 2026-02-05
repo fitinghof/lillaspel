@@ -6,13 +6,13 @@
 #include "rendering/vertexBuffer.h"
 #include "rendering/indexBuffer.h"
 #include "gameObjects/meshObjData.h"
-#include "rendering/material.h"
+#include "rendering/genericMaterial.h"
 #include <fastgltf/core.hpp>
 
 
 struct MeshLoadData {
 	std::vector<std::shared_ptr<Mesh>> meshes;
-	std::vector<std::shared_ptr<Material>> materials;
+	std::vector<std::shared_ptr<GenericMaterial>> materials;
 	std::vector<std::shared_ptr<Texture>> textures;
 	std::vector<MeshObjData> meshData;
 };
@@ -74,7 +74,7 @@ private:
 	/// <param name="primitive"></param>
 	/// <param name="device"></param>
 	/// <returns>texture pointer</returns>
-	ID3D11ShaderResourceView* LoadTexture(fastgltf::Asset& asset, fastgltf::Primitive& primitive, ID3D11Device* device);
+	ID3D11ShaderResourceView* LoadTexture(fastgltf::Asset& asset, fastgltf::TextureInfo& textureInfo, ID3D11Device* device);
 
 	std::filesystem::path basePath;
 };

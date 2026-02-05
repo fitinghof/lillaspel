@@ -19,7 +19,7 @@ public:
 	AssetManager(const AssetManager& assetManager) = delete;
 
 	Mesh* GetMeshPtr(std::string ident) { return ident != "" ? this->meshes.at(ident).get() : nullptr; }
-	Material* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
+	BaseMaterial* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
 
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename, std::string id);
@@ -43,9 +43,8 @@ private:
 
 	AssetManager() = default;
 	~AssetManager() = default;
-	
 
-	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+	std::unordered_map<std::string, std::shared_ptr<BaseMaterial>> materials;
 	std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;
 	std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
 	std::unordered_map<std::string, MeshObjData> meshObjDataSets;

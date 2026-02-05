@@ -23,6 +23,6 @@ void MeshObject::Tick()
 {
 	GameObject3D::Tick();
 
-	static float rot = 0;
-	this->transform.SetRotationRPY(0,0,rot += 0.0005f);
+	//static float rot = 0;
+	//this->transform.SetRotationRPY(0,0,rot += 0.0005f);
 }

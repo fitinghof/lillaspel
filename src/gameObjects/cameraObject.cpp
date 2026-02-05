@@ -33,18 +33,19 @@ void CameraObject::Tick()
 	std::array leftStick = InputManager::GetInstance().GetLeftThumbMovement();
 	std::array rightStick = InputManager::GetInstance().GetRightThumbMovement();
 
-	Logger::Log(leftStick.at(0));
-	float rotSpeed = 1 * Time::GetInstance().GetDeltaTime();
-	float moveSpeed = 20 * Time::GetInstance().GetDeltaTime();
-	/*rot[1] = rot[1] + mouseInput.first / 10000;
-	rot[2] = rot[2] + mouseInput.second / 10000;*/
-	this->transform.Rotate(-1 * rot[0], 0, 0);
-	this->transform.Rotate(0, rightStick.at(0) * rotSpeed);
-	this->transform.Rotate(rot[0], 0);
-	this->transform.Rotate(rightStick.at(1) * rotSpeed * -1, 0);
-	rot[0] = rot[0] + rightStick.at(1) * rotSpeed * -1;
+	float sensitivity = 2.0f; 
+	float rotSpeed = sensitivity * Time::GetInstance().GetDeltaTime();
 
-	this->transform.Move(this->transform.GetDirectionVector(), moveSpeed * leftStick.at(1));
+	rot[0] += rightStick.at(1) * rotSpeed * -1.0f;
+	rot[1] += rightStick.at(0) * rotSpeed;
+
+	if (rot[0] > 1.5f) rot[0] = 1.5f;
+	if (rot[0] < -1.5f) rot[0] = -1.5f;
+
+	
+	this->transform.SetRotationRPY(0.0f, rot[0], rot[1]);
+
+	this->transform.Move(this->transform.GetDirectionVector(), Time::GetInstance().GetDeltaTime() * leftStick.at(1) * 20);
 
 	//this->transform.SetPosition(DirectX::XMVectorSet(pos[0], pos[1], pos[2], 1.0f));
 	// this->transform.SetRotationRPY(DirectX::XMConvertToRadians(rot[0]), DirectX::XMConvertToRadians(rot[1]), DirectX::XMConvertToRadians(rot[2]));

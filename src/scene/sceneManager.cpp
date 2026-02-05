@@ -91,25 +91,25 @@ void SceneManager::SaveSceneToFile(const std::string& filePath)
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)
 {
-	this->assetManager.InitializeSoundBank(pathToSoundFolder);
+	AssetManager::GetInstance().InitializeSoundBank(pathToSoundFolder);
 }
 
 void SceneManager::AddSoundClipStandardFolder(std::string filename, std::string id)
 {
-	this->assetManager.AddSoundClipStandardFolder(filename, id);
+	AssetManager::GetInstance().AddSoundClipStandardFolder(filename, id);
 }
 
 void SceneManager::AddSoundClip(std::string path, std::string id)
 {
-	this->assetManager.AddSoundClip(path, id);
+	AssetManager::GetInstance().AddSoundClip(path, id);
 }
 
 std::string SceneManager::GetPathToSoundFolder()
 {
-	return this->assetManager.GetPathToSoundFolder();
+	return AssetManager::GetInstance().GetPathToSoundFolder();
 }
 
 SoundClip* SceneManager::GetSoundClip(std::string id)
 {
-	return this->assetManager.GetSoundClip(id);
+	return AssetManager::GetInstance().GetSoundClip(id);
 }

@@ -82,13 +82,14 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 				
 				this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
 				
-				this->LoadUV(asset, *it, verticies, oldOffset);
+				bool success = this->LoadUV(asset, *it, verticies, oldOffset);
+				if (!success) {
+					Logger::Error("Failed to load UV");
+					return false;
+				}
 
 
 			}
-
-			size_t logit = 0;
-
 
 			uint32_t indexStart = indexOffset;
 			if (!this->LoadIndices(asset, *it, indices, indexOffset)) {

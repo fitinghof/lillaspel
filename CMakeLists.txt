@@ -45,9 +45,6 @@ if(ENABLE_SCCACHE)
   endif()
 endif()
 
-# Windows Unicode defines
-add_compile_definitions(UNICODE _UNICODE)
-
 # Output directories for build artifacts
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
@@ -114,6 +111,9 @@ file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.c
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/headers/*.h" "${CMAKE_SOURCE_DIR}/headers/*.hpp")
 
 add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS})
+
+# Target-scoped Windows Unicode defines
+target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE _UNICODE)
 
 # Unity build (optional)
 option(ENABLE_UNITY_BUILD "Enable Unity build for faster compiles" ON)
@@ -207,7 +207,7 @@ endif()
 
 # Prevent PDB collisions with MSVC + Ninja
 if(MSVC)
-  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded)
+  set_property(TARGET ${PROJECT_NAME} PROPERTY MSVC_DEBUG_INFORMATION_FORMAT Embedded)
 endif()
 
 message(STATUS "Configured ${PROJECT_NAME} with ${CMAKE_CXX_STANDARD}-standard and ${PROJECT_SOURCES} source files")

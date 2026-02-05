@@ -85,7 +85,8 @@ bool AssetManager::LoadNewGltf(std::string identifier) {
 	}
 	for (MeshObjData& data : meshLoadData.meshData)
 	{
-		this->meshObjDataSets.emplace(identifier, std::move(data));
+		Logger::Log("mesh name: ", data.GetMeshIdent());
+		this->meshObjDataSets.emplace(data.GetMeshIdent(), std::move(data));
 	}
 
 	return true;

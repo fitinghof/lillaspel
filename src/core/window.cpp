@@ -79,7 +79,7 @@ void Window::ApplyFullscreenResolution(UINT width, UINT height)
 }
 
 Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, const UINT width, const UINT height)
-    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false), showIMGui(true), cursorVisible(true), inputManager(std::make_unique<InputManager>()) {
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false), showIMGui(true), cursorVisible(true) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
     DWORD style = WS_OVERLAPPEDWINDOW;
@@ -152,15 +152,15 @@ LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			default: {
 				const bool wasDown = lParam & (1 << 30);
 				if (!wasDown)
-					this->inputManager->SetKeyState(key, KEY_DOWN | KEY_PRESSED);
+					InputManager::GetInstance().SetKeyState(key, KEY_DOWN | KEY_PRESSED);
 				break;
 			}
 		}
 		return 0;
 	}
-
+                   
 	case WM_KEYUP: {
-		this->inputManager->SetKeyState(key, KEY_RELEASED);
+		InputManager::GetInstance().SetKeyState(key, KEY_RELEASED);
 		return 0;
 	}
 
@@ -168,29 +168,29 @@ LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	case WM_MOUSEMOVE: {
 		const int xPos = GET_X_LPARAM(lParam);
 		const int yPos = GET_Y_LPARAM(lParam);
-		this->inputManager->SetMousePosition(xPos, yPos);
+		InputManager::GetInstance().SetMousePosition(xPos, yPos);
 		return 0;
 	}
 
 	case WM_LBUTTONDOWN: {
-		if (!this->inputManager->IsLMDown())
-			this->inputManager->SetLMouseKeyState(KEY_DOWN | KEY_PRESSED);
+		if (!InputManager::GetInstance().IsLMDown())
+			InputManager::GetInstance().SetLMouseKeyState(KEY_DOWN | KEY_PRESSED);
 		return 0;
 	}
 
 	case WM_LBUTTONUP: {
-		this->inputManager->SetLMouseKeyState(KEY_RELEASED);
+		InputManager::GetInstance().SetLMouseKeyState(KEY_RELEASED);
 		return 0;
 	}
 
 	case WM_RBUTTONDOWN: {
-		if (!this->inputManager->IsRMDown())
-			this->inputManager->SetRMouseKeyState(KEY_DOWN | KEY_PRESSED);
+		if (!InputManager::GetInstance().IsRMDown())
+			InputManager::GetInstance().SetRMouseKeyState(KEY_DOWN | KEY_PRESSED);
 		return 0;
 	}
 
 	case WM_RBUTTONUP: {
-		this->inputManager->SetRMouseKeyState(KEY_RELEASED);
+		InputManager::GetInstance().SetRMouseKeyState(KEY_RELEASED);
 		return 0;
 	}
 
@@ -230,7 +230,7 @@ UINT Window::GetWidth() const { return this->width; }
 
 UINT Window::GetHeight() const { return this->height; }
 
-InputManager* Window::GetInputManager() const { return this->inputManager.get(); }
+
 
 bool Window::IsFullscreen() const { return this->isFullscreen; }
 

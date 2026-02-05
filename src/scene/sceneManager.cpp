@@ -18,7 +18,7 @@ void SceneManager::LoadScene()
 
 	this->mainScene->CreateGameObjectOfType<CameraObject>();
 	// So basically right now this is the temporary place to create scenes, before we can load them from file
-	MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
+	MeshObjData data = AssetManager::GetInstance().GetMeshObjData("CS/sas__cs2_agent_model_blue.glb:Mesh_2");
 
 	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));

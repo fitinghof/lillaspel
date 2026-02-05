@@ -157,6 +157,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   OpenAL::OpenAL
   sndfile
   fastgltf
+  xinput
 )
 
 # Shader compilation (fxc)

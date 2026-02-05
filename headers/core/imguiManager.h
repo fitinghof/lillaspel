@@ -23,21 +23,40 @@ public:
 	void SetResolutionChangeCallback(std::function<void(UINT, UINT)> callback);
 	void SetFullscreenChangeCallback(std::function<void(bool)> callback);
 	void SetVSyncChangeCallback(std::function<void(bool)> callback);
+	void SetWireframeChangeCallback(std::function<void(bool)> callback);
 
 private:
 
 	void ConsoleImGui();
-	void OptionsImGui();
+	void WindowOptionsImGui();
 	void MainMenuImGui();
 	float GetAvrageFrameRate();
 
+	// Options
 	bool showOptionsWindow = false;
-	bool showConsoleWindow = false;
+
+		// Window
 	bool isFullscreen = false;
 	bool isVSync = false;
+
+	// Debug
+	bool showConsoleWindow = false;
+	bool showWireframe = false;
+
+	// Edit
+	bool showTransformWindow = false;
+	bool showSoundWindow = false;
+	bool showMusicWindow = false;
+
+	// Scene
+	bool saveScene = false;
+	bool saveSceneAs = false;
+	bool loadScene = false;
+
+
 
 	std::function<void(UINT, UINT)> resolutionChangeCallback;
 	std::function<void(bool)> fullscreenChangeCallback;
 	std::function<void(bool)> vSyncChangeCallback;
-
+	std::function<void(bool)> wireframeChangeCallback;
 };

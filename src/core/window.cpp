@@ -27,7 +27,6 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-
     if (this->showIMGui) {
         ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
     }

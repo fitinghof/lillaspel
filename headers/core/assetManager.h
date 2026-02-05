@@ -54,5 +54,7 @@ private:
 	
 	ID3D11Device* d3d11Device = nullptr;
 
+	std::string getCleanPath(std::string pathToFix);
+
 };
 

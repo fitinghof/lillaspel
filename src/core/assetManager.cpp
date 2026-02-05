@@ -29,7 +29,7 @@ bool AssetManager::GetMaterial(std::string identifier)
 	}
 	else
 	{
-		if (!this->LoadNewGltf(identifier)) {
+		if (!this->LoadNewGltf(getCleanPath(identifier))) {
 			return false;
 		}
 	}
@@ -43,7 +43,7 @@ bool AssetManager::GetMesh(std::string identifier)
 	}
 	else
 	{
-		if (!this->LoadNewGltf(identifier)) {
+		if (!this->LoadNewGltf(getCleanPath(identifier))) {
 			return false;
 		}
 	}
@@ -57,7 +57,7 @@ bool AssetManager::GetTexture(std::string identifier)
 	}
 	else
 	{
-		if (!this->LoadNewGltf(identifier)) {
+		if (!this->LoadNewGltf(getCleanPath(identifier))) {
 			return false;
 		}
 	}
@@ -98,7 +98,7 @@ MeshObjData AssetManager::GetMeshObjData(std::string identifier)
 	}
 	else
 	{
-		Logger::Log(this->LoadNewGltf(identifier));
+		Logger::Log(this->LoadNewGltf(getCleanPath(identifier)));
 		return meshObjDataSets.at(identifier);
 	}
 }
@@ -117,4 +117,16 @@ AssetManager& AssetManager::GetInstance()
 {
 	static AssetManager instance;
 	return instance;
+}
+
+std::string AssetManager::getCleanPath(std::string pathToFix)
+{
+	int point = pathToFix.find(":");
+	if (point != std::string::npos) {
+		return pathToFix.substr(0, point);
+	}
+	else
+	{
+		return pathToFix;
+	}
 }

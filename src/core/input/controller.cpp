@@ -1,7 +1,8 @@
 #include "core/input/controller.h"
 
-#include <Windows.h>
 #include <cmath>
+
+#include "utilities/logger.h"
 
 #define XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE 7849
 #define XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE 8689
@@ -10,8 +11,7 @@
 #define MAX_THUMB_MAGNITUDE 32767.0f
 #define MAX_TRIGGER_MAGNITUDE 255.0f // May not be needed
 
-bool Controller::IsConnected()
-{
+bool Controller::IsConnected() {
 	this->previousState = this->state;
 
 	DWORD dwResult = XInputGetState(this->controllerIndex, &this->state);
@@ -100,4 +100,13 @@ ControllerInput& Controller::ReadNewInput()
 	this->input.rightBackTrigger = bool(RT);
 
 	return this->input;
+}
+
+void Controller::PrintInputState() {
+	Logger::Log("Left Thumb: " + std::to_string(this->input.leftThumb[0]) + std::to_string(this->input.leftThumb[1]));
+	Logger::Log("Right Thumb: " + std::to_string(this->input.rightThumb[0]) + std::to_string(this->input.rightThumb[1]));
+	Logger::Log("Left Back Trigger" + std::to_string(this->input.leftBackTrigger));
+	Logger::Log("Right Back Trigger" + std::to_string(this->input.rightBackTrigger));
+
+	Logger::Log("Buttons bitmask: " + std::to_string(this->input.buttons));
 }

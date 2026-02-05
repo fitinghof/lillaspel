@@ -66,19 +66,9 @@ void InputManager::ReadControllerInputs() {
 	}
 }
 
-std::array<float, 2> InputManager::GetLeftThumbMovement() const {
-	std::array<float, 2> LT = {};
-	LT[0] = this->input.leftThumb[0];
-	LT[1] = this->input.leftThumb[1];
-	return LT;
-}
+std::array<float, 2> InputManager::GetLeftThumbMovement() const { return this->input.leftThumb;  }
 
-std::array<float, 2> InputManager::GetRightThumbMovement() const {
-	std::array<float, 2> RT = {};
-	RT[0] = this->input.rightThumb[0];
-	RT[1] = this->input.rightThumb[1];
-	return RT;
-}
+std::array<float, 2> InputManager::GetRightThumbMovement() const { return this->input.rightThumb; }
 
 bool InputManager::IsLeftBackTriggerPressed() const { return this->input.leftBackTrigger; }
 

@@ -1,11 +1,17 @@
-#include <Xinput.h>
+#pragma once
+
+#define _AMD64_
+
+#include <windows.h>
+#include <xinput.h>
+#include <array>
 
 typedef struct {
-	WORD buttons;			// Bitmask of pressed buttons
-	float leftThumb[2];		// [-1.0f, 1.0f]
-    float rightThumb[2];	// [-1.0f, 1.0f]
-    bool leftBackTrigger;	// ON / OFF
-	bool rightBackTrigger;	// ON / OFF
+	WORD buttons;					 // Bitmask of pressed buttons
+	std::array<float, 2> leftThumb;	 // [-1.0f, 1.0f]
+	std::array<float, 2> rightThumb; // [-1.0f, 1.0f]
+	bool leftBackTrigger;			 // ON / OFF
+	bool rightBackTrigger;			 // ON / OFF
 } ControllerInput;
 
 class Controller {
@@ -16,6 +22,7 @@ private:
 
 	ControllerInput input;
 
+
 public:
 	Controller(DWORD controllerIndex) : controllerIndex(controllerIndex), state{}, previousState{}, input{} {}
 	~Controller() = default;
@@ -23,6 +30,7 @@ public:
 	bool IsConnected();
 	bool HasUpdatedState() const;
 	ControllerInput& GetInput() { return this->input; }
-
 	ControllerInput& ReadNewInput();
+
+	void PrintInputState();
 };

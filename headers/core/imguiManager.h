@@ -1,9 +1,13 @@
 #pragma once
+
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
+
 #include "imgui.h"
 #include "imgui_impl_win32.h"
 #include "imgui_impl_dx11.h"
+
+// std
 #include <Windows.h>
 #include <d3d11.h>
 #include <functional>
@@ -12,10 +16,10 @@ class ImguiManager
 {
 public:
 	ImguiManager() = default;
-	ImguiManager(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* immediateContext);
+	ImguiManager(HWND hwnd, ID3D11Device *device, ID3D11DeviceContext *immediateContext);
 	~ImguiManager();
 
-	void InitalizeImgui(HWND hwnd, ID3D11Device* device, ID3D11DeviceContext* immediateContext);
+	void InitalizeImgui(HWND hwnd, ID3D11Device *device, ID3D11DeviceContext *immediateContext);
 
 	void ImguiAtFrameStart();
 	void ImguiAtFrameEnd();
@@ -26,16 +30,15 @@ public:
 	void SetWireframeChangeCallback(std::function<void(bool)> callback);
 
 private:
-
 	void ConsoleImGui();
 	void WindowOptionsImGui();
 	void MainMenuImGui();
-	float GetAvrageFrameRate();
+	float GetAverageFrameRate();
 
 	// Options
 	bool showOptionsWindow = false;
 
-		// Window
+	// Window
 	bool isFullscreen = false;
 	bool isVSync = false;
 
@@ -52,8 +55,6 @@ private:
 	bool saveScene = false;
 	bool saveSceneAs = false;
 	bool loadScene = false;
-
-
 
 	std::function<void(UINT, UINT)> resolutionChangeCallback;
 	std::function<void(bool)> fullscreenChangeCallback;

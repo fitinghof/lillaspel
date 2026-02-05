@@ -11,6 +11,55 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Build toggles
+option(ENABLE_SHADERS "Build HLSL shaders" ON)
+option(ENABLE_IMGUI_DEMO "Include ImGui demo source" OFF)
+option(ENABLE_SCCACHE "Use sccache compiler launcher" ON)
+option(ENABLE_DEPENDENCY_TOOLS "Build third-party tests/examples/tools" OFF)
+
+# Avoid building third-party tests/examples/tools during clean builds
+if(NOT ENABLE_DEPENDENCY_TOOLS)
+  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+
+  set(ALSOFT_EXAMPLES OFF CACHE BOOL "" FORCE)
+  set(ALSOFT_UTILS OFF CACHE BOOL "" FORCE)
+  set(ALSOFT_TESTS OFF CACHE BOOL "" FORCE)
+
+  set(LIBSNDFILE_TESTS OFF CACHE BOOL "" FORCE)
+  set(LIBSNDFILE_EXAMPLES OFF CACHE BOOL "" FORCE)
+
+  set(FASTGLTF_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+endif()
+
+# test
+set(CMAKE_DISABLE_FIND_PACKAGE_PkgConfig ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_Ogg ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_Vorbis ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_FLAC ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_Opus ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_mp3lame ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_mpg123 ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_Speex ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_SQLite3 ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_PulseAudio ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_JACK ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_OpenSL ON)
+set(CMAKE_DISABLE_FIND_PACKAGE_PortAudio ON)
+
+# Enable sccache if found and requested
+if(ENABLE_SCCACHE)
+  find_program(SCCACHE_PROGRAM sccache)
+  if(SCCACHE_PROGRAM)
+    set(CMAKE_C_COMPILER_LAUNCHER "${SCCACHE_PROGRAM}")
+    set(CMAKE_CXX_COMPILER_LAUNCHER "${SCCACHE_PROGRAM}")
+    message(STATUS "sccache enabled: ${SCCACHE_PROGRAM}")
+  else()
+    message(STATUS "sccache not found, disabled")
+  endif()
+endif()
+
 # Define unicode macros consistently
 add_compile_definitions(UNICODE _UNICODE)
 
@@ -20,6 +69,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}")
 
 include(FetchContent)
+
+# Avoid re-checking/updating dependencies every configure
+set(FETCHCONTENT_UPDATES_DISCONNECTED ON)
 
 # Download nlohmann::json single-header into the build include dir so it can be used
 # URL points to the 'develop' branch single_include header
@@ -89,6 +141,16 @@ file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/headers
 
 add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
+# Unity build
+option(ENABLE_UNITY_BUILD "Enable Unity build for faster compiles" ON)
+if(ENABLE_UNITY_BUILD)
+    set_target_properties(${PROJECT_NAME} PROPERTIES 
+        UNITY_BUILD ON
+        UNITY_BUILD_BATCH_SIZE 8
+    )
+endif()
+
+
 # Include project headers and generated/include directory
 target_include_directories(${PROJECT_NAME} PRIVATE
   "${CMAKE_SOURCE_DIR}/headers"
@@ -102,10 +164,14 @@ if(imgui_SOURCE_DIR)
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/imgui_demo.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_win32.cpp
     ${imgui_SOURCE_DIR}/backends/imgui_impl_dx11.cpp
   )
+  if(ENABLE_IMGUI_DEMO)
+    target_sources(${PROJECT_NAME} PRIVATE
+        ${imgui_SOURCE_DIR}/imgui_demo.cpp
+    )
+  endif()
   target_include_directories(${PROJECT_NAME} PRIVATE
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends
@@ -131,33 +197,54 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 )
 
 # Build HLSL shaders
-set(SHADER_PATH "./src/shaders")
-set(PS_SHADER "${SHADER_PATH}/pixelshaders/PSTest.hlsl")
-set(PS_SHADER_UNLIT "${SHADER_PATH}/pixelshaders/psUnlit.hlsl")
-set(PS_SHADER_LIT "${SHADER_PATH}/pixelshaders/psLit.hlsl")
-set(VS_SHADER "${SHADER_PATH}/vertexshaders/VSTest.hlsl")
-set(HLSL_SHADER_FILES ${PS_SHADER} ${PS_SHADER_UNLIT} ${PS_SHADER_LIT} ${VS_SHADER})
+if(ENABLE_SHADERS)
+  set(SHADER_PATH "./src/shaders")
+  set(PS_SHADER "${SHADER_PATH}/pixelshaders/PSTest.hlsl")
+  set(PS_SHADER_UNLIT "${SHADER_PATH}/pixelshaders/psUnlit.hlsl")
+  set(PS_SHADER_LIT "${SHADER_PATH}/pixelshaders/psLit.hlsl")
+  set(VS_SHADER "${SHADER_PATH}/vertexshaders/VSTest.hlsl")
+  set(HLSL_SHADER_FILES ${PS_SHADER} ${PS_SHADER_UNLIT} ${PS_SHADER_LIT} ${VS_SHADER})
 
-set_source_files_properties(${VS_SHADER} PROPERTIES ShaderType "vs")
-set_source_files_properties(${PS_SHADER} PROPERTIES ShaderType "ps")
-set_source_files_properties(${PS_SHADER_UNLIT} PROPERTIES ShaderType "ps")
-set_source_files_properties(${PS_SHADER_LIT} PROPERTIES ShaderType "ps")
-set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
+  set_source_files_properties(${VS_SHADER} PROPERTIES ShaderType "vs")
+  set_source_files_properties(${PS_SHADER} PROPERTIES ShaderType "ps")
+  set_source_files_properties(${PS_SHADER_UNLIT} PROPERTIES ShaderType "ps")
+  set_source_files_properties(${PS_SHADER_LIT} PROPERTIES ShaderType "ps")
+  set_source_files_properties(${HLSL_SHADER_FILES} PROPERTIES ShaderModel "5_0")
 
-foreach(FILE ${HLSL_SHADER_FILES})
-  get_filename_component(FILE_WE ${FILE} NAME_WE)
-  list(APPEND CSO_SHADER_FILES ${CMAKE_BINARY_DIR}/${FILE_WE}.cso)
-  get_source_file_property(shadertype ${FILE} ShaderType)
-  get_source_file_property(shadermodel ${FILE} ShaderModel)
-  add_custom_command(TARGET ${PROJECT_NAME} PRE_LINK
-                     COMMAND fxc.exe /nologo /Emain /T${shadertype}_${shadermodel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi /Fo ${CMAKE_BINARY_DIR}/${FILE_WE}.cso /Fd ${CMAKE_BINARY_DIR}/${FILE_WE}.pdb ${FILE}
-                     COMMENT "HLSL ${FILE}"
-                     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-                     VERBATIM)
-endforeach(FILE)
+  set(SHADER_OUTPUT_DIR "${CMAKE_BINARY_DIR}/shaders")
+  file(MAKE_DIRECTORY "${SHADER_OUTPUT_DIR}")
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                  COMMAND ${CMAKE_COMMAND} -E copy ${CSO_SHADER_FILES} $<TARGET_FILE_DIR:${PROJECT_NAME}>
-                  COMMAND_EXPAND_LISTS)
+  foreach(FILE ${HLSL_SHADER_FILES})
+    get_filename_component(FILE_WE ${FILE} NAME_WE)
+    set(CSO_FILE "${SHADER_OUTPUT_DIR}/${FILE_WE}.cso")
+    set(PDB_FILE "${SHADER_OUTPUT_DIR}/${FILE_WE}.pdb")
+    list(APPEND CSO_SHADER_FILES ${CSO_FILE})
+
+    get_source_file_property(shadertype ${FILE} ShaderType)
+    get_source_file_property(shadermodel ${FILE} ShaderModel)
+
+    add_custom_command(
+      OUTPUT ${CSO_FILE} ${PDB_FILE}
+      COMMAND fxc.exe /nologo /Emain /T${shadertype}_${shadermodel} $<IF:$<CONFIG:DEBUG>,/Od,/O1> /Zi
+              /Fo ${CSO_FILE} /Fd ${PDB_FILE} ${FILE}
+      DEPENDS ${FILE}
+      COMMENT "HLSL ${FILE}"
+      WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+      VERBATIM
+    )
+  endforeach()
+
+  add_custom_target(Shaders DEPENDS ${CSO_SHADER_FILES})
+  add_dependencies(${PROJECT_NAME} Shaders)
+
+  add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CSO_SHADER_FILES} $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    COMMAND_EXPAND_LISTS)
+endif()
+
+# Avoid PDB contention with Ninja parallel builds (MSVC)
+if(MSVC)
+  set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT Embedded)
+endif()
 
 message(STATUS "Configured ${PROJECT_NAME} with ${CMAKE_CXX_STANDARD}-standard and ${PROJECT_SOURCES} source files")

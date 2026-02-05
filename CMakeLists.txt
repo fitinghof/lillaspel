@@ -12,7 +12,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # Build toggles
-option(ENABLE_SHADERS "Build HLSL shaders" OFF)
+option(ENABLE_SHADERS "Build HLSL shaders" ON)
 option(ENABLE_IMGUI_DEMO "Include ImGui demo source" OFF)
 option(ENABLE_SCCACHE "Use sccache compiler launcher" ON)
 option(ENABLE_DEPENDENCY_TOOLS "Build third-party tests/examples/tools" OFF)

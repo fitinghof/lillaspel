@@ -8,6 +8,7 @@ template <class T> void* Constructor() { return (void*)new T(); }
 
 class ObjectFromStringFactory {
 public:
+	ObjectFromStringFactory() = default;
 	typedef void* (*ConstructorT)();
 	typedef std::unordered_map<std::string, ConstructorT> MapType;
 	MapType classes;
@@ -18,7 +19,7 @@ public:
 	/// <typeparam name="T"></typeparam>
 	/// <param name="n"></param>
 	template <class T>
-	void RegisterClass(std::string const& n);
+	void RegisterType(std::string const& n);
 
 	/// <summary>
 	/// Takes in a string and return a pointer to a new instance of the class with that name.
@@ -29,7 +30,7 @@ public:
 };
 
 template<class T>
-inline void ObjectFromStringFactory::RegisterClass(std::string const& n)
+inline void ObjectFromStringFactory::RegisterType(std::string const& n)
 {
 	classes.insert(std::make_pair(n, &Constructor<T>));
 }

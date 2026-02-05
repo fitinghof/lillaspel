@@ -11,7 +11,9 @@ class SubMesh {
 public:
 	SubMesh(size_t startIndex, size_t nrOfIndices);
 	SubMesh(SubMesh&&) noexcept = default;
-	SubMesh(SubMesh& other) = default;
+	SubMesh(SubMesh&) = default;
+	SubMesh& operator=(SubMesh&&) noexcept = default;
+	SubMesh& operator=(SubMesh&) = default;
 	~SubMesh();
 
 	size_t GetStartIndex() const;

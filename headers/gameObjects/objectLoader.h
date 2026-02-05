@@ -11,10 +11,10 @@
 
 
 struct MeshLoadData {
-	std::vector<Mesh> meshes;
-	std::vector<Material> materials;
+	std::vector<std::shared_ptr<Mesh>> meshes;
+	std::vector<std::shared_ptr<Material>> materials;
+	std::vector<std::shared_ptr<Texture>> textures;
 	std::vector<MeshObjData> meshData;
-	std::vector<Texture> textures;
 };
 
 

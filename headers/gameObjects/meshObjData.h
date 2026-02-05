@@ -1,5 +1,15 @@
 #pragma once
 #include <string>
+#include "rendering/material.h"
+#include "gameObjects/mesh.h"
+#include <optional>
+
+#include <memory>
+
+struct SubMeshData {
+	SubMesh submesh = SubMesh(0, 0);
+	std::weak_ptr<Material> material;
+};
 
 class MeshObjData {
 public:
@@ -9,24 +19,13 @@ public:
 	MeshObjData(MeshObjData&)= default;
 	MeshObjData& operator=(MeshObjData&) = default;
 
-	void SetMesh(std::string meshIdent) { 
-		this->meshIdent = meshIdent;
-		this->materialidents.clear();
-	}; // clear materialIdents
-	void SetMaterial(size_t index, std::string materialIdent) {
-		if (index >= this->materialidents.size() ) {
-			std::string val;
-			this->materialidents.insert(
-				this->materialidents.end(), 
-				this->materialidents.size() + 1 - index,
-				val
-			);
-		}
-		this->materialidents[index] = materialIdent;
-	};
-	std::string GetMeshIdent() { return this->meshIdent; }
-	std::string GetMaterial(size_t index) { return index < this->materialidents.size() ? materialidents[index] : ""; }
+	void SetMesh(std::shared_ptr<Mesh> mesh);
+	void SetMaterial(size_t index, std::shared_ptr<Material> material);
+	std::string GetMeshIdent();
+	std::weak_ptr<Mesh> GetMesh();
+	std::optional<SubMeshData> GetSubMeshData(size_t index);
+	std::weak_ptr<Material> GetMaterial(size_t index);
 private:
-	std::string meshIdent;
-	std::vector<std::string> materialidents;
+	std::weak_ptr<Mesh> mesh;
+	std::vector<std::weak_ptr<Material>> materials;
 };

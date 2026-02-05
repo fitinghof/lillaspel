@@ -401,7 +401,14 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 {
 	// Bind mesh
 	MeshObjData data = meshObject->GetMesh();
-	Mesh* mesh = this->assetManager.GetMeshPtr(data.GetMeshIdent());
+	std::weak_ptr<Mesh> weak_mesh = data.GetMesh();
+	if (weak_mesh.expired()) {
+		Logger::Error("Trying to render with expired mesh");
+		return;
+	}
+
+	std::shared_ptr<Mesh> mesh = weak_mesh.lock();
+
 	VertexBuffer vBuf = mesh->GetVertexBuffer();
 
 	UINT stride = vBuf.GetVertexSize();
@@ -426,7 +433,13 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	{
 		//ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
 		// Temp
-		auto material = this->assetManager.GetMaterialPtr(data.GetMaterial(index));
+		std::weak_ptr<Material> weak_material = data.GetMaterial(index);
+		if (weak_material.expired()) {
+			Logger::Error("Trying to render expired material, trying to continue...");
+			continue;
+		}
+
+		std::shared_ptr<Material> material = weak_material.lock();
 		ID3D11ShaderResourceView* textureSrv = material->textures.size() > 0 ? material->textures[0].get()->GetSrv() : nullptr;
 		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
 

@@ -19,8 +19,8 @@ public:
 	AssetManager() = default;
 	~AssetManager() = default;
 
-	Mesh* GetMeshPtr(std::string ident) { return ident != "" ? &this->meshes.at(ident) : nullptr; }
-	Material* GetMaterialPtr(std::string ident) { return ident != "" ? &this->materials.at(ident) : nullptr; }
+	Mesh* GetMeshPtr(std::string ident) { return ident != "" ? this->meshes.at(ident).get() : nullptr; }
+	Material* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
 
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename);
@@ -42,9 +42,9 @@ private:
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
 
-	std::unordered_map<std::string, Material> materials;
-	std::unordered_map<std::string, Mesh> meshes;
-	std::unordered_map<std::string, Texture> textures;
+	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+	std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;
+	std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
 	std::unordered_map<std::string, MeshObjData> meshObjDataSets;
 
 	bool LoadNewGltf(std::string identifier);

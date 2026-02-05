@@ -44,8 +44,8 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 	
 	auto& asset = data.get();
 
-	std::unordered_map<uint32_t, Texture> loadedTextures;
-	std::unordered_map<std::string, Material> materials;
+	std::unordered_map<uint32_t, std::shared_ptr<Texture>> loadedTextures;
+	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
 	size_t meshIndex = 0;
 	
 	for (auto& gltfmesh : asset.meshes) {
@@ -57,13 +57,10 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		std::unordered_map<uint32_t, uint32_t> bufferOffsets;
 		std::vector<SubMesh> submeshes;
 
-		Mesh mesh;
-
-		mesh.SetName(path.generic_string() + ":Mesh_" + std::to_string(meshIndex));
-		
-
 		MeshObjData data;
-		data.SetMesh(mesh.GetName());
+
+		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
+		std::vector<std::shared_ptr<Material>> current_materials;
 
 		for (auto it = gltfmesh.primitives.begin(); it != gltfmesh.primitives.end(); ++it) {
 
@@ -104,8 +101,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			auto& baseColorTexture = material.pbrData.baseColorTexture;
 
-			Material materialOut;
-
+			std::shared_ptr<Material> materialOut = std::make_shared<Material>();
 			
 			if (baseColorTexture.has_value() && asset.textures[baseColorTexture->textureIndex].imageIndex.has_value()) {
 				auto& texture = asset.textures[baseColorTexture->textureIndex];
@@ -116,13 +112,13 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 						return false;
 					}
 					std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
-					Texture tex(textureRaw,  texIdent);
+					std::shared_ptr<Texture> tex = std::make_shared<Texture>(textureRaw,  texIdent);
 
 					loadedTextures.emplace(texture.imageIndex.value(), tex);
-					materialOut.textures.emplace_back(new Texture(tex));
+					materialOut->textures.emplace_back(tex);
 				}
 				else {
-					materialOut.textures.emplace_back(new Texture(loadedTextures.at(texture.imageIndex.value())));
+					materialOut->textures.emplace_back((*textureNameIt).second);
 				}
 			}
 			
@@ -130,25 +126,37 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			// Extract more material stuff
 
 			std::string materialIdent = path.generic_string() + ":Mat_" + std::to_string(materials.size());
-			materialOut.identifier = materialIdent;
+			materialOut->identifier = materialIdent;
 
-			data.SetMaterial(materials.size(), materialIdent);
+			current_materials.emplace_back(materialOut);
 			materials.emplace(materialIdent, std::move(materialOut));
-
 		}
+
 		VertexBuffer vertexBuffer;
 		vertexBuffer.Init(device, sizeof(Vertex), static_cast<UINT>(verticies.size()), verticies.data());
 
 		IndexBuffer indexBuffer;
 		indexBuffer.Init(device, indices.size(), indices.data());
 
-		mesh.Init(std::move(vertexBuffer), std::move(indexBuffer), std::move(submeshes));
+		mesh->Init(std::move(vertexBuffer), std::move(indexBuffer), std::move(submeshes));
+		data.SetMesh(mesh);
+
+		size_t index = 0;
+		for (auto& material : current_materials) {
+			data.SetMaterial(index++, material);
+		}
 
 		meshLoadData.meshes.emplace_back(std::move(mesh));
-		meshLoadData.meshData.emplace_back(data);
+		meshLoadData.meshData.emplace_back(std::move(data));
 		meshIndex++;
 	}
-	
+
+	for (auto& texture : loadedTextures) {
+		meshLoadData.textures.emplace_back(texture.second);
+	}
+	for (auto& material : materials) {
+		meshLoadData.materials.emplace_back(material.second);
+	}
 
 	return true;
 	

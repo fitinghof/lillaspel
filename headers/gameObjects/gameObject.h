@@ -42,15 +42,13 @@ public:
 	virtual void PhysicsTick();
 	virtual void LatePhysicsTick();
 
-	// These should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D:
-
-	virtual DirectX::XMVECTOR GetGlobalPosition() const;
+	// This should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D
 	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;
 
 	std::weak_ptr<GameObject> GetPtr();
 
 	virtual void LoadFromJson(const nlohmann::json& data);
-	virtual nlohmann::json SaveToJson();
+	virtual void SaveToJson(nlohmann::json& data);
 
 private:
 	/// <summary>

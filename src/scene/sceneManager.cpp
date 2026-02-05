@@ -3,6 +3,11 @@
 
 SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString()
 {
+	objectFromString.RegisterClassW<GameObject>("GameObject");
+	objectFromString.RegisterClassW<GameObject3D>("GameObject3D");
+	objectFromString.RegisterClassW<MeshObject>("MeshObject");
+	objectFromString.RegisterClassW<SpotlightObject>("SpotlightObject");
+	objectFromString.RegisterClassW<CameraObject>("CameraObject");
 }
 
 void SceneManager::SceneTick()
@@ -26,8 +31,9 @@ void SceneManager::LoadScene()
 	this->mainScene = std::unique_ptr<Scene>(new Scene());
 
 	LoadSceneFromFile("../../assets/scenes/test.json");
+	SaveSceneToFile("../../assets/scenes/testresult.json");
 
-	std::weak_ptr<CameraObject> camera = this->mainScene->CreateGameObjectOfType<CameraObject>();
+	//std::weak_ptr<CameraObject> camera = this->mainScene->CreateGameObjectOfType<CameraObject>();
 
 
 	//// Temporary meshes
@@ -154,8 +160,6 @@ void SceneManager::LoadScene()
 
 void SceneManager::LoadSceneFromFile(const std::string& filePath)
 {
-	std::weak_ptr<CameraObject> camera = this->mainScene->CreateGameObjectOfType<CameraObject>();
-
 	// Temp
 	std::unique_ptr<Mesh> glbMesh = std::unique_ptr<Mesh>(new Mesh());
 	ObjectLoader loader;
@@ -168,27 +172,49 @@ void SceneManager::LoadSceneFromFile(const std::string& filePath)
 	nlohmann::json data = nlohmann::json::parse(file);
 	file.close();
 
-	//Logger::Log(data.dump(4));
+	// Actual loading
+	CreateObjectsFromJsonRecursively(data["gameObjects"], std::shared_ptr<GameObject>(nullptr));
+}
 
-	objectFromString.RegisterClassW<GameObject>("GameObject");
-	objectFromString.RegisterClassW<GameObject3D>("GameObject3D");
-	objectFromString.RegisterClassW<MeshObject>("MeshObject");
-
-	for (const nlohmann::json& objectData : data["gameObjects"]) {
-
+void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent)
+{
+	for (const nlohmann::json& objectData : data) {
 		Logger::Log(objectData.dump());
 
-		GameObject* gameObjectPointer = static_cast<GameObject*>(objectFromString.Construct(objectData.at("type")));		
+		GameObject* gameObjectPointer = static_cast<GameObject*>(objectFromString.Construct(objectData.at("type")));
 		auto obj = std::shared_ptr<GameObject>(gameObjectPointer);
-		Logger::Log(gameObjectPointer);
 		this->mainScene->RegisterGameObject(obj);
 		obj->LoadFromJson(objectData);
+		if (!parent.expired()) {
+			obj->SetParent(parent);
+		}
 
 		// temp
 		if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {
 			p->SetMesh(this->tempMeshes[0].get());
 		}
+
+		if (objectData.contains("children")) {
+			CreateObjectsFromJsonRecursively(objectData["children"], obj);
+		}
 	}
+}
+
+void SceneManager::SaveSceneToFile(const std::string& filePath)
+{
+	nlohmann::json data;
+
+	int iterator = 0;
+	for (size_t i = 0; i < this->mainScene->gameObjects.size(); i++)
+	{
+		if (this->mainScene->gameObjects[i]->GetParent().expired()) {
+			this->mainScene->gameObjects[i]->SaveToJson(data["gameObjects"][iterator++]);
+		}
+	}
+
+	std::ofstream outFile(filePath);
+	outFile << data;
+	outFile.close();
 }
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)

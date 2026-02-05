@@ -26,3 +26,15 @@ void MeshObject::Tick()
 	static float rot = 0;
 	this->transform.SetRotationRPY(0,0,rot += 0.0005f);
 }
+
+void MeshObject::LoadFromJson(const nlohmann::json& data)
+{
+	this->GameObject3D::LoadFromJson(data);
+}
+
+void MeshObject::SaveToJson(nlohmann::json& data)
+{
+	this->GameObject3D::SaveToJson(data);
+
+	data["type"] = "MeshObject";
+}

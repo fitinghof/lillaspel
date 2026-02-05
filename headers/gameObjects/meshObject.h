@@ -18,6 +18,9 @@ public:
 	Mesh* GetMesh();
 
 	virtual void Tick() override;
+
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual void SaveToJson(nlohmann::json& data) override;
 private:
 	Mesh* mesh; // Temp, it shouldn't actually own the mesh
 };

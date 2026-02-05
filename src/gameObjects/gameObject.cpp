@@ -49,12 +49,7 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 
 void GameObject::Start()
 {
-	static bool created = false;
-	if (!created)
-	{
-		created = true;
-		this->factory->CreateGameObjectOfType<GameObject>();
-	}
+
 }
 
 void GameObject::Tick()
@@ -75,16 +70,6 @@ void GameObject::LatePhysicsTick()
 	// TO DO
 }
 
-DirectX::XMVECTOR GameObject::GetGlobalPosition() const
-{
-	if (this->parent.expired()) {
-		return DirectX::XMVectorSet(0,0,0,0);
-	}
-	else {
-		return this->parent.lock()->GetGlobalPosition();
-	}
-}
-
 DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
 {
 	if (this->parent.expired()) {
@@ -102,11 +87,15 @@ std::weak_ptr<GameObject> GameObject::GetPtr()
 
 void GameObject::LoadFromJson(const nlohmann::json& data)
 {
-
 }
 
-nlohmann::json GameObject::SaveToJson()
+void GameObject::SaveToJson(nlohmann::json& data)
 {
-	return nlohmann::json();
+	data["type"] = "GameObject";
+
+	for (size_t i = 0; i < this->children.size(); i++)
+	{
+		this->children[i].lock()->SaveToJson(data["children"][i]);
+	}
 }
 

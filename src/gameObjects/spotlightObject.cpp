@@ -16,6 +16,19 @@ SpotlightObject::SpotlightObject()
 
 void SpotlightObject::Tick()
 {
-	DirectX::XMStoreFloat3(&this->data.position, this->transform.GetPosition());
-	DirectX::XMStoreFloat3(&this->data.direction, this->transform.GetDirectionVector());
+	DirectX::XMStoreFloat3(&this->data.position, GetGlobalPosition());
+	DirectX::XMStoreFloat3(&this->data.direction, GetGlobalForward());
+}
+
+void SpotlightObject::LoadFromJson(const nlohmann::json& data)
+{
+	this->GameObject3D::LoadFromJson(data);
+
+}
+
+void SpotlightObject::SaveToJson(nlohmann::json& data)
+{
+	this->GameObject3D::SaveToJson(data);
+
+	data["type"] = "SpotlightObject";
 }

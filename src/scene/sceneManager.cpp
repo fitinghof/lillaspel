@@ -1,7 +1,7 @@
 #include "scene/sceneManager.h"
 #include "gameObjects/objectLoader.h"
 
-SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), assetManager(rend->GetDevice())
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend)
 {
 }
 
@@ -18,7 +18,7 @@ void SceneManager::LoadScene()
 
 	this->mainScene->CreateGameObjectOfType<CameraObject>();
 	// So basically right now this is the temporary place to create scenes, before we can load them from file
-	MeshObjData data = this->assetManager.GetMeshObjData("TexBox/TextureCube.glb");
+	MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
 
 	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
@@ -55,25 +55,25 @@ void SceneManager::LoadScene()
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)
 {
-	this->assetManager.InitializeSoundBank(pathToSoundFolder);
+	AssetManager::GetInstance().InitializeSoundBank(pathToSoundFolder);
 }
 
 void SceneManager::AddSoundClipStandardFolder(std::string filename, std::string id)
 {
-	this->assetManager.AddSoundClipStandardFolder(filename, id);
+	AssetManager::GetInstance().AddSoundClipStandardFolder(filename, id);
 }
 
 void SceneManager::AddSoundClip(std::string path, std::string id)
 {
-	this->assetManager.AddSoundClip(path, id);
+	AssetManager::GetInstance().AddSoundClip(path, id);
 }
 
 std::string SceneManager::GetPathToSoundFolder()
 {
-	return this->assetManager.GetPathToSoundFolder();
+	return AssetManager::GetInstance().GetPathToSoundFolder();
 }
 
 SoundClip* SceneManager::GetSoundClip(std::string id)
 {
-	return this->assetManager.GetSoundClip(id);
+	return AssetManager::GetInstance().GetSoundClip(id);
 }

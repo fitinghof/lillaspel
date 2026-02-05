@@ -1,10 +1,6 @@
 #include "core/assetManager.h"
 #include "gameObjects/mesh.h"
 
-AssetManager::AssetManager(ID3D11Device* device)
-{
-	this->setDevicePointer(device);
-}
 
 void AssetManager::InitializeSoundBank(std::string pathToSoundFolder)
 {
@@ -115,6 +111,12 @@ std::string AssetManager::GetPathToSoundFolder()
 SoundClip* AssetManager::GetSoundClip(std::string id)
 {
 	return this->soundBank.GetSoundClip(id);
+}
+
+AssetManager& AssetManager::GetInstance()
+{
+	static AssetManager instance;
+	return instance;
 }
 
 std::string AssetManager::getCleanPath(std::string pathToFix)

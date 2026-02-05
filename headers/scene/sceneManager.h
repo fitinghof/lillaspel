@@ -32,7 +32,6 @@ public:
 
 private:
 	std::unique_ptr<Scene> mainScene;
-	AssetManager assetManager;
 
 	Renderer* renderer; // This is temporary
 

@@ -40,7 +40,62 @@ AudioManager::~AudioManager()
 	if (!alcCloseDevice(this->ALCDevice)) Logger::Error("failed to close sound device!");
 }
 
-void AudioManager::Initialize()
+void AudioManager::InitializeMusicTrackManager(std::string pathToMusicFolder)
 {
-	//say yes
+	this->musicTrackManager.Initialize(pathToMusicFolder);
+}
+
+void AudioManager::AddMusicTrackStandardFolder(std::string filename, std::string id)
+{
+	this->musicTrackManager.AddMusicTrackStandardFolder(filename, id);
+}
+
+void AudioManager::AddMusicTrack(std::string path, std::string id)
+{
+	this->musicTrackManager.AddMusicTrack(path, id);
+}
+
+void AudioManager::Play(std::string id)
+{
+	this->musicTrackManager.Play(id);
+}
+
+void AudioManager::Stop(std::string id)
+{
+	this->musicTrackManager.Stop(id);
+}
+
+void AudioManager::FadeInPlay(std::string id, float startGain, float seconds)
+{
+	this->musicTrackManager.FadeInPlay(id, startGain, seconds);
+}
+
+void AudioManager::FadeOutStop(std::string id, float seconds)
+{
+	this->musicTrackManager.FadeOutStop(id, seconds);
+}
+
+void AudioManager::GetMusicTrackSourceState(std::string id, ALint& sourceState)
+{
+	this->musicTrackManager.GetMusicTrackSourceState(id, sourceState);
+}
+
+void AudioManager::SetGain(std::string id, float gain)
+{
+	this->musicTrackManager.SetGain(id, gain);
+}
+
+void AudioManager::SetPitch(std::string id, float pitch)
+{
+	this->musicTrackManager.SetPitch(id, pitch);
+}
+
+MusicTrack* AudioManager::GetMusicTrack(std::string id)
+{
+	return this->musicTrackManager.GetMusicTrack(id);
+}
+
+void AudioManager::Tick()
+{
+	this->musicTrackManager.Tick();
 }

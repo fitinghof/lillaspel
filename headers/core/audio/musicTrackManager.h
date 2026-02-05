@@ -14,7 +14,7 @@ public:
 	MusicTrackManager();
 	~MusicTrackManager();
 
-	void Initialize(std::string standardFolder);
+	void Initialize(std::string pathToMusicFolder);
 
 	/// <summary>
 	/// filename or path is ONLY used for loading, id is used for Get()'ing a track
@@ -27,11 +27,12 @@ public:
 	void Play(std::string id);
 	void Stop(std::string id);
 	void FadeInPlay(std::string id, float startGain, float seconds);
-	void FadeOut(std::string id, float seconds);
+	void FadeOutStop(std::string id, float seconds);
 	void FadeBetween(std::string id1, std::string id2, float seconds);
 
 	void GetMusicTrackSourceState(std::string id, ALint& sourceState);
 	void SetGain(std::string id, float gain);
+	void SetPitch(std::string id, float pitch);
 	MusicTrack* GetMusicTrack(std::string id);
 
 	void Tick();

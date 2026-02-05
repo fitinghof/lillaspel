@@ -278,8 +278,6 @@ ID3D11ShaderResourceView* ObjectLoader::LoadTexture(fastgltf::Asset& asset, fast
 	ID3D11ShaderResourceView* textureView = nullptr;
 	size_t baseColorTextureCordIndex = 0;
 
-	Logger::Log("Has value: ", primitive.materialIndex.has_value());
-
 	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
 	auto& baseColorTexture = material.pbrData.baseColorTexture;
 	if (baseColorTexture.has_value()) {

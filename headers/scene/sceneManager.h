@@ -40,7 +40,6 @@ public:
 
 private:
 	std::unique_ptr<Scene> mainScene;
-	AssetManager assetManager;
 	ObjectFromStringFactory objectFromString;
 
 	Renderer* renderer; // This is temporary

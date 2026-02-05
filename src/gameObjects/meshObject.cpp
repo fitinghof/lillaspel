@@ -32,7 +32,7 @@ void MeshObject::LoadFromJson(const nlohmann::json& data)
 	this->GameObject3D::LoadFromJson(data);
 
 	if (data.contains("meshIdentifier")) {
-		SetMesh(AssetManager::GetInstance(data["meshIdentifier"]));
+		SetMesh(AssetManager::GetInstance().GetMeshObjData(data["meshIdentifier"]));
 	}
 }
 

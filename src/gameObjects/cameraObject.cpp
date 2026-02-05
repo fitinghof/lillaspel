@@ -23,7 +23,6 @@ void CameraObject::Tick()
 		std::string buttonText = "Camera " + std::to_string(this->thisCameraId);
 		if (ImGui::Button(buttonText.c_str()))
 		{
-			Logger::Log("Pressed");
 			CameraObject::mainCamera = this;
 		}
 		ImGui::End();

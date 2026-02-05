@@ -1,8 +1,9 @@
 #include "scene/sceneManager.h"
 
+// Very good macro, please don't remove
 #define NAMEOF(x) #x
 
-SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), assetManager(rend->GetDevice()), objectFromString()
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString()
 {
 	this->objectFromString.RegisterType<GameObject>(NAMEOF(GameObject));
 	this->objectFromString.RegisterType<GameObject3D>(NAMEOF(GameObject3D));
@@ -62,7 +63,7 @@ void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, 
 
 		// temp
 		if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {
-			MeshObjData data = this->assetManager.GetMeshObjData("TexBox/TextureCube.glb");
+			MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
 			p->SetMesh(data);
 		}
 

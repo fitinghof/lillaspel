@@ -1,6 +1,7 @@
 ﻿#include "core/physics/collider.h"
 #include "core/physics/boxCollider.h"
 #include "core/physics/sphereCollider.h"
+#include "core/physics/rigidBody.h"
 
 Collider::Collider()
 {
@@ -8,6 +9,21 @@ Collider::Collider()
 
 Collider::~Collider()
 {
+}
+
+void Collider::SetParent(std::weak_ptr<RigidBody> newParent)
+{
+	this->GameObject::SetParent(newParent);
+
+	if (newParent.expired())
+	{
+		Logger::Error("Tried to set expired gameobject as parent");
+		return;
+	}
+
+	this->castedParent = newParent;
+	std::weak_ptr<Collider> thisCollider = std::dynamic_pointer_cast<Collider>(this->shared_from_this());
+	newParent.lock()->AddColliderChild(thisCollider);
 }
 
 bool Collider::Collision(Collider* otherCollider)
@@ -32,86 +48,103 @@ bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNorm
 
 void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)
 {
-	//DirectX::XMFLOAT3 resolveVector = FLOAT3MULT1(resolveAxis, resolveDistance);
-	//DirectX::XMFLOAT3 newPosition = FLOAT3ADD(this->transform.GetPosition(), resolveVector);
-	//this->SetPosition(newPosition);
+	std::shared_ptr<RigidBody> parent = this->castedParent.lock();
+
+	if (!parent)
+	{
+		Logger::Error("Collider didn't have RigidBody parent");
+		return;
+	}
+
+	//while (!parent)
+	//{
+	//	//loop to root parent??
+	//}
+
+	DirectX::XMFLOAT3 resolveVector = FLOAT3MULT1(resolveAxis, resolveDistance);
+	DirectX::XMVECTOR moveDistance = DirectX::XMLoadFloat3(&resolveVector);
+
+	DirectX::XMVECTOR oldPosition = parent->transform.GetPosition();
+	DirectX::XMVECTOR newPosition = DirectX::XMVectorAdd(oldPosition, moveDistance);
+
+	parent->transform.SetPosition(newPosition);
 }
 
 bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
 {
-	//using namespace DirectX;
+	using namespace DirectX;
 
-	//XMFLOAT3 boxCenter = box->GetPosition();
-	//XMFLOAT3 sphereCenter = sphere->GetPosition();
-	//XMVECTOR vSphereCenter = XMLoadFloat3(&sphereCenter);
-	//XMFLOAT3 fExtents = FLOAT3MULT1(box->GetExtents(), 1);
-	//XMVECTOR vExtents = XMLoadFloat3(&fExtents);
+	XMVECTOR boxCenter = box->GetGlobalPosition();
+	XMVECTOR sphereCenter = sphere->GetGlobalPosition();
+	XMFLOAT3 fExtents = FLOAT3MULT1(box->GetExtents(), 1);
+	XMVECTOR vExtents = XMLoadFloat3(&fExtents);
 
-	//XMFLOAT4X4 worldMatrix = box->transform.GetWorldMatrix();
-	//XMMATRIX boxWorldMatrix = XMMatrixTranspose(XMLoadFloat4x4(&worldMatrix)); //worldMatrix is pre-transposed, so needs to get un-transposed again here
+	//inverse transpose?
+	XMMATRIX boxWorldMatrix = XMMatrixTranspose(box->GetGlobalWorldMatrix(false)); //worldMatrix is pre-transposed, so needs to get un-transposed again here
 
-	////we get the inverse of the rotation and translation matrices, scale should not be included
-	//XMVECTOR scale, rotation, translation;
-	//XMMatrixDecompose(&scale, &rotation, &translation, boxWorldMatrix);
-	////XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotation);
-	//XMMATRIX rotationMatrix = box->transform.GetRotationMatrix();
-	//XMMATRIX invRotationMatrix = XMMatrixTranspose(rotationMatrix); //rotationMatrix here won't be pre-transposed, so a transpose is required to get the inverse
-	//XMMATRIX invTranslationMatrix = XMMatrixTranslation(-boxCenter.x, -boxCenter.y, -boxCenter.z);
-	//XMMATRIX invScalingMatrix = XMMatrixScaling(1.0f / XMVectorGetX(scale), 1.0f / XMVectorGetY(scale), 1.0f / XMVectorGetZ(scale));
+	//we get the inverse of the rotation and translation matrices, scale should not be included
+	XMVECTOR scale, rotation, translation;
+	XMMatrixDecompose(&scale, &rotation, &translation, boxWorldMatrix);
 
-	//XMMATRIX worldToLocalMatrix = invRotationMatrix * invTranslationMatrix;
-	//XMVECTOR vLocalSphereCenter = XMVector3TransformCoord(vSphereCenter, worldToLocalMatrix);
+	//XMMATRIX rotationMatrix = DirectX::XMMatrixRotationX(rotation.m128_f32[0]) * DirectX::XMMatrixRotationY(rotation.m128_f32[1]) * DirectX::XMMatrixRotationZ(rotation.m128_f32[2]);
+	XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(rotation.m128_f32[0], rotation.m128_f32[1], rotation.m128_f32[2]);
+	XMMATRIX invRotationMatrix = XMMatrixTranspose(rotationMatrix); //rotationMatrix here won't be pre-transposed, so a transpose is required to get the inverse
+	XMMATRIX invTranslationMatrix = XMMatrixTranslation(-boxCenter.m128_f32[0], -boxCenter.m128_f32[1], -boxCenter.m128_f32[2]);
+	XMMATRIX invScalingMatrix = XMMatrixScaling(1.0f / XMVectorGetX(scale), 1.0f / XMVectorGetY(scale), 1.0f / XMVectorGetZ(scale));
 
-	//XMVECTOR closestPointOnBox = XMVectorClamp(vLocalSphereCenter, -vExtents, vExtents);
-	//XMVECTOR delta = XMVectorSubtract(vLocalSphereCenter, closestPointOnBox);
+	XMMATRIX worldToLocalMatrix = invRotationMatrix * invTranslationMatrix;
+	XMVECTOR vLocalSphereCenter = XMVector3TransformCoord(sphereCenter, worldToLocalMatrix);
 
-	//float distSq = XMVectorGetX(XMVector3LengthSq(delta));
-	//float radius = sphere->GetDiameter() * 0.5f;
+	XMVECTOR closestPointOnBox = XMVectorClamp(vLocalSphereCenter, -vExtents, vExtents);
+	XMVECTOR delta = XMVectorSubtract(vLocalSphereCenter, closestPointOnBox);
 
-	//if (distSq < radius * radius)
-	//{
-	//	XMVECTOR axisLocal = XMVectorZero();
-	//	float penetration = 0;
+	float distSq = XMVectorGetX(XMVector3LengthSq(delta));
+	float radius = sphere->GetDiameter() * 0.5f;
 
-	//	if (box->dynamic)
-	//	{
-	//		int a = 0;
-	//	}
+	if (distSq < radius * radius)
+	{
+		XMVECTOR axisLocal = XMVectorZero();
+		float penetration = 0;
 
-	//	if (distSq < 1e-8f)
-	//	{
-	//		//this edge case needs to be handled
-	//	}
-	//	else
-	//	{
-	//		axisLocal = XMVector3Normalize(delta);
-	//		penetration = radius - sqrtf(distSq);
-	//	}
+		if (box->dynamic)
+		{
+			int a = 0;
+		}
 
-	//	XMMATRIX scalingMatrix = XMMatrixScaling(XMVectorGetX(scale), XMVectorGetY(scale), XMVectorGetZ(scale));
-	//	XMMATRIX translationMatrix = XMMatrixTranslation(boxCenter.x, boxCenter.y, boxCenter.z);
-	//	XMMATRIX localToWorldMatrix = scalingMatrix * rotationMatrix * translationMatrix;
-	//	XMVECTOR axisWorld = XMVector3TransformNormal(axisLocal, localToWorldMatrix);
-	//	XMStoreFloat3(&resolveAxis, XMVector3Normalize(axisWorld));
-	//	resolveDistance = penetration;
+		if (distSq < 1e-8f)
+		{
+			//this edge case needs to be handled
+		}
+		else
+		{
+			axisLocal = XMVector3Normalize(delta);
+			penetration = radius - sqrtf(distSq);
+		}
 
-	//	//std::cout << "-------------------------------------------------" << std::endl;
-	//	//PrintFloat3(sphereCenter, "SphereCenter: ");
-	//	//std::cout << "SphereRadius: " << radius << std::endl;
-	//	//std::cout << "---" << std::endl;
-	//	//PrintFloat3(boxCenter, "BoxCenter: ");
-	//	//PrintFloat3(fExtents, "boxExtents(transform.scale)");
+		XMMATRIX scalingMatrix = XMMatrixScaling(XMVectorGetX(scale), XMVectorGetY(scale), XMVectorGetZ(scale));
+		XMMATRIX translationMatrix = XMMatrixTranslation(boxCenter.m128_f32[0], boxCenter.m128_f32[1], boxCenter.m128_f32[2]);
+		XMMATRIX localToWorldMatrix = scalingMatrix * rotationMatrix * translationMatrix;
+		XMVECTOR axisWorld = XMVector3TransformNormal(axisLocal, localToWorldMatrix);
+		XMStoreFloat3(&resolveAxis, XMVector3Normalize(axisWorld));
+		resolveDistance = penetration;
 
-	//	//XMFLOAT4X4 world = {};
-	//	//XMStoreFloat4x4(&world, boxWorldMatrix);
-	//	//std::cout << "worldMatrix: ";
-	//	//PrintMatrix(world);
-	//	//std::cout << "---" << std::endl;
-	//	//std::cout << "penetration: " << penetration << std::endl;
-	//	//PrintFloat3(resolveAxis, "resolveAxis: ");
-	//	//std::cout << "-------------------------------------------------" << std::endl;
+		//std::cout << "-------------------------------------------------" << std::endl;
+		//PrintFloat3(sphereCenter, "SphereCenter: ");
+		//std::cout << "SphereRadius: " << radius << std::endl;
+		//std::cout << "---" << std::endl;
+		//PrintFloat3(boxCenter, "BoxCenter: ");
+		//PrintFloat3(fExtents, "boxExtents(transform.scale)");
 
-	//	return true;
+		//XMFLOAT4X4 world = {};
+		//XMStoreFloat4x4(&world, boxWorldMatrix);
+		//std::cout << "worldMatrix: ";
+		//PrintMatrix(world);
+		//std::cout << "---" << std::endl;
+		//std::cout << "penetration: " << penetration << std::endl;
+		//PrintFloat3(resolveAxis, "resolveAxis: ");
+		//std::cout << "-------------------------------------------------" << std::endl;
+
+		return true;
 	}
 
 	//std::cout << "<<<<<not in collision>>>>>" << std::endl;
@@ -119,19 +152,9 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 	return false;
 }
 
-DirectX::XMFLOAT3 Collider::GetPosition()
-{
-	//return this->transform.GetPosition();
-}
-
-DirectX::XMFLOAT3 Collider::GetSize()
-{
-	//return this->transform.GetScale();
-}
-
 bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance)
 {
-	//bool collision = false;
+	bool collision = false;
 
 	//if (!this->hasInitializedPreviousPosition) //little annoying, is there a way to not do this each check?
 	//{
@@ -141,9 +164,10 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 
 	//if (GetLengthOfFLOAT3(FLOAT3SUB(this->GetPosition(), this->previousPosition)) > this->shortestExtent * 3) //1.5 shortest side lengths result in coolision detection in 2 steps
 	//{
-	//	DirectX::XMFLOAT3 finalPosition = this->transform.GetPosition();
-	//	DirectX::XMFLOAT3 movementVector = FLOAT3SUB(finalPosition, this->previousPosition);
-	//	DirectX::XMFLOAT3 middlePosition = FLOAT3ADD(this->previousPosition, FLOAT3MULT1(movementVector, 0.5f));
+	//	this happens when when move is bigger than 1.5 sideLengths
+	//	DirectX::XMVECTOR finalPosition = this->transform.GetPosition();
+	//	DirectX::XMVECTOR movementVector = FLOAT3SUB(finalPosition, this->previousPosition);
+	//	DirectX::XMVECTOR middlePosition = FLOAT3ADD(this->previousPosition, FLOAT3MULT1(movementVector, 0.5f));
 
 	//	this->SetPosition(middlePosition);
 	//	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
@@ -179,30 +203,30 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 	//	}
 	//}
 
-	//collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
+	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
 
-	//if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE)
-	//{
-	//	mtvDistance = -mtvDistance;
-	//}
+	if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE)
+	{
+		mtvDistance = -mtvDistance;
+	}
 
-	//if (!collision) return false;
-	//if (!this->solid || !otherCollider->solid) return collision;
+	if (!collision) return false;
+	if (!this->solid || !otherCollider->solid) return collision;
 
-	//// Determine who moves
-	//if (this->dynamic && otherCollider->dynamic)
-	//{
-	//	this->ResolveCollision(mtvAxis, mtvDistance / 2);
-	//	otherCollider->ResolveCollision(mtvAxis, -mtvDistance / 2);
-	//}
-	//else if (this->dynamic)
-	//{
-	//	this->ResolveCollision(mtvAxis, mtvDistance);
-	//}
-	//else if (otherCollider->dynamic)
-	//{
-	//	otherCollider->ResolveCollision(mtvAxis, -mtvDistance);
-	//}
+	// Determine who moves
+	if (this->dynamic && otherCollider->dynamic)
+	{
+		this->ResolveCollision(mtvAxis, mtvDistance / 2);
+		otherCollider->ResolveCollision(mtvAxis, -mtvDistance / 2);
+	}
+	else if (this->dynamic)
+	{
+		this->ResolveCollision(mtvAxis, mtvDistance);
+	}
+	else if (otherCollider->dynamic)
+	{
+		otherCollider->ResolveCollision(mtvAxis, -mtvDistance);
+	}
 
 	return true;
 }

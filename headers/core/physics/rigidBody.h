@@ -1,6 +1,7 @@
 #pragma once
 #include "gameObjects/gameObject3D.h"
-#include "physics/collider.h"
+
+class Collider;
 
 class RigidBody : public GameObject3D
 {
@@ -11,10 +12,10 @@ public:
 	/// <summary>
 	/// Loops through children to find children of type collider and puts them in exclusive vector
 	/// </summary>
-	void AddColliderChildren();
-	void RemoveExpiredColliderChildren();
+	void AddColliderChild(std::weak_ptr<Collider> collider);
+	void RemoveExpiredColliderChild();
 	int GetNrOfColliderChildren();
-	std::vector<std::unique_ptr<Collider>>* GetColliderChildrenVectorReference();
+	std::vector<std::weak_ptr<Collider>>* GetColliderChildrenVector();
 
 	void Collision(std::weak_ptr<RigidBody> rigidbody);
 

@@ -1,6 +1,6 @@
 #pragma once
-#define NOMINMAX //tells windows to not define min/max so I can use algorithm min/max instead
-#include <algorithm>
+#include <memory>
+#include "gameObjects/gameObject3D.h"
 #include "core/physics/physics.h"
 
 static const DirectX::XMFLOAT3 localBoxCorners[8] =
@@ -37,8 +37,9 @@ enum ColliderType
 
 class BoxCollider; //forward declaration
 class SphereCollider;
+class RigidBody;
 
-class Collider
+class Collider : public GameObject3D
 {
 public:
 	Collider();
@@ -50,6 +51,8 @@ public:
 	bool Collision(Collider* other);
 	bool Collision(Collider* other, DirectX::XMVECTOR& contactNormal);
 
+	void SetParent(std::weak_ptr<RigidBody> newParent); //this isn't an override since it only accepts RigidBody parents
+
 	virtual void Physics() = 0;
 	virtual bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) = 0;
 	virtual bool CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) = 0;
@@ -57,22 +60,20 @@ public:
 	virtual void SetPosition(DirectX::XMFLOAT3 newPosition) = 0;
 	bool BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance);
 
-	DirectX::XMFLOAT3 GetPosition();
-	DirectX::XMFLOAT3 GetSize();
-
 	//DirectX::XMFLOAT3 resolveAxis = {};
 	//float resolveDistance = 0;
 
 	ColliderType type = ColliderType::NONE;
 	Tag tag = Tag::OBJECT;
 	PhysicsMaterial physicsMaterial;
-	DirectX::XMFLOAT3 previousPosition = {};
+	//DirectX::XMFLOAT3 previousPosition = {};
 	bool solid = true;
 	bool dynamic = false;
 	bool hasInitializedPreviousPosition = false;
 
 private:
 	std::weak_ptr<GameObject> meshObjectChild; //reference to the mesh visual representation of the collider
+	std::weak_ptr<RigidBody> castedParent;
 
 	bool CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance);
 };

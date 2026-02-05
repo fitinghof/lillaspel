@@ -1,4 +1,5 @@
 #include "core/physics/rigidBody.h"
+#include "core/physics/collider.h"
 
 RigidBody::RigidBody()
 {
@@ -8,28 +9,14 @@ RigidBody::~RigidBody()
 {
 }
 
-RigidBody::AddColliderChildren()
+void RigidBody::AddColliderChild(std::weak_ptr<Collider> collider)
 {
-	for (int i = 0; i < this->children.size(); i++)
-	{
-		std::weak_ptr<Collider> collider = dynamic_cast<std::weak_ptr<Collider>>();
-
-		if (!collider.expired)
-		{
-			this->colliderChildren.push_back(collider);
-		}
-	}
+	this->colliderChildren.push_back(collider);
 }
 
-void RigidBody::RemoveExpiredColliderChildren()
+void RigidBody::RemoveExpiredColliderChild()
 {
-	for (int i = this->colliderChildren.size() - 1; i >= 0; i--)
-	{
-		if (colliderChildren[i].expired)
-		{
-			colliderChildren.erase(this->colliderChildren.begin + i);
-		}
-	}
+	//japp
 }
 
 int RigidBody::GetNrOfColliderChildren()
@@ -37,15 +24,22 @@ int RigidBody::GetNrOfColliderChildren()
 	return this->colliderChildren.size();
 }
 
-void RigidBody::Collision(std::unique_ptr<RigidBody> rigidbody)
+std::vector<std::weak_ptr<Collider>>* RigidBody::GetColliderChildrenVector()
 {
+	return &this->colliderChildren;
+}
+
+void RigidBody::Collision(std::weak_ptr<RigidBody> rigidbody)
+{
+	//checking expired pointers should be done before calling this, with RemoveExpiredColliderChildren()
+
 	for (int i = 0; i < this->colliderChildren.size(); i++)
 	{
-		Collider* thisCollider = this->colliderChildren[i].lock();
+		Collider* thisCollider = this->colliderChildren[i].lock().get(); //make sure this ptr isn't stored in collider
 
-		for (int j = 0; j < rigidbody->GetNrOfColliderChildren(); j++)
+		for (int j = 0; j < rigidbody.lock()->GetNrOfColliderChildren(); j++)
 		{
-			Collider* otherCollider = rigidbody->GetColliderChildrenVectorReference()->[j];
+			Collider* otherCollider = (*rigidbody.lock()->GetColliderChildrenVector())[j].lock().get(); //make sure this ptr isn't stored in collider
 			thisCollider->Collision(otherCollider);
 		}
 	}

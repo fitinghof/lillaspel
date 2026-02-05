@@ -3,6 +3,8 @@
 #include <DirectXMath.h>
 #include "core/physics/collider.h"
 
+//sphere collider transform scale has to be unifrom!
+
 class BoxCollider;
 
 class SphereCollider : public Collider

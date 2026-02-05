@@ -3,6 +3,8 @@
 #include <DirectXMath.h>
 #include "core/physics/collider.h"
 
+//how will satData.center and BuildCornersArray be handled?
+
 class SphereCollider;
 
 class BoxCollider : public Collider
@@ -14,8 +16,6 @@ public:
 	//Center and Size is only in the transform
 	bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) override;
 
-	void Move(DirectX::XMFLOAT3 moveVector, float deltaTime);
-	void Rotate(DirectX::XMFLOAT3 rotationVector, float deltaTime);
 	void SetPosition(DirectX::XMFLOAT3 newCenter) override;
 	void SetRotation(DirectX::XMFLOAT3 newRotation);
 	void SetExtents(DirectX::XMFLOAT3 newSize);

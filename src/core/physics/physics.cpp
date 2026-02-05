@@ -13,8 +13,8 @@ inline float OverlapOnAxis(const SATData& shapeA, const SATData& shapeB, DirectX
         XMVECTOR position = XMLoadFloat3(&shapeA.positionData[j]);
         float projection = XMVectorGetX(XMVector3Dot(position, axis));
 
-        A_MinDot = min(A_MinDot, projection);
-        A_MaxDot = max(A_MaxDot, projection);
+        A_MinDot = std::min(A_MinDot, projection);
+        A_MaxDot = std::max(A_MaxDot, projection);
     }
 
     // Shape B
@@ -26,11 +26,11 @@ inline float OverlapOnAxis(const SATData& shapeA, const SATData& shapeB, DirectX
         XMVECTOR position = XMLoadFloat3(&shapeB.positionData[j]);
         float projection = XMVectorGetX(XMVector3Dot(position, axis));
 
-        B_MinDot = min(B_MinDot, projection);
-        B_MaxDot = max(B_MaxDot, projection);
+        B_MinDot = std::min(B_MinDot, projection);
+        B_MaxDot = std::max(B_MaxDot, projection);
     }
 
-    float overlap = min(A_MaxDot, B_MaxDot) - max(A_MinDot, B_MinDot);
+    float overlap = std::min(A_MaxDot, B_MaxDot) - std::max(A_MinDot, B_MinDot);
 
     return overlap; // positive = overlap, negative/0 = separation
 }

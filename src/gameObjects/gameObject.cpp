@@ -87,6 +87,7 @@ std::weak_ptr<GameObject> GameObject::GetPtr()
 
 void GameObject::LoadFromJson(const nlohmann::json& data)
 {
+	// Children are loaded by the sceneManager
 }
 
 void GameObject::SaveToJson(nlohmann::json& data)

@@ -69,7 +69,9 @@ void CameraObject::LoadFromJson(const nlohmann::json& data)
 {
 	this->GameObject3D::LoadFromJson(data);
 
-	this->fieldOfView = data.at("fov").get<float>();
+	if (data.contains("fov")) {
+		this->fieldOfView = data.at("fov").get<float>();
+	}
 }
 
 void CameraObject::SaveToJson(nlohmann::json& data)

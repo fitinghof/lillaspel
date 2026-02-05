@@ -181,6 +181,10 @@ void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, 
 	for (const nlohmann::json& objectData : data) {
 		Logger::Log(objectData.dump());
 
+		if (!objectData.contains("type")) {
+			throw std::runtime_error("Failed to load scene: GameObject doesn't have a type.");
+		}
+
 		GameObject* gameObjectPointer = static_cast<GameObject*>(objectFromString.Construct(objectData.at("type")));
 		auto obj = std::shared_ptr<GameObject>(gameObjectPointer);
 		this->mainScene->RegisterGameObject(obj);

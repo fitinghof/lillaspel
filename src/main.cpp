@@ -19,7 +19,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 
 	std::unique_ptr<Game> game = std::unique_ptr<Game>(new Game());
 
-	Logger::Log("Exiting game...");
+	Logger::Log("Starting game...");
 	try {
 		game->Run(hInstance, nCmdShow);
 	}

@@ -40,7 +40,10 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     SoundSourceObject speaker;
     speaker.transform.SetPosition(DirectX::XMVectorZero());
     speaker.SetGain(0.7f);
-
+    int x = 5;
+ 
+    Logger::Warn(x, "location");
+    Logger::Log("hello");
     MSG msg = {};
 
     while (msg.message != WM_QUIT)

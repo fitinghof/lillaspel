@@ -29,9 +29,12 @@ std::vector<std::weak_ptr<Collider>>* RigidBody::GetColliderChildrenVector()
 	return &this->colliderChildren;
 }
 
-void RigidBody::Collision(std::weak_ptr<RigidBody> rigidbody)
+bool RigidBody::Collision(std::weak_ptr<RigidBody> rigidbody)
 {
 	//checking expired pointers should be done before calling this, with RemoveExpiredColliderChildren()
+
+	bool collision = false;
+	bool tempCollision = false;
 
 	for (int i = 0; i < this->colliderChildren.size(); i++)
 	{
@@ -40,7 +43,11 @@ void RigidBody::Collision(std::weak_ptr<RigidBody> rigidbody)
 		for (int j = 0; j < rigidbody.lock()->GetNrOfColliderChildren(); j++)
 		{
 			Collider* otherCollider = (*rigidbody.lock()->GetColliderChildrenVector())[j].lock().get(); //make sure this ptr isn't stored in collider
-			thisCollider->Collision(otherCollider);
+			tempCollision = thisCollider->Collision(otherCollider);
+
+			if (tempCollision) collision = true;
 		}
 	}
+
+	return collision;
 }

@@ -17,7 +17,7 @@ public:
 	int GetNrOfColliderChildren();
 	std::vector<std::weak_ptr<Collider>>* GetColliderChildrenVector();
 
-	void Collision(std::weak_ptr<RigidBody> rigidbody);
+	bool Collision(std::weak_ptr<RigidBody> rigidbody);
 
 
 private:

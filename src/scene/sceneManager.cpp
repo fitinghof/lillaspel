@@ -55,7 +55,7 @@ void SceneManager::LoadScene()
 	////////////////
 
 	DirectX::XMVECTOR pos1;
-	pos1.m128_f32[0] = -2;
+	pos1.m128_f32[0] = 1.5f;
 	pos1.m128_f32[1] = 0;
 	pos1.m128_f32[2] = 0;
 
@@ -76,7 +76,8 @@ void SceneManager::LoadScene()
 	coll2.lock()->SetParent(rb2);
 	rb2.lock()->transform.SetPosition(pos2);
 
-	rb1.lock()->Collision(rb2);
+	if(rb1.lock()->Collision(rb2)) Logger::Log("true");
+	else Logger::Log("false");
 }
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)

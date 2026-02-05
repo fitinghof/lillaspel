@@ -41,6 +41,9 @@ private:
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
 
+	AssetManager() = default;
+	~AssetManager() = default;
+
 	std::unordered_map<std::string, std::shared_ptr<BaseMaterial>> materials;
 	std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;
 	std::unordered_map<std::string, std::shared_ptr<Texture>> textures;

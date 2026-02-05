@@ -187,6 +187,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   OpenAL::OpenAL
   sndfile
   fastgltf
+  xinput
 )
 
 # Ensure consistent output directories for the target

@@ -1,11 +1,11 @@
 #include "gameObjects/meshObject.h"
 
-MeshObject::MeshObject() : mesh(nullptr)
+MeshObject::MeshObject() : mesh()
 {
 	Logger::Log("Created a MeshObject.");
 }
 
-void MeshObject::SetMesh(Mesh* newMesh)
+void MeshObject::SetMesh(MeshObjData newMesh)
 {
 	this->mesh = newMesh;
 
@@ -14,7 +14,7 @@ void MeshObject::SetMesh(Mesh* newMesh)
 	RenderQueue::AddMeshObject(this);
 }
 
-Mesh* MeshObject::GetMesh()
+MeshObjData MeshObject::GetMesh()
 {
 	return this->mesh;
 }

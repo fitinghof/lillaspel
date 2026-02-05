@@ -18,6 +18,8 @@ public:
 	~ConstantBuffer() = default;
 	ConstantBuffer(const ConstantBuffer& other) = delete;
 	ConstantBuffer& operator=(const ConstantBuffer& other) = delete;
+	ConstantBuffer(ConstantBuffer&& other) noexcept = default;
+	ConstantBuffer& operator=(ConstantBuffer&& other) noexcept = default;
 
 	/// <summary>
 	/// Intialize the constant buffer with data

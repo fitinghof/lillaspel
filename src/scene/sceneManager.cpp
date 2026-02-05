@@ -2,6 +2,7 @@
 #include "gameObjects/objectLoader.h"
 
 SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString()
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), assetManager(rend->GetDevice())
 {
 	objectFromString.RegisterClassW<GameObject>("GameObject");
 	objectFromString.RegisterClassW<GameObject3D>("GameObject3D");
@@ -19,7 +20,7 @@ void SceneManager::SceneTick()
 
 void SceneManager::LoadScene()
 {
-	// So basically right now this is the temporary place to create scenes, before we can load them from file
+	this->mainScene = std::make_unique<Scene>();
 
 	if (this->mainScene)
 	{
@@ -60,6 +61,9 @@ void SceneManager::LoadScene()
 
 	//IndexBuffer tempIBuffer;
 	//tempIBuffer.Init(renderer->GetDevice(), 6, indices);
+	this->mainScene->CreateGameObjectOfType<CameraObject>();
+	// So basically right now this is the temporary place to create scenes, before we can load them from file
+	MeshObjData data = this->assetManager.GetMeshObjData("TexBox/TextureCube.glb");
 
 	//std::vector<SubMesh> quadSubMeshes;
 	//quadSubMeshes.push_back(SubMesh(0, 6));
@@ -184,6 +188,14 @@ void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, 
 		if (!objectData.contains("type")) {
 			throw std::runtime_error("Failed to load scene: GameObject doesn't have a type.");
 		}
+	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
+	firstMesh.lock()->SetMesh(data);
+
+	auto secondMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));	
+	secondMesh.lock()->SetMesh(data);
+	
 
 		GameObject* gameObjectPointer = static_cast<GameObject*>(objectFromString.Construct(objectData.at("type")));
 		auto obj = std::shared_ptr<GameObject>(gameObjectPointer);
@@ -192,6 +204,9 @@ void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, 
 		if (!parent.expired()) {
 			obj->SetParent(parent);
 		}
+	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
+	thirdMesh.lock()->SetMesh(data);
 
 		// temp
 		if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {

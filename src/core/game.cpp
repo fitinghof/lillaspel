@@ -3,7 +3,7 @@
 #include "scene/sceneManager.h"
 #include "utilities/time.h"
 #include <memory>
-#include "core/inputManager.h"
+
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     Window window(hInstance, nCmdShow, "Game Window");
@@ -40,7 +40,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     SoundSourceObject speaker;
     speaker.transform.SetPosition(DirectX::XMVectorZero());
     speaker.SetGain(0.7f);
-
+   
     MSG msg = {};
 
     while (msg.message != WM_QUIT)

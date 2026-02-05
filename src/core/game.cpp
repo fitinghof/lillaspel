@@ -3,7 +3,7 @@
 #include "scene/sceneManager.h"
 #include "utilities/time.h"
 #include <memory>
-#include "core/inputManager.h"
+
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     Window window(hInstance, nCmdShow, "Game Window");

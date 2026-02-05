@@ -37,15 +37,15 @@ int RigidBody::GetNrOfColliderChildren()
 	return this->colliderChildren.size();
 }
 
-void RigidBody::Collision(std::weak_ptr<RigidBody> rigidbody)
+void RigidBody::Collision(std::unique_ptr<RigidBody> rigidbody)
 {
 	for (int i = 0; i < this->colliderChildren.size(); i++)
 	{
-		for (int j = 0; j < rigidbody.lock()->GetNrOfColliderChildren(); j++)
-		{
-			Collider* thisCollider = this->colliderChildren[i].lock();
-			Collider* otherCollider = *(rigidbody.lock()->GetRigidBodyCollidersVectorReference())[j]; //dereferencing not worky
+		Collider* thisCollider = this->colliderChildren[i].lock();
 
+		for (int j = 0; j < rigidbody->GetNrOfColliderChildren(); j++)
+		{
+			Collider* otherCollider = rigidbody->GetColliderChildrenVectorReference()->[j];
 			thisCollider->Collision(otherCollider);
 		}
 	}

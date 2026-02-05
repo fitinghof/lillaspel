@@ -14,7 +14,7 @@ public:
 	void AddColliderChildren();
 	void RemoveExpiredColliderChildren();
 	int GetNrOfColliderChildren();
-	std::vector<std::weak_ptr<Collider>>* GetRigidBodyCollidersVectorReference();
+	std::vector<std::unique_ptr<Collider>>* GetColliderChildrenVectorReference();
 
 	void Collision(std::weak_ptr<RigidBody> rigidbody);
 

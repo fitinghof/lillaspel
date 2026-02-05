@@ -12,22 +12,22 @@ Collider::~Collider()
 
 bool Collider::Collision(Collider* otherCollider)
 {
-	//DirectX::XMFLOAT3 mtvAxis = {};
-	//float mtvDistance = 0;
+	DirectX::XMFLOAT3 mtvAxis = {};
+	float mtvDistance = 0;
 
-	//return this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
+	return this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
 }
 
 bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNormal)
 {
-	//DirectX::XMFLOAT3 mtvAxis = {};
-	//float mtvDistance = 0;
-	//bool collision = this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
+	DirectX::XMFLOAT3 mtvAxis = {};
+	float mtvDistance = 0;
+	bool collision = this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
 
-	//contactNormal = DirectX::XMLoadFloat3(&mtvAxis);
-	//contactNormal = DirectX::XMVector3Normalize(contactNormal);
+	contactNormal = DirectX::XMLoadFloat3(&mtvAxis);
+	contactNormal = DirectX::XMVector3Normalize(contactNormal);
 
-	//return collision;
+	return collision;
 }
 
 void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)

@@ -36,7 +36,7 @@ private:
 	void LoadVerticiesAndNormals(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex>& dest, uint32_t& offset);
 	bool LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset);
 	bool LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex>& dest, size_t offset);
-	ID3D11ShaderResourceView* LoadTexture(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, ID3D11Device* device);
+	ID3D11ShaderResourceView* LoadTexture(fastgltf::Asset& asset, fastgltf::Primitive& primitive, ID3D11Device* device);
 
 	std::filesystem::path basePath;
 };

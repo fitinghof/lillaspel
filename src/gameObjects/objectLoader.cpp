@@ -109,7 +109,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 				if (textureNameIt == loadedTextures.end()) {
 					auto* textureRaw = this->LoadTexture(asset, * it, device);
 					if (textureRaw == nullptr) {
-						return false;
+						Logger::Error("Failed to load texture");
 					}
 					std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
 					std::shared_ptr<Texture> tex = std::make_shared<Texture>(textureRaw,  texIdent);
@@ -272,30 +272,41 @@ bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitiv
 	return true;
 }
 
-ID3D11ShaderResourceView* ObjectLoader::LoadTexture(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, ID3D11Device* device)
+ID3D11ShaderResourceView* ObjectLoader::LoadTexture(fastgltf::Asset& asset, fastgltf::Primitive& primitive, ID3D11Device* device)
 {
 	Logger::Log("Loading textures");
 	ID3D11ShaderResourceView* textureView = nullptr;
 	size_t baseColorTextureCordIndex = 0;
-	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
 
+	Logger::Log("Has value: ", primitive.materialIndex.has_value());
+
+	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
 	auto& baseColorTexture = material.pbrData.baseColorTexture;
 	if (baseColorTexture.has_value()) {
+
 		auto& texture = asset.textures[baseColorTexture->textureIndex];
 		if (!texture.imageIndex.has_value()) {
 			Logger::Error("Texture has no image index!");
 			return nullptr;
 		}
+
+		Logger::Log("Texture index: ", texture.imageIndex.value());
 		auto& textureImage = asset.images[texture.imageIndex.value()];
+
+		Logger::Log("tex name: ", textureImage.name);
 		std::visit(fastgltf::visitor{
-			[](auto& arg) {},
+			[](auto& arg) {
+				Logger::Warn("What did you load bruh?");
+			},
 			[&](fastgltf::sources::URI& filePath) {
-				// maybe implement?
+				Logger::Log("Loading texture from filePath");
 			},
 			[&](fastgltf::sources::Array& vector) {
+				Logger::Log("Loading texture from vector");
 				// maybe implement?
 			},
 			[&](fastgltf::sources::BufferView& view) {
+				Logger::Log("Loading texture from bufferview");
 				auto& bufferView = asset.bufferViews[view.bufferViewIndex];
 				auto& buffer = asset.buffers[bufferView.bufferIndex];
 
@@ -304,18 +315,25 @@ ID3D11ShaderResourceView* ObjectLoader::LoadTexture(const fastgltf::Asset& asset
 					[](auto& arg) {},
 					[&](fastgltf::sources::Array& vector) {
 						int width, height, nrChannels;
-						DirectX::CreateWICTextureFromMemory(
+						HRESULT hr = DirectX::CreateWICTextureFromMemory(
 							device,
 							reinterpret_cast<const uint8_t*>(vector.bytes.data() + bufferView.byteOffset),
 							static_cast<size_t>(bufferView.byteLength),
 							nullptr,
 							&textureView
 						);
-
+						if (FAILED(hr)) {
+							Logger::Error("WICLoader failed to load texture");
+						}
 					}
 				}, buffer.data);
 			},
 		}, textureImage.data);
+
+	}
+	else {
+		Logger::Error("No baseColorTexture was found");
+		return nullptr;
 	}
 	Logger::Log("Loaded texture");
 	return textureView;

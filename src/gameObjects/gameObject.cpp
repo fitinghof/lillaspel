@@ -1,8 +1,8 @@
 #include "gameObjects/gameObject.h"
 
-GameObject::GameObject() : children(), parent()
+GameObject::GameObject() : children(), parent(), factory(nullptr)
 {
-
+	
 }
 
 const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const
@@ -34,7 +34,7 @@ void GameObject::SetParent(std::weak_ptr<GameObject> newParent)
 	}
 
 	this->parent = newParent;
-	this->parent.lock()->AddChild(this->weakPtr);
+	this->parent.lock()->AddChild(this->GetPtr());
 
 	Logger::Log("Set Parent.");
 }
@@ -49,6 +49,12 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 
 void GameObject::Start()
 {
+	static bool created = false;
+	if (!created)
+	{
+		created = true;
+		this->factory->CreateGameObjectOfType<GameObject>();
+	}
 }
 
 void GameObject::Tick()
@@ -89,8 +95,8 @@ DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
 	}
 }
 
-void GameObject::SetWeakPtr(std::weak_ptr<GameObject> yourPtr)
+std::weak_ptr<GameObject> GameObject::GetPtr()
 {
-	this->weakPtr = yourPtr;
+	return shared_from_this();
 }
 

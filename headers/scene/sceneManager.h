@@ -10,6 +10,8 @@
 #include "core/assetManager.h"
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
+#include "core/physics/rigidBody.h"
+#include "core/physics/collision.h"
 
 class SceneManager {
 public:

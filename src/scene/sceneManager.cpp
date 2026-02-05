@@ -51,6 +51,32 @@ void SceneManager::LoadScene()
 	Logger::Log(this->mainScene->GetNumberOfGameObjects());
 	this->mainScene->QueueDeleteGameObject(light2);
 	Logger::Log("Loaded scene");
+
+	////////////////
+
+	DirectX::XMVECTOR pos1;
+	pos1.m128_f32[0] = -2;
+	pos1.m128_f32[1] = 0;
+	pos1.m128_f32[2] = 0;
+
+	DirectX::XMVECTOR pos2;
+	pos2.m128_f32[0] = 2;
+	pos2.m128_f32[1] = 0;
+	pos2.m128_f32[2] = 0;
+
+	auto rb1 = this->mainScene->CreateGameObjectOfType<RigidBody>();
+	auto coll1 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	coll1.lock()->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+	coll1.lock()->SetParent(rb1);
+	rb1.lock()->transform.SetPosition(pos1);
+
+	auto rb2 = this->mainScene->CreateGameObjectOfType<RigidBody>();
+	auto coll2 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	coll2.lock()->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+	coll2.lock()->SetParent(rb2);
+	rb2.lock()->transform.SetPosition(pos2);
+
+	rb1.lock()->Collision(rb2);
 }
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)

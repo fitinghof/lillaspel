@@ -53,7 +53,6 @@ public:
 
 	void SetParent(std::weak_ptr<RigidBody> newParent); //this isn't an override since it only accepts RigidBody parents
 
-	virtual void Physics() = 0;
 	virtual bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) = 0;
 	virtual bool CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) = 0;
 	virtual bool CollidesWithSphere(SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) = 0;

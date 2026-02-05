@@ -47,7 +47,7 @@ void GameObject3D::LoadFromJson(const nlohmann::json& data)
 	this->GameObject::LoadFromJson(data);
 
 	if (data.contains("transform")) {
-		if (data.contains("position")) {
+		if (data["transform"].contains("position")) {
 			auto position = data.at("transform").at("position");
 
 			this->transform.SetPosition(DirectX::XMVectorSet(position[0], position[1], position[2], 1));

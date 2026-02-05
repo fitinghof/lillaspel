@@ -71,11 +71,11 @@ bool AssetManager::LoadNewGltf(std::string identifier) {
 	if (!objectLoaded) {
 		return false;
 	}
-	for (std::shared_ptr<Mesh>& data : meshLoadData.meshes) 
+	for (std::shared_ptr<Mesh>& data : meshLoadData.meshes)
 	{
 		this->meshes.emplace(data->GetName(), std::move(data));
 	}
-	for (std::shared_ptr<Material>& data : meshLoadData.materials)
+	for (std::shared_ptr<GenericMaterial>& data : meshLoadData.materials)
 	{
 		this->materials.emplace(data->identifier, std::move(data));
 	}

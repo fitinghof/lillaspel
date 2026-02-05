@@ -436,17 +436,38 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	size_t index = 0;
 	for (auto& subMesh : mesh->GetSubMeshes())
 	{
-		//ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
-		// Temp
-		std::weak_ptr<Material> weak_material = data.GetMaterial(index);
+		std::weak_ptr<BaseMaterial> weak_material = data.GetMaterial(index);
 		if (weak_material.expired()) {
 			Logger::Error("Trying to render expired material, trying to continue...");
 			continue;
 		}
 
-		std::shared_ptr<Material> material = weak_material.lock();
-		ID3D11ShaderResourceView* textureSrv = material->textures.size() > 0 ? material->textures[0].get()->GetSrv() : nullptr;
-		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
+		std::shared_ptr<BaseMaterial> material = weak_material.lock();
+		RenderData renderData = material->GetRenderData();
+
+		if (renderData.pixelShader) {
+			if (/*current ps ! renderData.pixelShader*/ 0) {
+				//this->immediateContext->PSSetShader();
+			}
+		}
+		else {
+			if (/*current ps != default ps*/ 0) {
+				//this->immediateContext->PSSetShader(default);
+			}
+		}
+
+		if (renderData.vertexShader) {
+			if (/*current vs ! renderData.vertexShader*/ 0) {
+				//this->immediateContext->VSSetShader();
+			}
+		}
+		else {
+			if (/*current vs != default vs*/ 0) {
+				//this->immediateContext->VSSetShader(default);
+			}
+		}
+
+		this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 		// Draw to screen
 		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);

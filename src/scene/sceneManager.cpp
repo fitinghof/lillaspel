@@ -179,7 +179,7 @@ void SceneManager::LoadSceneFromFile(const std::string& filePath)
 void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent)
 {
 	for (const nlohmann::json& objectData : data) {
-		Logger::Log(objectData.dump());
+		//Logger::Log(objectData.dump());
 
 		if (!objectData.contains("type")) {
 			throw std::runtime_error("Failed to load scene: GameObject doesn't have a type.");

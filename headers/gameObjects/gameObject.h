@@ -57,6 +57,12 @@ private:
 	/// <param name="newChild"></param>
 	void AddChild(std::weak_ptr<GameObject> newChild);
 
+	/// <summary>
+	/// Engine only
+	/// </summary>
+	/// <param name="oldChild"></param>
+	void DeleteChild(std::weak_ptr<GameObject> oldChild);
+
 	std::vector<std::weak_ptr<GameObject>> children;
 	std::weak_ptr<GameObject> parent;
 	//std::weak_ptr<GameObject> weakPtr;

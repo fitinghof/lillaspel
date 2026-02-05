@@ -16,17 +16,16 @@ CameraObject::CameraObject() : fieldOfView(80.0f), thisCameraId(CameraObject::ca
 
 void CameraObject::Tick()
 {
-	if (this->thisCameraId == 1) {
-		ImGui::SetNextWindowSize(ImVec2(450.f, 120.f));
+	if (this->thisCameraId != CameraObject::mainCamera->thisCameraId) {
+		ImGui::SetNextWindowSize(ImVec2(150, 120.f));
 		ImGui::Begin("MainCamera");
-		ImGui::PushItemWidth(350);
-		if (ImGui::Button("ChangeCamera")) {
+		ImGui::Text("Switch camera");
+		std::string buttonText = "Camera " + std::to_string(this->thisCameraId);
+		if (ImGui::Button(buttonText.c_str()))
+		{
 			Logger::Log("Pressed");
-			Logger::Log(CameraObject::mainCamera->thisCameraId);
 			CameraObject::mainCamera = this;
-			Logger::Log(CameraObject::mainCamera->thisCameraId);
 		}
-		ImGui::PopItemWidth();
 		ImGui::End();
 	}
 

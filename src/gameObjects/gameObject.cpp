@@ -24,7 +24,8 @@ void GameObject::SetParent(std::weak_ptr<GameObject> newParent)
 {
 	if (!this->parent.expired())
 	{
-		// Remove from children
+		// Remove from the parent's children
+		this->parent.lock()->DeleteChild(this->GetPtr());
 	}
 
 	if (newParent.expired())
@@ -45,6 +46,19 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 		return;
 
 	this->children.push_back(newChild);
+}
+
+void GameObject::DeleteChild(std::weak_ptr<GameObject> oldChild)
+{
+	GameObject* oldChildPtr = oldChild.lock().get();
+	for (size_t i = 0; i < this->children.size(); i++) {
+		if (this->children[i].lock().get() == oldChildPtr) {
+			this->children.erase(this->children.begin() + i);
+		}
+		else {
+			Logger::Warn("Something went wrong with the delete function.");
+		}
+	}
 }
 
 void GameObject::Start()

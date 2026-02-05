@@ -6,11 +6,17 @@
 
 #include <memory>
 
+/// <summary>
+/// Data to render a single Submesh, note that this still needs the Index and Vertex buffer from the Mesh
+/// </summary>
 struct SubMeshData {
 	SubMesh submesh = SubMesh(0, 0);
 	std::weak_ptr<Material> material;
 };
 
+/// <summary>
+/// Contains reference data needed to render a mesh, owns nothing.
+/// </summary>
 class MeshObjData {
 public:
 	MeshObjData() = default;

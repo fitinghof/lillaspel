@@ -74,16 +74,16 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			// If we haven't processed these vertexes yet, do so.
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
 				bufferOffsets.emplace(positionIt->accessorIndex, totalOffset);
-
-				size_t oldOffset = totalOffset;
 				
-				this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
+				size_t loadedVertices = this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
 				
-				bool success = this->LoadUV(asset, *it, verticies, oldOffset);
+				bool success = this->LoadUV(asset, *it, verticies, totalOffset);
 				if (!success) {
 					Logger::Error("Failed to load UV");
 					return false;
 				}
+
+				totalOffset += loadedVertices;
 
 
 			}
@@ -162,7 +162,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 	
 }
 
-void ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex>& dest, uint32_t& offset)
+size_t ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<Vertex>& dest, uint32_t offset)
 {
 	auto* positionIt = primitive.findAttribute("POSITION");
 	assert(positionIt != primitive.attributes.end());
@@ -200,7 +200,7 @@ void ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const f
 		// Implement normal generation later maybe
 		Logger::Warn("No normals found for mesh primitive!");
 	}
-	offset += static_cast<uint32_t>(positionAccessor.count);
+	return static_cast<uint32_t>(positionAccessor.count);
 }
 
 bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset)

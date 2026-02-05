@@ -30,8 +30,8 @@ void SceneManager::LoadScene()
 
 	this->mainScene = std::make_unique<Scene>();
 
-	LoadSceneFromFile("../../assets/scenes/test.json");
-	SaveSceneToFile("../../assets/scenes/testresult.json");
+	LoadSceneFromFile("../../assets/scenes/testresult.json");
+	//SaveSceneToFile("../../assets/scenes/testresult.json");
 }
 
 void SceneManager::LoadSceneFromFile(const std::string& filePath)
@@ -61,11 +61,11 @@ void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, 
 			obj->SetParent(parent);
 		}
 
-		// temp
-		if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {
-			MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
-			p->SetMesh(data);
-		}
+		//// temp
+		//if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {
+		//	MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
+		//	p->SetMesh(data);
+		//}
 
 		if (objectData.contains("children")) {
 			CreateObjectsFromJsonRecursively(objectData["children"], obj);

@@ -15,9 +15,8 @@
 class AssetManager
 {
 public:
-	AssetManager(ID3D11Device* device);
-	AssetManager() = default;
-	~AssetManager() = default;
+	
+	AssetManager(const AssetManager& assetManager) = delete;
 
 	Mesh* GetMeshPtr(std::string ident) { return ident != "" ? this->meshes.at(ident).get() : nullptr; }
 	Material* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
@@ -36,9 +35,15 @@ public:
 	std::string GetPathToSoundFolder();
 	SoundClip* GetSoundClip(std::string path);
 
+	static AssetManager& GetInstance();
+
 private:
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
+
+	AssetManager() = default;
+	~AssetManager() = default;
+	
 
 	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
 	std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;

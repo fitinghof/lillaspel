@@ -437,7 +437,6 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	for (auto& subMesh : mesh->GetSubMeshes())
 	{
 		std::weak_ptr<BaseMaterial> weak_material = data.GetMaterial(index);
-		Logger::Warn("");
 		if (weak_material.expired()) {
 			Logger::Error("Trying to render expired material, trying to continue...");
 			continue;
@@ -468,7 +467,6 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 			}
 		}
 
-		Logger::Log(renderData.textures.size());
 		this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 		// Draw to screen

@@ -74,7 +74,7 @@ private:
 	/// <param name="primitive"></param>
 	/// <param name="device"></param>
 	/// <returns>texture pointer</returns>
-	ID3D11ShaderResourceView* LoadTexture(fastgltf::Asset& asset, fastgltf::Primitive& primitive, ID3D11Device* device);
+	ID3D11ShaderResourceView* LoadTexture(fastgltf::Asset& asset, fastgltf::TextureInfo& textureInfo, ID3D11Device* device);
 
 	std::filesystem::path basePath;
 };

@@ -7,7 +7,6 @@ Renderer::Renderer() : viewport(), maximumSpotlights(16)
 
 void Renderer::Init(const Window& window)
 {
-	ObjectLoader objectLoader;
 	SetViewport(window);
 
 	CreateDeviceAndSwapChain(window);
@@ -193,7 +192,7 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
 	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
 
-	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 0, {1,1} };
+	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
 
 	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
 	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get(), sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
@@ -404,13 +403,22 @@ void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 void Renderer::RenderMeshObject(MeshObject* meshObject)
 {
 	// Bind mesh
-	VertexBuffer vBuf = meshObject->GetMesh()->GetVertexBuffer();
+	MeshObjData data = meshObject->GetMesh();
+	std::weak_ptr<Mesh> weak_mesh = data.GetMesh();
+	if (weak_mesh.expired()) {
+		Logger::Error("Trying to render with expired mesh");
+		return;
+	}
+
+	std::shared_ptr<Mesh> mesh = weak_mesh.lock();
+
+	VertexBuffer vBuf = mesh->GetVertexBuffer();
 
 	UINT stride = vBuf.GetVertexSize();
 	UINT offset = 0;
 	ID3D11Buffer* vBuff = vBuf.GetBuffer();
 	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-	this->immediateContext->IASetIndexBuffer(meshObject->GetMesh()->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	this->immediateContext->IASetIndexBuffer(mesh->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 
 
@@ -425,13 +433,23 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
 	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
 
-
-	for (auto subMesh : meshObject->GetMesh()->GetSubMeshes())
+	size_t index = 0;
+	for (auto& subMesh : mesh->GetSubMeshes())
 	{
-		ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
+		//ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
+		// Temp
+		std::weak_ptr<Material> weak_material = data.GetMaterial(index);
+		if (weak_material.expired()) {
+			Logger::Error("Trying to render expired material, trying to continue...");
+			continue;
+		}
+
+		std::shared_ptr<Material> material = weak_material.lock();
+		ID3D11ShaderResourceView* textureSrv = material->textures.size() > 0 ? material->textures[0].get()->GetSrv() : nullptr;
 		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
 
 		// Draw to screen
 		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
+		index++;
 	}
 }

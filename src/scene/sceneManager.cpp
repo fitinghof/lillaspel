@@ -18,7 +18,7 @@ void SceneManager::LoadScene()
 
 	this->mainScene->CreateGameObjectOfType<CameraObject>();
 	// So basically right now this is the temporary place to create scenes, before we can load them from file
-	MeshObjData data = this->renderer->assetManager.GetMeshObjData("Box/cube.glb");
+	MeshObjData data = this->assetManager.GetMeshObjData("TexBox/TextureCube.glb");
 
 	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
 	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
@@ -29,15 +29,51 @@ void SceneManager::LoadScene()
 	secondMesh.lock()->SetMesh(data);
 	
 
+	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
+	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
+	thirdMesh.lock()->SetMesh(data);
 
-	//auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	//thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
-	//thirdMesh.lock()->SetMesh(this->tempMeshes[2].get());
+	auto emptyObj = this->mainScene->CreateGameObjectOfType<GameObject>();
+
+	thirdMesh.lock()->SetParent(secondMesh);
+	emptyObj.lock()->SetParent(thirdMesh);
+	firstMesh.lock()->SetParent(emptyObj);
+	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 5, 1));
+	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 5, 1));
+	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 15, 1));
 
 	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 
 	auto light2 = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
 	light2.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
 	DirectX::XMStoreFloat4(&light2.lock()->data.color, DirectX::XMVectorSet(0, 0, 1, 1));
+
+	Logger::Log(this->mainScene->GetNumberOfGameObjects());
+	this->mainScene->QueueDeleteGameObject(light2);
 	Logger::Log("Loaded scene");
+}
+
+void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)
+{
+	this->assetManager.InitializeSoundBank(pathToSoundFolder);
+}
+
+void SceneManager::AddSoundClipStandardFolder(std::string filename, std::string id)
+{
+	this->assetManager.AddSoundClipStandardFolder(filename, id);
+}
+
+void SceneManager::AddSoundClip(std::string path, std::string id)
+{
+	this->assetManager.AddSoundClip(path, id);
+}
+
+std::string SceneManager::GetPathToSoundFolder()
+{
+	return this->assetManager.GetPathToSoundFolder();
+}
+
+SoundClip* SceneManager::GetSoundClip(std::string id)
+{
+	return this->assetManager.GetSoundClip(id);
 }

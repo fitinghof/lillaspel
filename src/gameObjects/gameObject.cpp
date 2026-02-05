@@ -1,8 +1,8 @@
 #include "gameObjects/gameObject.h"
 
-GameObject::GameObject() : children(), parent()
+GameObject::GameObject() : children(), parent(), factory(nullptr)
 {
-
+	
 }
 
 const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const
@@ -34,7 +34,9 @@ void GameObject::SetParent(std::weak_ptr<GameObject> newParent)
 	}
 
 	this->parent = newParent;
-	this->parent.lock()->AddChild(this->weakPtr);
+	this->parent.lock()->AddChild(this->GetPtr());
+
+	Logger::Log("Set Parent.");
 }
 
 void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
@@ -47,6 +49,12 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 
 void GameObject::Start()
 {
+	static bool created = false;
+	if (!created)
+	{
+		created = true;
+		this->factory->CreateGameObjectOfType<GameObject>();
+	}
 }
 
 void GameObject::Tick()
@@ -67,8 +75,28 @@ void GameObject::LatePhysicsTick()
 	// TO DO
 }
 
-void GameObject::SetWeakPtr(std::weak_ptr<GameObject> yourPtr)
+DirectX::XMVECTOR GameObject::GetGlobalPosition() const
 {
-	this->weakPtr = yourPtr;
+	if (this->parent.expired()) {
+		return DirectX::XMVectorSet(0,0,0,0);
+	}
+	else {
+		return this->parent.lock()->GetGlobalPosition();
+	}
+}
+
+DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
+{
+	if (this->parent.expired()) {
+		return DirectX::XMMatrixIdentity();
+	}
+	else {
+		return this->parent.lock()->GetGlobalWorldMatrix(inverseTranspose);
+	}
+}
+
+std::weak_ptr<GameObject> GameObject::GetPtr()
+{
+	return shared_from_this();
 }
 

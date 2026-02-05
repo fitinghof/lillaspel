@@ -25,10 +25,8 @@
 #include <algorithm>
 #include "core/assetManager.h"
 
-
-
-
-class Renderer {
+class Renderer
+{
 public:
 	Renderer();
 	~Renderer() = default;
@@ -37,7 +35,7 @@ public:
 	/// Initialize the renderer
 	/// </summary>
 	/// <param name="window"></param>
-	void Init(const Window& window);
+	void Init(const Window &window);
 
 	/// <summary>
 	/// Render a frame
@@ -49,23 +47,25 @@ public:
 	/// </summary>
 	void Present();
 
-	void Resize(const Window& window);
+	void Resize(const Window &window);
 
+	void ToggleVSync(bool enable);
 
-	ID3D11Device* GetDevice() const;
-	ID3D11DeviceContext* GetContext() const;
-	IDXGISwapChain* GetSwapChain() const;
-	AssetManager assetManager;
+	ID3D11Device *GetDevice() const;
+	ID3D11DeviceContext *GetContext() const;
+	IDXGISwapChain *GetSwapChain() const;
+
 private:
-
 	const size_t maximumSpotlights;
 
-	struct WorldMatrixBufferContainer {
+	struct WorldMatrixBufferContainer
+	{
 		DirectX::XMFLOAT4X4 worldMatrix;
 		DirectX::XMFLOAT4X4 worldMatrixInversedTransposed;
 	};
 
-	struct LightCountBufferContainer {
+	struct LightCountBufferContainer
+	{
 		size_t spotlightCount;
 		float padding[3];
 	};
@@ -84,7 +84,6 @@ private:
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 
-
 	// Temporary:
 
 	std::unique_ptr<Material> defaultMat;
@@ -94,13 +93,11 @@ private:
 	std::shared_ptr<Shader> pixelShaderLit;
 	std::shared_ptr<Shader> pixelShaderUnlit;
 
-
 	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;
-	std::shared_ptr<std::vector<MeshObject*>> meshRenderQueue;
-	std::shared_ptr<std::vector<SpotlightObject*>> lightRenderQueue;
-
+	std::shared_ptr<std::vector<MeshObject *>> meshRenderQueue;
+	std::shared_ptr<std::vector<SpotlightObject *>> lightRenderQueue;
 
 	// Constant buffers:
 	// The renderer keeps these constant buffers since only one is ever required
@@ -108,15 +105,19 @@ private:
 
 	std::unique_ptr<ConstantBuffer> cameraBuffer;
 	std::unique_ptr<ConstantBuffer> worldMatrixBuffer;
+
 	std::unique_ptr<ConstantBuffer> spotlightCountBuffer;
 	std::unique_ptr<StructuredBuffer> spotlightBuffer;
 
+	// ImGui variables
 
-	void SetViewport(const Window& window);
-	void CreateDeviceAndSwapChain(const Window& window);
+	bool isVSyncEnabled = false;
+
+	void SetViewport(const Window &window);
+	void CreateDeviceAndSwapChain(const Window &window);
 	void CreateRenderTarget();
-	void CreateDepthBuffer(const Window& window);
-	void CreateInputLayout(const std::string& vShaderByteCode);
+	void CreateDepthBuffer(const Window &window);
+	void CreateInputLayout(const std::string &vShaderByteCode);
 	void CreateSampler();
 	void CreateStandardRasterizerState();
 
@@ -127,7 +128,7 @@ private:
 
 	void CreateRenderQueue();
 
-	void LoadShaders(std::string& vShaderByteCode);
+	void LoadShaders(std::string &vShaderByteCode);
 
 	/// <summary>
 	/// This is where the actual rendering logic is done
@@ -139,23 +140,23 @@ private:
 	/// </summary>
 	void ClearRenderTargetViewAndDepthStencilView();
 
-	void ResizeSwapChain(const Window& window);
+	void ResizeSwapChain(const Window &window);
 
 	void BindSampler();
 	void BindInputLayout();
 	void BindRenderTarget();
 	void BindViewport();
-	void BindRasterizerState(RasterizerState* rastState);
+	void BindRasterizerState(RasterizerState *rastState);
 
-	void BindMaterial(Material* material);
+	void BindMaterial(Material *material);
 	void BindLights();
 
 	void BindCameraMatrix();
-	void BindWorldMatrix(ID3D11Buffer* buffer);
+	void BindWorldMatrix(ID3D11Buffer *buffer);
 
 	/// <summary>
 	/// Renders a single MeshObject
 	/// </summary>
 	/// <param name="meshObject"></param>
-	void RenderMeshObject(MeshObject* meshObject);
+	void RenderMeshObject(MeshObject *meshObject);
 };

@@ -23,8 +23,8 @@ public:
 	Material* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
 
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
-	void AddSoundClipStandardFolder(std::string filename);
-	void AddSoundClip(std::string path);
+	void AddSoundClipStandardFolder(std::string filename, std::string id);
+	void AddSoundClip(std::string path, std::string id);
 
 	void setDevicePointer(ID3D11Device* device);
 
@@ -33,12 +33,10 @@ public:
 	bool GetTexture(std::string identifier);
 	MeshObjData GetMeshObjData(std::string identifier);
 
-
-	SoundClip* GetSoundClipStandardFolder(std::string filename);
+	std::string GetPathToSoundFolder();
 	SoundClip* GetSoundClip(std::string path);
 
 private:
-	MusicTrack currentMusicTrack;
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
 

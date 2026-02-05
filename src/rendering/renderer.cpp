@@ -23,8 +23,6 @@ void Renderer::Init(const Window& window)
 	CreateRenderQueue();
 
 	CreateRendererConstantBuffers();
-
-	this->assetManager.setDevicePointer(this->GetDevice());
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -207,12 +205,17 @@ void Renderer::Render()
 
 void Renderer::Present()
 {
-	this->swapChain->Present(0, 0);
+	this->swapChain->Present(this->isVSyncEnabled ? 1 : 0, 0);
 }
 
 void Renderer::Resize(const Window& window)
 {
 	this->ResizeSwapChain(window);
+}
+
+void Renderer::ToggleVSync(bool enable)
+{
+	this->isVSyncEnabled = enable;
 }
 
 ID3D11Device* Renderer::GetDevice() const
@@ -420,8 +423,10 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 
 
 	// Bind worldmatrix
-	DirectX::XMFLOAT4X4 worldMatrix = meshObject->transform.GetWorldMatrix(false);
-	DirectX::XMFLOAT4X4 worldMatrixInverseTransposed = meshObject->transform.GetWorldMatrix(true);
+	DirectX::XMFLOAT4X4 worldMatrix;
+	DirectX::XMStoreFloat4x4(&worldMatrix, meshObject->GetGlobalWorldMatrix(false));
+	DirectX::XMFLOAT4X4 worldMatrixInverseTransposed;
+	DirectX::XMStoreFloat4x4(&worldMatrixInverseTransposed, meshObject->GetGlobalWorldMatrix(true));
 
 	Renderer::WorldMatrixBufferContainer worldMatrixBufferContainer = { worldMatrix, worldMatrixInverseTransposed };
 

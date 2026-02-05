@@ -288,23 +288,20 @@ ID3D11ShaderResourceView* ObjectLoader::LoadTexture(fastgltf::Asset& asset, fast
 			return nullptr;
 		}
 
-		Logger::Log("Texture index: ", texture.imageIndex.value());
 		auto& textureImage = asset.images[texture.imageIndex.value()];
 
-		Logger::Log("tex name: ", textureImage.name);
 		std::visit(fastgltf::visitor{
 			[](auto& arg) {
-				Logger::Warn("What did you load bruh?");
+				Logger::Error("What did you load bruh?, Wont be implemented (Doesn't exist)");
 			},
 			[&](fastgltf::sources::URI& filePath) {
-				Logger::Log("Loading texture from filePath");
+				Logger::Error("Loading texture from filePath, Not yet implemented");
 			},
 			[&](fastgltf::sources::Array& vector) {
-				Logger::Log("Loading texture from vector");
+				Logger::Error("Loading texture from vector, Not yet implemented");
 				// maybe implement?
 			},
 			[&](fastgltf::sources::BufferView& view) {
-				Logger::Log("Loading texture from bufferview");
 				auto& bufferView = asset.bufferViews[view.bufferViewIndex];
 				auto& buffer = asset.buffers[bufferView.bufferIndex];
 

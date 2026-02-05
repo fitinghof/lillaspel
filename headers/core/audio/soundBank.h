@@ -14,19 +14,17 @@ public:
 	SoundBank();
 	~SoundBank();
 
-	std::string pathToSoundFolder;
-
 	void Initialize(std::string pathToSoundFolder);
-	void AddSoundClipStandardFolder(const std::string filename); //filename without the path to its folder
-	void AddSoundClip(const std::string relativePath); //full/relative path to soundfile
-	SoundClip* GetSoundClipStandardFolder(const std::string filename);
-	SoundClip* GetSoundClip(const std::string path);
-	bool RemoveSoundClipStandardFolder(const std::string filename);
-	bool RemoveSoundClip(const std::string relativePath);
+	void AddSoundClipStandardFolder(const std::string filename, const std::string id); //filename without the path to its folder
+	void AddSoundClip(const std::string path, const std::string id); //full/relative path to soundfile
+	std::string GetPathToSoundFolder();
+	SoundClip* GetSoundClip(const std::string id);
+	bool RemoveSoundClip(const std::string path);
 
 private:
 	std::unordered_map<std::string, SoundClip*> soundClips;
+	std::string pathToSoundFolder = "";
 
-	void CreateSoundBuffer(std::string filepath);
-	void DeleteSoundBuffer(std::string filepath);
+	void CreateSoundBuffer(std::string filepath, std::string id);
+	void DeleteSoundBuffer(std::string id);
 };

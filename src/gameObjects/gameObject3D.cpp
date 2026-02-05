@@ -52,6 +52,16 @@ void GameObject3D::LoadFromJson(const nlohmann::json& data)
 
 			this->transform.SetPosition(DirectX::XMVectorSet(position[0], position[1], position[2], 1));
 		}
+		if (data["transform"].contains("rotation")) {
+			auto rotation = data.at("transform").at("rotation");
+
+			this->transform.SetRotationQuaternion(DirectX::XMVectorSet(rotation[0], rotation[1], rotation[2], rotation[3]));
+		}
+		if (data["transform"].contains("scale")) {
+			auto scale = data.at("transform").at("scale");
+
+			this->transform.SetScale(DirectX::XMVectorSet(scale[0], scale[1], scale[2], 1));
+		}
 	}
 }
 
@@ -61,6 +71,8 @@ void GameObject3D::SaveToJson(nlohmann::json& data)
 
 	data["type"] = "GameObject3D";
 	data["transform"]["position"] = { this->transform.GetPosition().m128_f32[0], this->transform.GetPosition().m128_f32[1], this->transform.GetPosition().m128_f32[2] };
+	data["transform"]["rotation"] = { this->transform.GetRotationQuaternion().m128_f32[0], this->transform.GetRotationQuaternion().m128_f32[1], this->transform.GetRotationQuaternion().m128_f32[2], this->transform.GetRotationQuaternion().m128_f32[3] };
+	data["transform"]["scale"] = { this->transform.GetScale().m128_f32[0], this->transform.GetScale().m128_f32[1], this->transform.GetScale().m128_f32[2] };
 }
 
 DirectX::XMVECTOR GameObject3D::GetDecomposedWorldMatrix(const TransformComponent& component) const

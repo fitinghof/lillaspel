@@ -23,6 +23,7 @@
 #include "gameObjects/spotlightObject.h"
 #include "rendering/structuredBuffer.h"
 #include <algorithm>
+#include "core/assetManager.h"
 
 class Renderer
 {

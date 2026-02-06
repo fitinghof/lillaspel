@@ -10,6 +10,7 @@ SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<MeshObject>(NAMEOF(MeshObject));
 	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
+	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
 }
 
 void SceneManager::SceneTick()

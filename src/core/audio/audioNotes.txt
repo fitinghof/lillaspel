@@ -1,40 +1,60 @@
 
 - update orientation every frame
+- move audioManager to assetmanager?
 - fix looping
 - add muffle at distance effect
 - add reverb
 - add cross fade
 
-    MusicTrackManager mtm;
-    mtm.Initialize("C:/Users/Gabriel/Music/Testing/");
-    mtm.AddMusicTrackStandardFolder("Sneak16.wav", "sneak");
-    mtm.AddMusicTrackStandardFolder("BloodyFangs16.wav", "fangs");
+    float timer1 = 10.0f;
+    float timer2 = 2.0f;
 
-    mtm.SetGain("sneak", 0.8f);
-    mtm.FadeInPlay("sneak", 0, 12);
+    //Play music example
+    this->audioManager.InitializeMusicTrackManager("../../assets/audio/music/");
+    this->audioManager.AddMusicTrackStandardFolder("Sneak16.wav", "sneak");
+    this->audioManager.SetMusicGain(1.0f);
+    this->audioManager.SetGain("sneak", 0.1f);
+    this->audioManager.SetPitch("sneak", 1.05f);
+    this->audioManager.FadeInPlay("sneak", 0, 6.0f); //un-comment to listen
 
-    SoundBank sb;
-    sb.Initialize("C:/Users/Gabriel/Music/Testing/");
-    sb.AddSoundClipStandardFolder("TestSound.wav", "scream1");
+    //Play 3D sound effect example
+    SetListenerPosition(3, 0, -1);
+    srand(0);
 
-    SoundClip* clip = sb.GetSoundClip("scream1");
+    this->sceneManager.get()->InitializeSoundBank("../../assets/audio/soundeffects/");
+    this->sceneManager.get()->AddSoundClipStandardFolder("Step.wav", "step");
+    SoundClip* soundClip = sceneManager.get()->GetSoundClip("step");
 
-    SoundSourceObject sso;
-    sso.SetRandomPitch(1.2f, 1.8f);
+    SoundSourceObject speaker;
+    speaker.transform.SetPosition(DirectX::XMVectorZero());
+    speaker.SetGain(0.7f);
 
-    float time = 3;
-    float timer = time;
 
-    SetListenerPosition(-5, 0, -1);
+    int the loop:
+            this->audioManager.Tick();
+        speaker.Tick(); //remember to tick speakers, as with any game object
 
-    //in the loop:
-            timer -= Time::GetInstance().GetDeltaTime();
-
-        mtm.Tick();
-
-        if (timer <= 0)
+        //fade out music example
+        timer1 -= Time::GetInstance().GetDeltaTime();
+        timer2 -= Time::GetInstance().GetDeltaTime();
+        if (timer1 <= 0)
         {
-            timer = time;
-            //mtm.Stop("fangs");
-            sso.Play(clip);
+            //should be called once
+            this->audioManager.FadeOutStop("sneak", 8.0f);
+            timer1 = 10;
+        }
+
+        //randomize position and pitch example
+        if (timer2 <= 0)
+        {
+            DirectX::XMVECTOR pos;
+            pos.m128_f32[0] = rand() % 16 - 8;
+            pos.m128_f32[1] = rand() % 16 - 8;
+            pos.m128_f32[2] = rand() % 16 - 8;
+
+            speaker.transform.SetPosition(pos);
+            speaker.SetRandomPitch(0.8f, 1.2f);
+            speaker.Play(soundClip); //un-comment to listen
+
+            timer2 = 2;
         }

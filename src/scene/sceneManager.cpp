@@ -18,6 +18,7 @@ void SceneManager::SceneTick()
 	if (!this->mainScene) return;
 
 	this->mainScene->SceneTick();
+	this->AudioManagerTick();
 }
 
 void SceneManager::LoadScene()
@@ -114,4 +115,64 @@ std::string SceneManager::GetPathToSoundFolder()
 SoundClip* SceneManager::GetSoundClip(std::string id)
 {
 	return AssetManager::GetInstance().GetSoundClip(id);
+}
+
+void SceneManager::AudioManagerTick()
+{
+	this->audioManager.Tick();
+}
+
+void SceneManager::InitializeMusicTrackManager(std::string pathToMusicFolder)
+{
+	this->audioManager.InitializeMusicTrackManager(pathToMusicFolder);
+}
+
+void SceneManager::AddMusicTrackStandardFolder(std::string filename, std::string id)
+{
+	this->audioManager.AddMusicTrackStandardFolder(filename, id);
+}
+
+void SceneManager::AddMusicTrack(std::string path, std::string id)
+{
+	this->audioManager.AddMusicTrack(path, id);
+}
+
+void SceneManager::PlayMusicTrack(std::string id)
+{
+	this->audioManager.Play(id);
+}
+
+void SceneManager::StopMusicTrack(std::string id)
+{
+	this->audioManager.Stop(id);
+}
+
+void SceneManager::FadeInPlayMusicTrack(std::string id, float startGain, float seconds)
+{
+	this->audioManager.FadeInPlay(id, startGain, seconds);
+}
+
+void SceneManager::FadeOutStopMusicTrack(std::string id, float seconds)
+{
+	this->audioManager.FadeOutStop(id, seconds);
+}
+
+void SceneManager::GetMusicTrackSourceState(std::string id, ALint& sourceState)
+{
+	this->audioManager.GetMusicTrackSourceState(id, sourceState);
+}
+
+void SceneManager::SetMusicTrackGain(std::string id, float gain)
+{
+	this->audioManager.SetGain(id, gain);
+}
+
+void SceneManager::SetMasterMusicGain(float gain)
+{
+	this->audioManager.SetMusicGain(gain);
+}
+
+MusicTrack* SceneManager::GetMusicTrack(std::string id)
+{
+	return this->audioManager.GetMusicTrack(id);
 }

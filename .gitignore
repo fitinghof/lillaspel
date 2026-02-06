@@ -2,3 +2,7 @@
 .vscode/
 build/
 *.dll
+log.txt
+*.ini
+/assets/scenes/imgui.ini
+/assets/scenes/log.txt

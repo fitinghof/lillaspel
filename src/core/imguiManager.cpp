@@ -78,6 +78,7 @@ void ImguiManager::InitalizeImgui(HWND hwnd, ID3D11Device *device, ID3D11DeviceC
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO &io = ImGui::GetIO();
+	io.IniFilename = nullptr;
 	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	// io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	// io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch

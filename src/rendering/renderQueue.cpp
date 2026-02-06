@@ -49,3 +49,17 @@ void RenderQueue::AddLightObject(SpotlightObject* newSpotlightObject)
 
 	instance->lightRenderQueue->push_back(newSpotlightObject);
 }
+
+void RenderQueue::ClearAllQueues()
+{
+	Logger::Log("Clearing render queue...");
+
+	if (!instance) {
+		throw std::runtime_error("Tried to remove object from queue, but RenderQueue is not initialized.");
+	}
+
+	instance->meshRenderQueue->clear();
+	instance->lightRenderQueue->clear();
+
+	Logger::Log("Clearing render queue successful.");
+}

@@ -60,9 +60,6 @@ public:
 	void SetMasterMusicGain(float gain);
 	MusicTrack* GetMusicTrack(std::string id);
 
-	void LoadSceneFromFile(const std::string& filePath);
-	void CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent);
-	void SaveSceneToFile(const std::string& filePath);
 	void SaveSceneToCurrentFile();
 	void CreateNewScene(std::shared_ptr<Scene>& scene);
 	void DeleteScene(std::shared_ptr<Scene>& scene);

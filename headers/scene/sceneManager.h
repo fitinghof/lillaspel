@@ -54,6 +54,7 @@ public:
 	void LoadSceneFromFile(const std::string& filePath);
 	void CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent);
 	void SaveSceneToFile(const std::string& filePath);
+	void SaveSceneToCurrentFile();
 
 private:
 	std::unique_ptr<Scene> mainScene;

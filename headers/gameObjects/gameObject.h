@@ -8,6 +8,7 @@
 #include "utilities/logger.h"
 #include <DirectXMath.h>
 #include "gameObjects/gameObjectFactory.h"
+#include <nlohmann/json.hpp>
 
 class Scene;
 class GameObjectFactory;
@@ -41,12 +42,13 @@ public:
 	virtual void PhysicsTick();
 	virtual void LatePhysicsTick();
 
-	// These should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D:
-
-	virtual DirectX::XMVECTOR GetGlobalPosition() const;
+	// This should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D
 	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;
 
 	std::weak_ptr<GameObject> GetPtr();
+
+	virtual void LoadFromJson(const nlohmann::json& data);
+	virtual void SaveToJson(nlohmann::json& data);
 
 private:
 	/// <summary>
@@ -54,6 +56,12 @@ private:
 	/// </summary>
 	/// <param name="newChild"></param>
 	void AddChild(std::weak_ptr<GameObject> newChild);
+
+	/// <summary>
+	/// Engine only
+	/// </summary>
+	/// <param name="oldChild"></param>
+	void DeleteChild(std::weak_ptr<GameObject> oldChild);
 
 	std::vector<std::weak_ptr<GameObject>> children;
 	std::weak_ptr<GameObject> parent;

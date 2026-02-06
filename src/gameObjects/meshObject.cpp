@@ -26,3 +26,21 @@ void MeshObject::Tick()
 	//static float rot = 0;
 	//this->transform.SetRotationRPY(0,0,rot += 0.0005f);
 }
+
+void MeshObject::LoadFromJson(const nlohmann::json& data)
+{
+	this->GameObject3D::LoadFromJson(data);
+
+	if (data.contains("meshIdentifier")) {
+		SetMesh(AssetManager::GetInstance().GetMeshObjData(data["meshIdentifier"].get<std::string>()));
+	}
+}
+
+void MeshObject::SaveToJson(nlohmann::json& data)
+{
+	this->GameObject3D::SaveToJson(data);
+
+	data["type"] = "MeshObject";
+
+	data["meshIdentifier"] = GetMesh().GetMeshIdent();
+}

@@ -2,11 +2,12 @@
 #include "DirectXMath.h"
 
 CameraObject* CameraObject::mainCamera = nullptr;
+size_t CameraObject::cameraId = 0;
 
-CameraObject::CameraObject() : fieldOfView(80.0f)
+CameraObject::CameraObject() : fieldOfView(80.0f), thisCameraId(CameraObject::cameraId++)
 {
-	if (!mainCamera) {
-		mainCamera = this;
+	if (!this->mainCamera) {
+		this->mainCamera = this;
 	}
 
 	UpdateCameraMatrix();
@@ -16,10 +17,22 @@ CameraObject::CameraObject() : fieldOfView(80.0f)
 
 void CameraObject::Tick()
 {
+	if (this->thisCameraId != CameraObject::mainCamera->thisCameraId) {
+		ImGui::SetNextWindowSize(ImVec2(150, 120.f));
+		ImGui::Begin("MainCamera");
+		ImGui::Text("Switch camera");
+		std::string buttonText = "Camera " + std::to_string(this->thisCameraId);
+		if (ImGui::Button(buttonText.c_str()))
+		{
+			CameraObject::mainCamera = this;
+		}
+		ImGui::End();
+	}
+
 	// Until we get input
 
-	static float pos[3] = { 0,0,0 };
-	static float rot[3] = { 0,0,0 };
+	//static float pos[3] = { 0,0,0 };
+	//static float rot[3] = { 0,0,0 };
 
 	
 	InputManager::GetInstance().ReadControllerInputs();
@@ -61,18 +74,37 @@ CameraObject& CameraObject::GetMainCamera()
 	return *CameraObject::mainCamera;
 }
 
+void CameraObject::LoadFromJson(const nlohmann::json& data)
+{
+	this->GameObject3D::LoadFromJson(data);
+
+	if (data.contains("fov")) {
+		this->fieldOfView = data.at("fov").get<float>();
+	}
+}
+
+void CameraObject::SaveToJson(nlohmann::json& data)
+{
+	this->GameObject3D::SaveToJson(data);
+
+	data["type"] = "CameraObject";
+	data["fov"] = this->fieldOfView;
+}
+
 void CameraObject::UpdateCameraMatrix()
 {
 	// Position
 
-	this->cameraMatrix.cameraPosition = this->transform.GetPosition();
+	this->cameraMatrix.cameraPosition = GetGlobalPosition();
 
 
 	// View Projection Matrix
 
-	DirectX::XMVECTOR focusPos = DirectX::XMVectorAdd(this->transform.GetPosition(), this->transform.GetDirectionVector());
-	DirectX::XMVECTOR upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), this->transform.GetRotationQuaternion());
-	DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtLH(this->transform.GetPosition(), focusPos, upDir);
+	DirectX::XMVECTOR globalRotation = GetGlobalRotation();
+
+	DirectX::XMVECTOR focusPos = DirectX::XMVectorAdd(this->cameraMatrix.cameraPosition, DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 0, 1, 0), globalRotation));
+	DirectX::XMVECTOR upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), globalRotation);
+	DirectX::XMMATRIX viewMatrix = DirectX::XMMatrixLookAtLH(this->cameraMatrix.cameraPosition, focusPos, upDir);
 
 	float tempAspectRatio = 16.0f / 9.0f;
 	DirectX::XMMATRIX projMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(this->fieldOfView), tempAspectRatio, 0.1f, 1000.0f);

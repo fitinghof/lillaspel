@@ -4,6 +4,7 @@
 #include "gameObjects/mesh.h"
 #include "rendering/renderQueue.h"
 #include "gameObjects/meshObjData.h"
+#include "core/assetManager.h"
 
 class MeshObject : public GameObject3D {
 public:
@@ -19,6 +20,9 @@ public:
 	MeshObjData GetMesh();
 
 	virtual void Tick() override;
+
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual void SaveToJson(nlohmann::json& data) override;
 private:
-	MeshObjData mesh; // Temp, it shouldn't actually own the mesh
+	MeshObjData mesh; 
 };

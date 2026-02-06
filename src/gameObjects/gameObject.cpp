@@ -24,7 +24,8 @@ void GameObject::SetParent(std::weak_ptr<GameObject> newParent)
 {
 	if (!this->parent.expired())
 	{
-		// Remove from children
+		// Remove from the parent's children
+		this->parent.lock()->DeleteChild(this->GetPtr());
 	}
 
 	if (newParent.expired())
@@ -47,14 +48,22 @@ void GameObject::AddChild(std::weak_ptr<GameObject> newChild)
 	this->children.push_back(newChild);
 }
 
+void GameObject::DeleteChild(std::weak_ptr<GameObject> oldChild)
+{
+	GameObject* oldChildPtr = oldChild.lock().get();
+	for (size_t i = 0; i < this->children.size(); i++) {
+		if (this->children[i].lock().get() == oldChildPtr) {
+			this->children.erase(this->children.begin() + i);
+		}
+		else {
+			Logger::Warn("Something went wrong with the delete function.");
+		}
+	}
+}
+
 void GameObject::Start()
 {
-	static bool created = false;
-	if (!created)
-	{
-		created = true;
-		this->factory->CreateGameObjectOfType<GameObject>();
-	}
+
 }
 
 void GameObject::Tick()
@@ -75,16 +84,6 @@ void GameObject::LatePhysicsTick()
 	// TO DO
 }
 
-DirectX::XMVECTOR GameObject::GetGlobalPosition() const
-{
-	if (this->parent.expired()) {
-		return DirectX::XMVectorSet(0,0,0,0);
-	}
-	else {
-		return this->parent.lock()->GetGlobalPosition();
-	}
-}
-
 DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
 {
 	if (this->parent.expired()) {
@@ -98,5 +97,20 @@ DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
 std::weak_ptr<GameObject> GameObject::GetPtr()
 {
 	return shared_from_this();
+}
+
+void GameObject::LoadFromJson(const nlohmann::json& data)
+{
+	// Children are loaded by the sceneManager
+}
+
+void GameObject::SaveToJson(nlohmann::json& data)
+{
+	data["type"] = "GameObject";
+
+	for (size_t i = 0; i < this->children.size(); i++)
+	{
+		this->children[i].lock()->SaveToJson(data["children"][i]);
+	}
 }
 

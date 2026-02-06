@@ -35,7 +35,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow)
     this->imguiManager.SetLoadSceneChangeCallback([&](const std::string &filepath)
                                                   { this->sceneManager->LoadSceneFromFile(filepath); });
 
-    this->sceneManager->LoadScene();
+    this->sceneManager->LoadScene(SceneManager::Scenes::EMPTY);
 
 
    

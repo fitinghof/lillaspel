@@ -20,6 +20,15 @@
 class SceneManager
 {
 public:
+
+	enum Scenes {
+		EMPTY,
+		MAIN_MENU,
+		GAME,
+		END_CREDITS,
+		DEMO
+	};
+
 	SceneManager(Renderer *rend); // The renderer reference is temporary
 	~SceneManager() = default;
 
@@ -28,7 +37,7 @@ public:
 	/// <summary>
 	/// For now this serves as a place to build scenes
 	/// </summary>
-	void LoadScene();
+	void LoadScene(Scenes scene);
 
 	//Sound effects
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
@@ -51,13 +60,18 @@ public:
 	void SetMasterMusicGain(float gain);
 	MusicTrack* GetMusicTrack(std::string id);
 
+	void SaveSceneToCurrentFile();
+	void CreateNewScene(std::shared_ptr<Scene>& scene);
+	void DeleteScene(std::shared_ptr<Scene>& scene);
 	void LoadSceneFromFile(const std::string& filePath);
 	void CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent);
 	void SaveSceneToFile(const std::string& filePath);
-	void SaveSceneToCurrentFile();
+
+	void SetMainCameraInScene(std::shared_ptr<Scene>& scene);
 
 private:
-	std::unique_ptr<Scene> mainScene;
+	std::shared_ptr<Scene> mainScene;
+	std::shared_ptr<Scene> emptyScene;
 	ObjectFromStringFactory objectFromString;
 	AudioManager audioManager;
 

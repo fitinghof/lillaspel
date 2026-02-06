@@ -33,6 +33,7 @@ public:
 	virtual void LateTick() override;
 
 	CameraObject::CameraMatrixContainer& GetCameraMatrix();
+	void SetMainCamera();
 	static CameraObject& GetMainCamera();
 
 	virtual void LoadFromJson(const nlohmann::json& data) override;

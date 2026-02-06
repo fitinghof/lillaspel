@@ -7,7 +7,7 @@ size_t CameraObject::cameraId = 0;
 CameraObject::CameraObject() : fieldOfView(80.0f), thisCameraId(CameraObject::cameraId++)
 {
 	if (!this->mainCamera) {
-		this->mainCamera = this;
+		SetMainCamera();
 	}
 
 	UpdateCameraMatrix();
@@ -38,6 +38,11 @@ void CameraObject::LateTick()
 CameraObject::CameraMatrixContainer& CameraObject::GetCameraMatrix()
 {
 	return this->cameraMatrix;
+}
+
+void CameraObject::SetMainCamera()
+{
+	this->mainCamera = this;
 }
 
 CameraObject& CameraObject::GetMainCamera()

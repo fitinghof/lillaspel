@@ -110,7 +110,7 @@ FetchContent_MakeAvailable(imgui)
 file(GLOB_RECURSE PROJECT_SOURCES CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/src/*.cpp")
 file(GLOB_RECURSE PROJECT_HEADERS CONFIGURE_DEPENDS "${CMAKE_SOURCE_DIR}/headers/*.h" "${CMAKE_SOURCE_DIR}/headers/*.hpp")
 
-add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS} "headers/gameObjects/gameObjectSerialization.h")
+add_executable(${PROJECT_NAME} WIN32 ${PROJECT_SOURCES} ${PROJECT_HEADERS})
 
 # Target-scoped Windows Unicode defines
 target_compile_definitions(${PROJECT_NAME} PRIVATE UNICODE _UNICODE)

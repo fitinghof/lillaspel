@@ -11,6 +11,7 @@
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
 #include "scene/objectFromStringFactory.h"
+#include "gameObjects/debugCamera.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>

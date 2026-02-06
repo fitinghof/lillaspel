@@ -46,9 +46,12 @@ private:
 	unsigned char LM;
 	unsigned char RM;
 
-public:
+
 	InputManager();
 	~InputManager() = default;
+	InputManager(InputManager& inputManager) = delete;
+public:
+	static InputManager& GetInstance();
 	void Reset();
 
 	// Keyboard

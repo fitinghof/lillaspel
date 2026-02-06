@@ -62,4 +62,5 @@ private:
 	std::function<void(const std::string &)> saveSceneChangeCallback;
 	std::function<void(const std::string &)> saveSceneAsChangeCallback;
 	std::function<void(const std::string &)> loadSceneChangeCallback;
+	std::string currentScenePath;
 };

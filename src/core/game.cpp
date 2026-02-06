@@ -22,6 +22,14 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow)
                              { this->renderer.Resize(window); });
     this->imguiManager.SetVSyncChangeCallback([&](bool enable)
                                               { this->renderer.ToggleVSync(enable); });
+    this->imguiManager.SetSaveSceneChangeCallback([&](const std::string &filepath)
+                                                  {
+                                                    if (filepath.empty())
+                                                    {
+                                                        this->sceneManager->SaveSceneToCurrentFile();
+                                                        return;
+                                                    }
+                                                    this->sceneManager->SaveSceneToFile(filepath); });
     this->imguiManager.SetSaveSceneAsChangeCallback([&](const std::string &filepath)
                                                     { this->sceneManager->SaveSceneToFile(filepath); });
     this->imguiManager.SetLoadSceneChangeCallback([&](const std::string &filepath)

@@ -276,6 +276,19 @@ void ImguiManager::MainMenuImGui()
 		{
 			if (ImGui::MenuItem("Save") && this->saveSceneChangeCallback)
 			{
+				if (this->currentScenePath.empty())
+				{
+					const std::wstring pathW = SaveSceneFileDialog(GetActiveWindow());
+					if (!pathW.empty())
+					{
+						this->currentScenePath = WideToUtf8(pathW);
+						this->saveSceneChangeCallback(this->currentScenePath);
+					}
+				}
+				else
+				{
+					this->saveSceneChangeCallback(this->currentScenePath);
+				}
 			}
 
 			if (ImGui::MenuItem("Save As...") && this->saveSceneAsChangeCallback)
@@ -283,7 +296,8 @@ void ImguiManager::MainMenuImGui()
 				const std::wstring pathW = SaveSceneFileDialog(GetActiveWindow());
 				if (!pathW.empty())
 				{
-					this->saveSceneAsChangeCallback(WideToUtf8(pathW));
+					this->currentScenePath = WideToUtf8(pathW);
+					this->saveSceneAsChangeCallback(this->currentScenePath);
 				}
 			}
 
@@ -292,7 +306,8 @@ void ImguiManager::MainMenuImGui()
 				const std::wstring pathW = OpenSceneFileDialog(GetActiveWindow());
 				if (!pathW.empty())
 				{
-					this->loadSceneChangeCallback(WideToUtf8(pathW));
+					this->currentScenePath = WideToUtf8(pathW);
+					this->loadSceneChangeCallback(this->currentScenePath);
 				}
 			}
 

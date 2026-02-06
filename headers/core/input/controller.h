@@ -15,22 +15,19 @@ typedef struct {
 } ControllerInput;
 
 class Controller {
+public:
+	Controller(DWORD controllerIndex) : controllerIndex(controllerIndex), state{}, previousState{}, input{} {}
+	~Controller() = default;
+
+	const bool IsConnected();
+	ControllerInput& ReadInput();
+
+	void PrintInputState();
+
 private:
 	DWORD controllerIndex;
 	XINPUT_STATE state;
 	XINPUT_STATE previousState;
 
 	ControllerInput input;
-
-
-public:
-	Controller(DWORD controllerIndex) : controllerIndex(controllerIndex), state{}, previousState{}, input{} {}
-	~Controller() = default;
-
-	bool IsConnected();
-	bool HasUpdatedState() const;
-	ControllerInput& GetInput() { return this->input; }
-	ControllerInput& ReadNewInput();
-
-	void PrintInputState();
 };

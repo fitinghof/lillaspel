@@ -4,27 +4,22 @@
 
 #include "utilities/logger.h"
 
-#define XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE 7849
-#define XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE 8689
-#define XINPUT_GAMEPAD_TRIGGER_THRESHOLD 30
+static constexpr unsigned int leftThumbDeadzone = 7849;
+static constexpr unsigned int rightThumbDeadzone = 8689;
+static constexpr unsigned int triggerDeadzone = 30;
 
-#define MAX_THUMB_MAGNITUDE 32767.0f
-#define MAX_TRIGGER_MAGNITUDE 255.0f // May not be needed
+static constexpr float maxThumbMagnitude = 32767.0f;
+static constexpr float maxTriggerMagnitude = 255.0f; // May not be needed
 
-bool Controller::IsConnected() {
+const bool Controller::IsConnected() {
 	this->previousState = this->state;
 
-	DWORD dwResult = XInputGetState(this->controllerIndex, &this->state);
-	return (dwResult == ERROR_SUCCESS);
-}
-
-bool Controller::HasUpdatedState() const {
 	if (this->previousState.dwPacketNumber == this->state.dwPacketNumber)
 		return false;
 	return true;
 }
 
-ControllerInput& Controller::ReadNewInput()
+ControllerInput& Controller::ReadInput()
 {
 	XINPUT_GAMEPAD gamepad = this->state.Gamepad;
 	this->input.buttons = gamepad.wButtons;
@@ -34,12 +29,12 @@ ControllerInput& Controller::ReadNewInput()
 	float LY = gamepad.sThumbLY;
 
 	float leftMagnitude = sqrt(LX * LX + LY * LY);
-	float normMagnitude = leftMagnitude / (MAX_THUMB_MAGNITUDE - XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE);
+	float normMagnitude = leftMagnitude / (maxThumbMagnitude - leftThumbDeadzone);
 
 	float normLX = LX / leftMagnitude;
 	float normLY = LY / leftMagnitude;
 
-	if (leftMagnitude > XINPUT_GAMEPAD_LEFT_THUMB_DEADZONE) {
+	if (leftMagnitude > leftThumbDeadzone) {
 		if(normMagnitude > 1.0f) 
 			normMagnitude = 1.0f;
 
@@ -59,12 +54,12 @@ ControllerInput& Controller::ReadNewInput()
 	float RY = gamepad.sThumbRY;
 
 	float rightMagnitude = sqrt(RX * RX + RY * RY);
-	normMagnitude = rightMagnitude / (MAX_THUMB_MAGNITUDE - XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE);
+	normMagnitude = rightMagnitude / (maxThumbMagnitude - rightThumbDeadzone);
 
 	float normRX = RX / rightMagnitude;
 	float normRY = RY / rightMagnitude;
 
-	if (rightMagnitude > XINPUT_GAMEPAD_RIGHT_THUMB_DEADZONE) {
+	if (rightMagnitude > rightThumbDeadzone) {
 		if (normMagnitude > 1.0f)
 			normMagnitude = 1.0f;
 
@@ -81,7 +76,7 @@ ControllerInput& Controller::ReadNewInput()
 
 	// Deadzone BACK TRIGGERS ( ON / OFF )
 	float LT = gamepad.bLeftTrigger;
-	if (LT > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
+	if (LT > triggerDeadzone) {
 		LT = 1.f;
 	}
 	else {
@@ -91,7 +86,7 @@ ControllerInput& Controller::ReadNewInput()
 	this->input.leftBackTrigger = bool(LT);
 
 	float RT = gamepad.bRightTrigger;
-	if (RT > XINPUT_GAMEPAD_TRIGGER_THRESHOLD) {
+	if (RT > triggerDeadzone) {
 		RT = 1.f;
 	}
 	else {

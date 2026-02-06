@@ -85,14 +85,14 @@ void SceneManager::SaveSceneToFile(const std::string& filePath)
 		}
 	}
 
-	Logger::Log(this->mainScene->GetNumberOfGameObjects());
-	this->mainScene->QueueDeleteGameObject(light2);
-	Logger::Log("Loaded scene");
+	//Logger::Log(this->mainScene->GetNumberOfGameObjects());
+	//this->mainScene->QueueDeleteGameObject(light2);
+	//Logger::Log("Loaded scene");
 
 	////////////////
 
 	DirectX::XMVECTOR pos1;
-	pos1.m128_f32[0] = 1.5f;
+	pos1.m128_f32[0] = -2.0f;
 	pos1.m128_f32[1] = 0;
 	pos1.m128_f32[2] = 0;
 

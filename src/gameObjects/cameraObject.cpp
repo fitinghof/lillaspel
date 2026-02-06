@@ -1,4 +1,5 @@
 #include "gameObjects/cameraObject.h"
+#include "DirectXMath.h"
 
 CameraObject* CameraObject::mainCamera = nullptr;
 size_t CameraObject::cameraId = 0;
@@ -27,24 +28,10 @@ void CameraObject::Tick()
 		}
 		ImGui::End();
 	}
+}
 
-	// Until we get input
-
-	//static float pos[3] = { 0,0,0 };
-	//static float rot[3] = { 0,0,0 };
-
-	//ImGui::SetNextWindowSize(ImVec2(450.f, 120.f));
-	//ImGui::Begin("Camera");
-	//ImGui::PushItemWidth(350);
-	//ImGui::SliderFloat3("Position", pos, -20, 20);
-	//ImGui::SliderFloat3("Rotation", rot, -180, 180);
-	//ImGui::SliderFloat("FOV", &this->fieldOfView, 1, 180);
-	//ImGui::PopItemWidth();
-	//ImGui::End();
-
-	//this->transform.SetPosition(DirectX::XMVectorSet(pos[0], pos[1], pos[2], 1.0f));
-	//this->transform.SetRotationRPY(DirectX::XMConvertToRadians(rot[0]), DirectX::XMConvertToRadians(rot[1]), DirectX::XMConvertToRadians(rot[2]));
-
+void CameraObject::LateTick()
+{
 	UpdateCameraMatrix();
 }
 

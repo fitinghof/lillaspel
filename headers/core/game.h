@@ -4,6 +4,9 @@
 #include "utilities/logger.h"
 #include "core/window.h"
 #include "rendering/renderer.h"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 #include "core/imguiManager.h"
 #include "core/audio/soundEngine.h"
 #include "scene/sceneManager.h"

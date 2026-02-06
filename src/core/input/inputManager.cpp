@@ -14,6 +14,13 @@ void InputManager::SetMousePosition(const int x, const int y) {
 	this->mousePosition = { x, y };
 }
 
+InputManager& InputManager::GetInstance()
+{
+	static InputManager instance;
+	return instance;
+
+}
+
 void InputManager::Reset() {
 	for (unsigned char& state : keyStates)
 	{

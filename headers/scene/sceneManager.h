@@ -11,13 +11,15 @@
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
 #include "scene/objectFromStringFactory.h"
+#include "gameObjects/debugCamera.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>
 
-class SceneManager {
+class SceneManager
+{
 public:
-	SceneManager(Renderer* rend); // The renderer reference is temporary
+	SceneManager(Renderer *rend); // The renderer reference is temporary
 	~SceneManager() = default;
 
 	void SceneTick();
@@ -25,15 +27,19 @@ public:
 	/// <summary>
 	/// For now this serves as a place to build scenes
 	/// </summary>
-	void LoadScene(); 
+	void LoadScene();
 
-	//Audio
-	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
+	// Audio
+	void InitializeSoundBank(std::string pathToSoundFolder); // end the path with /
 	void AddSoundClipStandardFolder(std::string filename, std::string id);
 	void AddSoundClip(std::string path, std::string id);
 	std::string GetPathToSoundFolder();
-	SoundClip* GetSoundClip(std::string id);
+	SoundClip *GetSoundClip(std::string id);
 
+	void LoadSceneFromFile(const std::string &filePath);
+	void CreateObjectsFromJsonRecursively(const nlohmann::json &data, std::weak_ptr<GameObject> parent);
+	void SaveSceneToFile(const std::string &filePath);
+	void SaveSceneToCurrentFile();
 	void CreateNewScene(std::shared_ptr<Scene>& scene);
 	void DeleteScene(std::shared_ptr<Scene>& scene);
 	void LoadSceneFromFile(const std::string& filePath);
@@ -45,7 +51,8 @@ private:
 	std::shared_ptr<Scene> emptyScene;
 	ObjectFromStringFactory objectFromString;
 
-	Renderer* renderer; // This is temporary
+	Renderer *renderer; // This is temporary
+	std::string currentScenePath;
 
 	std::vector<std::unique_ptr<Mesh>> tempMeshes; // This is also temporary
 };

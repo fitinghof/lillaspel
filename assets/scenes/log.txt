@@ -1,0 +1,53 @@
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene!
+Successfully created a camera.
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene!
+Exiting game...50166A038
+[ERROR] [audioManager.cpp:38] failed to destroy context!
+Clearing render queue...
+Clearing render queue successful.
+Successfully created a camera.
+Clearing render queue...
+Clearing render queue successful.
+Successfully created a camera.
+Created a MeshObject.
+TexBox/TextureCube.glb
+TexBox/TextureCube.glb:Mesh_0
+Loading indices
+Loaded indices
+Loading textures
+Loaded texture
+1
+Created a MeshObject.
+Set Parent.
+Successfully created a camera.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a spotlight.
+Exiting game...5010BA410
+[ERROR] [audioManager.cpp:38] failed to destroy context!
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene: 
+Successfully created a camera.
+Created a MeshObject.
+TexBox/TextureCube.glb
+TexBox/TextureCube.glb:Mesh_0
+Loading indices
+Loaded indices
+Loading textures
+Loaded texture
+1
+Created a MeshObject.
+Set Parent.
+Successfully created a camera.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a spotlight.
+Exiting game...5014A4C80
+[ERROR] [audioManager.cpp:38] failed to destroy context!

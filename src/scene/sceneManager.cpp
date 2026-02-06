@@ -31,10 +31,26 @@ void SceneManager::SceneTick()
 	ImGui::End();
 }
 
-void SceneManager::LoadScene()
+void SceneManager::LoadScene(Scenes scene)
 {
-	LoadSceneFromFile("../../assets/scenes/testresult.json");
-	//SaveSceneToFile("../../assets/scenes/testresult.json");
+	switch (scene) {
+	case Scenes::EMPTY:
+		break;
+	case Scenes::MAIN_MENU:
+		Logger::Warn("There is no main menu scene.");
+		break;
+	case Scenes::GAME:
+		Logger::Warn("There is no game scene.");
+		break;
+	case Scenes::END_CREDITS:
+		Logger::Warn("There is no end credits scene.");
+		break;
+	case Scenes::DEMO:
+		LoadSceneFromFile("../../assets/scenes/testresult.json");
+		break;
+	default:
+		break;
+	}
 }
 
 void SceneManager::CreateNewScene(std::shared_ptr<Scene>& scene)
@@ -51,7 +67,7 @@ void SceneManager::DeleteScene(std::shared_ptr<Scene>& scene)
 {
 	scene.reset();
 	RenderQueue::ClearAllQueues();
-	Logger::Log("Deleted scene!");
+	Logger::Log("Deleted scene: ", this->currentScenePath);
 }
 
 void SceneManager::LoadSceneFromFile(const std::string &filePath)
@@ -65,6 +81,8 @@ void SceneManager::LoadSceneFromFile(const std::string &filePath)
 
 	// Actual loading
 	CreateObjectsFromJsonRecursively(data["gameObjects"], std::shared_ptr<GameObject>(nullptr));
+
+	SetMainCameraInScene(this->mainScene);
 }
 
 void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json &data, std::weak_ptr<GameObject> parent)
@@ -86,12 +104,6 @@ void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json &data, 
 		{
 			obj->SetParent(parent);
 		}
-
-		//// temp
-		// if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {
-		//	MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
-		//	p->SetMesh(data);
-		// }
 
 		if (objectData.contains("children"))
 		{
@@ -117,6 +129,17 @@ void SceneManager::SaveSceneToFile(const std::string &filePath)
 	outFile << data;
 	outFile.close();
 	this->currentScenePath = filePath;
+}
+
+void SceneManager::SetMainCameraInScene(std::shared_ptr<Scene>& scene)
+{
+	for (auto gameObject : scene->gameObjects) {
+		if (CameraObject* newMainCamera = dynamic_cast<CameraObject*>(gameObject.get())) {
+			if (newMainCamera != nullptr) {
+				newMainCamera->SetMainCamera();
+			}
+		}
+	}
 }
 
 void SceneManager::SaveSceneToCurrentFile()

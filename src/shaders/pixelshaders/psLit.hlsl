@@ -64,6 +64,8 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float4 textureColor = float4(1, 1, 1, 1);
     textureColor += min(textureCount, 1) * (mainTexture.Sample(mainSampler, float2(input.uv.x, 1 - input.uv.y)) - float4(1, 1, 1, 1));
     
+   // return float4(input.uv, 0, 1);
+    
     // Clamp color between 0 and 1
     return min(textureColor * (ambientColor + diffuseColor) + specularColor, 1);
 }

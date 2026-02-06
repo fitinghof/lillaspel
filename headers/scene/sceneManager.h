@@ -34,12 +34,15 @@ public:
 	std::string GetPathToSoundFolder();
 	SoundClip* GetSoundClip(std::string id);
 
+	void CreateNewScene(std::shared_ptr<Scene>& scene);
+	void DeleteScene(std::shared_ptr<Scene>& scene);
 	void LoadSceneFromFile(const std::string& filePath);
 	void CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent);
 	void SaveSceneToFile(const std::string& filePath);
 
 private:
-	std::unique_ptr<Scene> mainScene;
+	std::shared_ptr<Scene> mainScene;
+	std::shared_ptr<Scene> emptyScene;
 	ObjectFromStringFactory objectFromString;
 
 	Renderer* renderer; // This is temporary

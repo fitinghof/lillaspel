@@ -10,32 +10,53 @@ SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<MeshObject>(NAMEOF(MeshObject));
 	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
+
+	CreateNewScene(this->emptyScene);
+	this->emptyScene->CreateGameObjectOfType<CameraObject>();
 }
 
 void SceneManager::SceneTick()
 {
-	if (!this->mainScene) return;
+	if (!this->mainScene.get()) {
+		this->mainScene = this->emptyScene;
+	}
 
 	this->mainScene->SceneTick();
+
+	ImGui::Begin("SceneTest");
+	if (ImGui::Button("Delete Scene")) {
+		DeleteScene(this->mainScene);
+	}
+	ImGui::End();
 }
 
 void SceneManager::LoadScene()
 {
-	if (this->mainScene)
-	{
-		// TO DO: Delete old scene
-
-		throw std::runtime_error("Tried to load another scene, unsupported.");
-	}
-
-	this->mainScene = std::make_unique<Scene>();
-
 	LoadSceneFromFile("../../assets/scenes/testresult.json");
 	//SaveSceneToFile("../../assets/scenes/testresult.json");
 }
 
+void SceneManager::CreateNewScene(std::shared_ptr<Scene>& scene)
+{
+	if (scene.get())
+	{
+		DeleteScene(scene);
+	}
+
+	scene = std::make_shared<Scene>();
+}
+
+void SceneManager::DeleteScene(std::shared_ptr<Scene>& scene)
+{
+	scene.reset();
+	RenderQueue::ClearAllQueues();
+	Logger::Log("Deleted scene!");
+}
+
 void SceneManager::LoadSceneFromFile(const std::string& filePath)
 {
+	CreateNewScene(this->mainScene);
+
 	std::ifstream file(filePath);
 	nlohmann::json data = nlohmann::json::parse(file);
 	file.close();

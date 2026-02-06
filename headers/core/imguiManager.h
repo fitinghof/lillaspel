@@ -11,6 +11,7 @@
 #include <Windows.h>
 #include <d3d11.h>
 #include <functional>
+#include <string>
 
 class ImguiManager
 {
@@ -28,6 +29,9 @@ public:
 	void SetFullscreenChangeCallback(std::function<void(bool)> callback);
 	void SetVSyncChangeCallback(std::function<void(bool)> callback);
 	void SetWireframeChangeCallback(std::function<void(bool)> callback);
+	void SetSaveSceneChangeCallback(std::function<void(const std::string &)> callback);
+	void SetSaveSceneAsChangeCallback(std::function<void(const std::string &)> callback);
+	void SetLoadSceneChangeCallback(std::function<void(const std::string &)> callback);
 
 private:
 	void ConsoleImGui();
@@ -51,13 +55,11 @@ private:
 	bool showSoundWindow = false;
 	bool showMusicWindow = false;
 
-	// Scene
-	bool saveScene = false;
-	bool saveSceneAs = false;
-	bool loadScene = false;
-
 	std::function<void(UINT, UINT)> resolutionChangeCallback;
 	std::function<void(bool)> fullscreenChangeCallback;
 	std::function<void(bool)> vSyncChangeCallback;
 	std::function<void(bool)> wireframeChangeCallback;
+	std::function<void(const std::string &)> saveSceneChangeCallback;
+	std::function<void(const std::string &)> saveSceneAsChangeCallback;
+	std::function<void(const std::string &)> loadSceneChangeCallback;
 };

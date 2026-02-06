@@ -4,6 +4,61 @@
 
 // std
 #include <format>
+#include <commdlg.h>
+
+namespace
+{
+	std::string WideToUtf8(const std::wstring &w)
+	{
+		if (w.empty())
+			return {};
+		const int size = WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, nullptr, 0, nullptr, nullptr);
+		std::string out(size - 1, '\0');
+		WideCharToMultiByte(CP_UTF8, 0, w.c_str(), -1, out.data(), size, nullptr, nullptr);
+		return out;
+	}
+
+	std::wstring SaveSceneFileDialog(HWND hwnd)
+	{
+		wchar_t filePath[MAX_PATH] = L"";
+
+		OPENFILENAMEW ofn = {};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hwnd;
+		ofn.lpstrFile = filePath;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.lpstrFilter = L"Scene Files (*.scene)\0*.scene\0All Files (*.*)\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_OVERWRITEPROMPT;
+		ofn.lpstrDefExt = L"scene";
+
+		if (GetSaveFileNameW(&ofn))
+		{
+			return std::wstring(filePath);
+		}
+		return L"";
+	}
+
+	std::wstring OpenSceneFileDialog(HWND hwnd)
+	{
+		wchar_t filePath[MAX_PATH] = L"";
+
+		OPENFILENAMEW ofn = {};
+		ofn.lStructSize = sizeof(ofn);
+		ofn.hwndOwner = hwnd;
+		ofn.lpstrFile = filePath;
+		ofn.nMaxFile = MAX_PATH;
+		ofn.lpstrFilter = L"Scene Files (*.scene)\0*.scene\0All Files (*.*)\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+		if (GetOpenFileNameW(&ofn))
+		{
+			return std::wstring(filePath);
+		}
+		return L"";
+	}
+}
 
 ImguiManager::ImguiManager(HWND hwnd, ID3D11Device *device, ID3D11DeviceContext *immediateContext)
 {
@@ -72,6 +127,20 @@ void ImguiManager::SetVSyncChangeCallback(std::function<void(bool)> callback)
 void ImguiManager::SetWireframeChangeCallback(std::function<void(bool)> callback)
 {
 	this->wireframeChangeCallback = std::move(callback);
+}
+
+void ImguiManager::SetSaveSceneChangeCallback(std::function<void(const std::string &)> callback)
+{
+	this->saveSceneChangeCallback = std::move(callback);
+}
+
+void ImguiManager::SetSaveSceneAsChangeCallback(std::function<void(const std::string &)> callback)
+{
+	this->saveSceneAsChangeCallback = std::move(callback);
+}
+void ImguiManager::SetLoadSceneChangeCallback(std::function<void(const std::string &)> callback)
+{
+	this->loadSceneChangeCallback = std::move(callback);
 }
 
 void ImguiManager::ConsoleImGui()
@@ -205,9 +274,28 @@ void ImguiManager::MainMenuImGui()
 		}
 		if (ImGui::BeginMenu("Scene"))
 		{
-			ImGui::MenuItem("Save", nullptr, &this->saveScene);
-			ImGui::MenuItem("Save As...", nullptr, &this->saveSceneAs);
-			ImGui::MenuItem("Load", nullptr, &this->loadScene);
+			if (ImGui::MenuItem("Save") && this->saveSceneChangeCallback)
+			{
+			}
+
+			if (ImGui::MenuItem("Save As...") && this->saveSceneAsChangeCallback)
+			{
+				const std::wstring pathW = SaveSceneFileDialog(GetActiveWindow());
+				if (!pathW.empty())
+				{
+					this->saveSceneAsChangeCallback(WideToUtf8(pathW));
+				}
+			}
+
+			if (ImGui::MenuItem("Load") && this->loadSceneChangeCallback)
+			{
+				const std::wstring pathW = OpenSceneFileDialog(GetActiveWindow());
+				if (!pathW.empty())
+				{
+					this->loadSceneChangeCallback(WideToUtf8(pathW));
+				}
+			}
+
 			ImGui::EndMenu();
 		}
 

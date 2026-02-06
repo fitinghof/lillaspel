@@ -22,6 +22,9 @@ public:
 
 	virtual void Tick() override;
 
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual void SaveToJson(nlohmann::json& data) override;
+
 private:
 	
 };

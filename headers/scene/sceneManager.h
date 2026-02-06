@@ -10,6 +10,10 @@
 #include "core/assetManager.h"
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
+#include "scene/objectFromStringFactory.h"
+
+#include <fstream>
+#include <nlohmann/json.hpp>
 
 class SceneManager {
 public:
@@ -21,7 +25,7 @@ public:
 	/// <summary>
 	/// For now this serves as a place to build scenes
 	/// </summary>
-	void LoadScene(); // Should be able to take a scene file?
+	void LoadScene(); 
 
 	//Audio
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
@@ -30,9 +34,13 @@ public:
 	std::string GetPathToSoundFolder();
 	SoundClip* GetSoundClip(std::string id);
 
+	void LoadSceneFromFile(const std::string& filePath);
+	void CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent);
+	void SaveSceneToFile(const std::string& filePath);
+
 private:
 	std::unique_ptr<Scene> mainScene;
-	AssetManager assetManager;
+	ObjectFromStringFactory objectFromString;
 
 	Renderer* renderer; // This is temporary
 

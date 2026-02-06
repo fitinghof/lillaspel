@@ -45,7 +45,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 	auto& asset = data.get();
 
 	std::unordered_map<uint32_t, std::shared_ptr<Texture>> loadedTextures;
-	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+	std::unordered_map<std::string, std::shared_ptr<GenericMaterial>> materials;
 	size_t meshIndex = 0;
 	
 	for (auto& gltfmesh : asset.meshes) {
@@ -60,7 +60,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		MeshObjData data;
 
 		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>();
-		std::vector<std::shared_ptr<Material>> current_materials;
+		std::vector<std::shared_ptr<GenericMaterial>> current_materials;
 
 		for (auto it = gltfmesh.primitives.begin(); it != gltfmesh.primitives.end(); ++it) {
 
@@ -101,13 +101,14 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			auto& baseColorTexture = material.pbrData.baseColorTexture;
 
-			std::shared_ptr<Material> materialOut = std::make_shared<Material>();
+			std::shared_ptr<GenericMaterial> materialOut = std::make_shared<GenericMaterial>();
 			
 			if (baseColorTexture.has_value() && asset.textures[baseColorTexture->textureIndex].imageIndex.has_value()) {
 				auto& texture = asset.textures[baseColorTexture->textureIndex];
 				auto textureNameIt = loadedTextures.find(texture.imageIndex.value());
 				if (textureNameIt == loadedTextures.end()) {
-					auto* textureRaw = this->LoadTexture(asset, * it, device);
+
+					auto* textureRaw = this->LoadTexture(asset, baseColorTexture.value(), device);
 					if (textureRaw == nullptr) {
 						Logger::Error("Failed to load texture");
 					}
@@ -115,18 +116,79 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 					std::shared_ptr<Texture> tex = std::make_shared<Texture>(textureRaw,  texIdent);
 
 					loadedTextures.emplace(texture.imageIndex.value(), tex);
-					materialOut->textures.emplace_back(tex);
+					materialOut->diffuseTexture = tex;
 				}
 				else {
-					materialOut->textures.emplace_back((*textureNameIt).second);
+					materialOut->diffuseTexture = (*textureNameIt).second;
 				}
 			}
 			
 			
 			// Extract more material stuff
+			GenericMaterial::BasicMaterialStruct basicData{
+
+				// Either ambient or diffuse must be missmapped
+				//.ambient {
+				//	material.pbrData.baseColorFactor[0],
+				//	material.pbrData.baseColorFactor[1],
+				//	material.pbrData.baseColorFactor[2],
+				//	material.pbrData.baseColorFactor[3],
+				//},
+				// Either ambient or diffuse must be missmapped
+				.diffuse {
+					material.pbrData.baseColorFactor[0],
+					material.pbrData.baseColorFactor[1],
+					material.pbrData.baseColorFactor[2],
+					material.pbrData.baseColorFactor[3],
+				},
+
+				.specular {
+					// pointer scary, make null check before assigning
+				},
+
+				.shininess {
+					// pointer scary, make null check before assigning (belongs with specular)
+				},
+
+				.padding {},
+			};
+
+			if (material.specular) {
+				basicData.specular[0] = material.specular->specularColorFactor[0];
+				basicData.specular[1] = material.specular->specularColorFactor[1];
+				basicData.specular[2] = material.specular->specularColorFactor[2];
+
+				basicData.shininess = material.specular->specularFactor;
+
+				if (material.specular->specularTexture.has_value()) {
+					auto& texture = material.specular->specularTexture.value();
+					// Add some sort of assert unique to make sure no duplicates are loaded
+					ID3D11ShaderResourceView* texturePtr = this->LoadTexture(asset, texture, device);
+					if (texturePtr) {
+						materialOut->specularTexture = std::make_shared<Texture>(texturePtr, localpath.generic_string() + ":SpecTex_");
+					}
+					else {
+						Logger::Warn("Specular texture failed to load");
+					}
+				}
+			}
+			
+			if (material.normalTexture.has_value()) {
+				auto& texture = material.normalTexture.value();
+				// Add some sort of assert unique to make sure no duplicates are loaded
+				ID3D11ShaderResourceView* texturePtr = this->LoadTexture(asset, texture, device);
+				if (texturePtr) {
+					materialOut->normalTexture = std::make_shared<Texture>(texturePtr, localpath.generic_string() + ":NormalTex_");
+				}
+				else {
+					Logger::Warn("Specular texture failed to load");
+				}
+			}
+
+			// Might want to do something for ambient texture aswell
 
 			std::string materialIdent = path.generic_string() + ":Mat_" + std::to_string(materials.size());
-			materialOut->identifier = materialIdent;
+			materialOut->BaseMaterial::identifier = materialIdent;
 
 			current_materials.emplace_back(materialOut);
 			materials.emplace(materialIdent, std::move(materialOut));
@@ -138,6 +200,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 		IndexBuffer indexBuffer;
 		indexBuffer.Init(device, indices.size(), indices.data());
 
+		mesh->SetName(localpath.generic_string() + ":Mesh_" + std::to_string(meshIndex));
 		mesh->Init(std::move(vertexBuffer), std::move(indexBuffer), std::move(submeshes));
 		data.SetMesh(mesh);
 
@@ -272,64 +335,54 @@ bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitiv
 	return true;
 }
 
-ID3D11ShaderResourceView* ObjectLoader::LoadTexture(fastgltf::Asset& asset, fastgltf::Primitive& primitive, ID3D11Device* device)
+ID3D11ShaderResourceView* ObjectLoader::LoadTexture(fastgltf::Asset& asset, fastgltf::TextureInfo& textureInfo, ID3D11Device* device)
 {
 	Logger::Log("Loading textures");
 	ID3D11ShaderResourceView* textureView = nullptr;
 	size_t baseColorTextureCordIndex = 0;
 
-	auto& material = asset.materials[primitive.materialIndex.value_or(0)];
-	auto& baseColorTexture = material.pbrData.baseColorTexture;
-	if (baseColorTexture.has_value()) {
-
-		auto& texture = asset.textures[baseColorTexture->textureIndex];
-		if (!texture.imageIndex.has_value()) {
-			Logger::Error("Texture has no image index!");
-			return nullptr;
-		}
-
-		auto& textureImage = asset.images[texture.imageIndex.value()];
-
-		std::visit(fastgltf::visitor{
-			[](auto& arg) {
-				Logger::Error("What did you load bruh?, Wont be implemented (Doesn't exist)");
-			},
-			[&](fastgltf::sources::URI& filePath) {
-				Logger::Error("Loading texture from filePath, Not yet implemented");
-			},
-			[&](fastgltf::sources::Array& vector) {
-				Logger::Error("Loading texture from vector, Not yet implemented");
-				// maybe implement?
-			},
-			[&](fastgltf::sources::BufferView& view) {
-				auto& bufferView = asset.bufferViews[view.bufferViewIndex];
-				auto& buffer = asset.buffers[bufferView.bufferIndex];
-
-				std::visit(fastgltf::visitor {
-
-					[](auto& arg) {},
-					[&](fastgltf::sources::Array& vector) {
-						int width, height, nrChannels;
-						HRESULT hr = DirectX::CreateWICTextureFromMemory(
-							device,
-							reinterpret_cast<const uint8_t*>(vector.bytes.data() + bufferView.byteOffset),
-							static_cast<size_t>(bufferView.byteLength),
-							nullptr,
-							&textureView
-						);
-						if (FAILED(hr)) {
-							Logger::Error("WICLoader failed to load texture");
-						}
-					}
-				}, buffer.data);
-			},
-		}, textureImage.data);
-
-	}
-	else {
-		Logger::Error("No baseColorTexture was found");
+	auto& texture = asset.textures[textureInfo.textureIndex];
+	if (!texture.imageIndex.has_value()) {
+		Logger::Error("Texture has no image index!");
 		return nullptr;
 	}
+
+	auto& textureImage = asset.images[texture.imageIndex.value()];
+
+	std::visit(fastgltf::visitor{
+		[](auto& arg) {
+			Logger::Error("What did you load bruh?, Wont be implemented (Doesn't exist)");
+		},
+		[&](fastgltf::sources::URI& filePath) {
+			Logger::Error("Loading texture from filePath, Not yet implemented");
+		},
+		[&](fastgltf::sources::Array& vector) {
+			Logger::Error("Loading texture from vector, Not yet implemented");
+			// maybe implement?
+		},
+		[&](fastgltf::sources::BufferView& view) {
+			auto& bufferView = asset.bufferViews[view.bufferViewIndex];
+			auto& buffer = asset.buffers[bufferView.bufferIndex];
+
+			std::visit(fastgltf::visitor {
+
+				[](auto& arg) {},
+				[&](fastgltf::sources::Array& vector) {
+					int width, height, nrChannels;
+					HRESULT hr = DirectX::CreateWICTextureFromMemory(
+						device,
+						reinterpret_cast<const uint8_t*>(vector.bytes.data() + bufferView.byteOffset),
+						static_cast<size_t>(bufferView.byteLength),
+						nullptr,
+						&textureView
+					);
+					if (FAILED(hr)) {
+						Logger::Error("WICLoader failed to load texture");
+					}
+				}
+			}, buffer.data);
+		},
+	}, textureImage.data);
 	Logger::Log("Loaded texture");
 	return textureView;
 }

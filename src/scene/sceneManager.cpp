@@ -1,8 +1,15 @@
 #include "scene/sceneManager.h"
-#include "gameObjects/objectLoader.h"
 
-SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), assetManager(rend->GetDevice())
+// Very good macro, please don't remove
+#define NAMEOF(x) #x
+
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString()
 {
+	this->objectFromString.RegisterType<GameObject>(NAMEOF(GameObject));
+	this->objectFromString.RegisterType<GameObject3D>(NAMEOF(GameObject3D));
+	this->objectFromString.RegisterType<MeshObject>(NAMEOF(MeshObject));
+	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
+	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
 }
 
 void SceneManager::SceneTick()
@@ -14,66 +21,96 @@ void SceneManager::SceneTick()
 
 void SceneManager::LoadScene()
 {
+	if (this->mainScene)
+	{
+		// TO DO: Delete old scene
+
+		throw std::runtime_error("Tried to load another scene, unsupported.");
+	}
+
 	this->mainScene = std::make_unique<Scene>();
 
-	this->mainScene->CreateGameObjectOfType<CameraObject>();
-	// So basically right now this is the temporary place to create scenes, before we can load them from file
-	MeshObjData data = this->assetManager.GetMeshObjData("TexBox/TextureCube.glb");
+	LoadSceneFromFile("../../assets/scenes/testresult.json");
+	//SaveSceneToFile("../../assets/scenes/testresult.json");
+}
 
-	auto firstMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(5, 0, 10, 1));
-	firstMesh.lock()->SetMesh(data);
+void SceneManager::LoadSceneFromFile(const std::string& filePath)
+{
+	std::ifstream file(filePath);
+	nlohmann::json data = nlohmann::json::parse(file);
+	file.close();
 
-	auto secondMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));	
-	secondMesh.lock()->SetMesh(data);
-	
+	// Actual loading
+	CreateObjectsFromJsonRecursively(data["gameObjects"], std::shared_ptr<GameObject>(nullptr));
+}
 
-	auto thirdMesh = this->mainScene->CreateGameObjectOfType<MeshObject>();
-	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(-5, 0, 10, 1));
-	thirdMesh.lock()->SetMesh(data);
+void SceneManager::CreateObjectsFromJsonRecursively(const nlohmann::json& data, std::weak_ptr<GameObject> parent)
+{
+	for (const nlohmann::json& objectData : data) {
+		//Logger::Log(objectData.dump());
 
-	auto emptyObj = this->mainScene->CreateGameObjectOfType<GameObject>();
+		if (!objectData.contains("type")) {
+			throw std::runtime_error("Failed to load scene: GameObject doesn't have a type.");
+		}	
 
-	thirdMesh.lock()->SetParent(secondMesh);
-	emptyObj.lock()->SetParent(thirdMesh);
-	firstMesh.lock()->SetParent(emptyObj);
-	thirdMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 5, 1));
-	firstMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 5, 1));
-	secondMesh.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 15, 1));
+		GameObject* gameObjectPointer = static_cast<GameObject*>(objectFromString.Construct(objectData.at("type")));
+		auto obj = std::shared_ptr<GameObject>(gameObjectPointer);
+		this->mainScene->RegisterGameObject(obj);
+		obj->LoadFromJson(objectData);
+		if (!parent.expired()) {
+			obj->SetParent(parent);
+		}
 
-	auto light = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
+		//// temp
+		//if (auto p = dynamic_cast<MeshObject*>(gameObjectPointer)) {
+		//	MeshObjData data = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb");
+		//	p->SetMesh(data);
+		//}
 
-	auto light2 = this->mainScene->CreateGameObjectOfType<SpotlightObject>();
-	light2.lock()->transform.SetPosition(DirectX::XMVectorSet(0, 0, 10, 1));
-	DirectX::XMStoreFloat4(&light2.lock()->data.color, DirectX::XMVectorSet(0, 0, 1, 1));
+		if (objectData.contains("children")) {
+			CreateObjectsFromJsonRecursively(objectData["children"], obj);
+		}
+	}
+}
 
-	Logger::Log(this->mainScene->GetNumberOfGameObjects());
-	this->mainScene->QueueDeleteGameObject(light2);
-	Logger::Log("Loaded scene");
+void SceneManager::SaveSceneToFile(const std::string& filePath)
+{
+	nlohmann::json data;
+
+	int iterator = 0;
+	for (size_t i = 0; i < this->mainScene->gameObjects.size(); i++)
+	{
+		if (this->mainScene->gameObjects[i]->GetParent().expired()) {
+			this->mainScene->gameObjects[i]->SaveToJson(data["gameObjects"][iterator++]);
+		}
+	}
+
+	std::ofstream outFile(filePath);
+	outFile << data;
+	outFile.close();
 }
 
 void SceneManager::InitializeSoundBank(std::string pathToSoundFolder)
 {
-	this->assetManager.InitializeSoundBank(pathToSoundFolder);
+	AssetManager::GetInstance().InitializeSoundBank(pathToSoundFolder);
 }
 
 void SceneManager::AddSoundClipStandardFolder(std::string filename, std::string id)
 {
-	this->assetManager.AddSoundClipStandardFolder(filename, id);
+	AssetManager::GetInstance().AddSoundClipStandardFolder(filename, id);
 }
 
 void SceneManager::AddSoundClip(std::string path, std::string id)
 {
-	this->assetManager.AddSoundClip(path, id);
+	AssetManager::GetInstance().AddSoundClip(path, id);
 }
 
 std::string SceneManager::GetPathToSoundFolder()
 {
-	return this->assetManager.GetPathToSoundFolder();
+	return AssetManager::GetInstance().GetPathToSoundFolder();
 }
 
 SoundClip* SceneManager::GetSoundClip(std::string id)
 {
-	return this->assetManager.GetSoundClip(id);
+	return AssetManager::GetInstance().GetSoundClip(id);
 }

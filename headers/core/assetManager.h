@@ -15,12 +15,11 @@
 class AssetManager
 {
 public:
-	AssetManager(ID3D11Device* device);
-	AssetManager() = default;
-	~AssetManager() = default;
+	
+	AssetManager(const AssetManager& assetManager) = delete;
 
 	Mesh* GetMeshPtr(std::string ident) { return ident != "" ? this->meshes.at(ident).get() : nullptr; }
-	Material* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
+	BaseMaterial* GetMaterialPtr(std::string ident) { return ident != "" ? this->materials.at(ident).get() : nullptr; }
 
 	void InitializeSoundBank(std::string pathToSoundFolder); //end the path with /
 	void AddSoundClipStandardFolder(std::string filename, std::string id);
@@ -36,11 +35,16 @@ public:
 	std::string GetPathToSoundFolder();
 	SoundClip* GetSoundClip(std::string path);
 
+	static AssetManager& GetInstance();
+
 private:
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
 
-	std::unordered_map<std::string, std::shared_ptr<Material>> materials;
+	AssetManager() = default;
+	~AssetManager() = default;
+
+	std::unordered_map<std::string, std::shared_ptr<BaseMaterial>> materials;
 	std::unordered_map<std::string, std::shared_ptr<Mesh>> meshes;
 	std::unordered_map<std::string, std::shared_ptr<Texture>> textures;
 	std::unordered_map<std::string, MeshObjData> meshObjDataSets;
@@ -48,6 +52,8 @@ private:
 	bool LoadNewGltf(std::string identifier);
 	
 	ID3D11Device* d3d11Device = nullptr;
+
+	std::string getCleanPath(std::string pathToFix);
 
 };
 

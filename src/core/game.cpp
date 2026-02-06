@@ -5,7 +5,8 @@
 #include <memory>
 
 // Game Loop
-void Game::Run(HINSTANCE hInstance, int nCmdShow) {
+void Game::Run(HINSTANCE hInstance, int nCmdShow)
+{
     Window window(hInstance, nCmdShow, "Game Window");
 
     this->renderer.Init(window);
@@ -13,10 +14,26 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
     this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
-    this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height) { window.Resize(width, height); });
-	this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen) { window.ToggleFullscreen(fullscreen); });
-    window.SetResizeCallback([&](UINT, UINT) { this->renderer.Resize(window); });
-    this->imguiManager.SetVSyncChangeCallback([&](bool enable) { this->renderer.ToggleVSync(enable); });
+    this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height)
+                                                   { window.Resize(width, height); });
+    this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen)
+                                                   { window.ToggleFullscreen(fullscreen); });
+    window.SetResizeCallback([&](UINT, UINT)
+                             { this->renderer.Resize(window); });
+    this->imguiManager.SetVSyncChangeCallback([&](bool enable)
+                                              { this->renderer.ToggleVSync(enable); });
+    this->imguiManager.SetSaveSceneChangeCallback([&](const std::string &filepath)
+                                                  {
+                                                    if (filepath.empty())
+                                                    {
+                                                        this->sceneManager->SaveSceneToCurrentFile();
+                                                        return;
+                                                    }
+                                                    this->sceneManager->SaveSceneToFile(filepath); });
+    this->imguiManager.SetSaveSceneAsChangeCallback([&](const std::string &filepath)
+                                                    { this->sceneManager->SaveSceneToFile(filepath); });
+    this->imguiManager.SetLoadSceneChangeCallback([&](const std::string &filepath)
+                                                  { this->sceneManager->LoadSceneFromFile(filepath); });
 
     this->sceneManager->LoadScene();
 
@@ -27,7 +44,6 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     while (msg.message != WM_QUIT)
     {
         this->imguiManager.ImguiAtFrameStart();
-        
 
         if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
         {

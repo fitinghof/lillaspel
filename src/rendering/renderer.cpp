@@ -139,7 +139,7 @@ void Renderer::CreateStandardRasterizerState()
 {
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(rastDesc));
-	rastDesc.CullMode = D3D11_CULL_NONE;
+	rastDesc.CullMode = D3D11_CULL_BACK;
 	rastDesc.DepthClipEnable = TRUE;
 	rastDesc.FillMode = D3D11_FILL_SOLID;
 	this->standardRasterizerState = std::make_unique<RasterizerState>();

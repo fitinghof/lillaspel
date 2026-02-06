@@ -7,6 +7,8 @@
 #include "gameObjects/gameObjectFactory.h"
 #include <algorithm>
 
+class SceneManager;
+
 class Scene : public GameObjectFactory {
 public:
 	Scene();
@@ -24,4 +26,6 @@ private:
 
 	std::vector<std::shared_ptr<GameObject>> gameObjects;
 	std::vector<std::weak_ptr<GameObject>> deleteQueue;
+
+	friend SceneManager;
 };

@@ -5,6 +5,7 @@
 #include "utilities/logger.h"
 
 #include "imgui.h"
+#include <string>
 
 class CameraObject : public GameObject3D {
 public:
@@ -30,8 +31,13 @@ public:
 	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 	static CameraObject& GetMainCamera();
 
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual void SaveToJson(nlohmann::json& data) override;
+
 private:
 	static CameraObject* mainCamera;
+	static size_t cameraId;
+	size_t thisCameraId;
 
 	CameraMatrixContainer cameraMatrix;
 

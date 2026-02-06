@@ -14,12 +14,13 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_ LPWSTR    lpCmdLine,
 	_In_ int       nCmdShow) 
 {
-	// Maybe put some memory leak flags here
-
+	// Some memory leak flags here
+	//_CrtDumpMemoryLeaks();
+	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 
 	std::unique_ptr<Game> game = std::unique_ptr<Game>(new Game());
 
-	Logger::Log("Exiting game...");
+	Logger::Log("Starting game...");
 	try {
 		game->Run(hInstance, nCmdShow);
 	}

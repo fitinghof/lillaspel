@@ -1,0 +1,56 @@
+{
+    "gameObjects": [
+        {
+            "type": "CameraObject",
+            "transform": {
+                "position": [
+                    0,
+                    4,
+                    0
+                ]
+            },
+            "fov": 120
+        },
+        {
+            "type": "MeshObject",
+            "transform": {
+                "position": [0,0,10]
+            },
+            "children": [
+                {
+                    "type": "MeshObject",
+                    "transform": {
+                        "position": [5,0,0]
+                    },
+                    "children": [
+                        {
+                            "type": "CameraObject",
+                            "transform": {
+                                "position": [0,2,0]
+                            },
+                            "fov": 120,
+                            "children": [
+                                {
+                                    "type": "MeshObject",
+                                    "transform": {
+                                        "position": [
+                                            0,
+                                            2,
+                                            0
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "type": "SpotlightObject",
+            "transform": {
+                "position": [0,0,5]
+            }
+        }
+    ]
+}

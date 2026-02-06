@@ -1,5 +1,9 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+
 #include "rendering/shader.h"
 #include "rendering/constantBuffer.h"
 #include <vector>
@@ -22,6 +26,7 @@ public:
 
 	Material() = default;
 	~Material() = default;
+	Material(Material&&) = default;
 
 	void Init(std::shared_ptr<Shader>& vShader, std::shared_ptr<Shader>& pShader);
 
@@ -32,4 +37,6 @@ public:
 	std::vector<std::unique_ptr<ConstantBuffer>> pixelShaderBuffers;
 
 	std::vector<std::shared_ptr<Texture>> textures;
+
+	std::string identifier;
 };

@@ -1,5 +1,9 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+
 #include "gameObjects/gameObject.h"
 #include "gameObjects/transform.h"
 
@@ -12,6 +16,45 @@ public:
 
 	Transform transform;
 
-	DirectX::XMVECTOR GetGlobalPosition() const override;
+	/// <summary>
+	/// Get global position as an XMVECTOR
+	/// </summary>
+	/// <returns></returns>
+	virtual DirectX::XMVECTOR GetGlobalPosition() const;
+
+	/// <summary>
+	/// Get global rotation as a quaternion, in an XMVECTOR
+	/// </summary>
+	/// <returns></returns>
+	virtual DirectX::XMVECTOR GetGlobalRotation() const;
+
+	/// <summary>
+	/// Get global scale as an XMVECTOR
+	/// </summary>
+	/// <returns></returns>
+	virtual DirectX::XMVECTOR GetGlobalScale() const;
+
+	/// <summary>
+	/// Get XMMATRIX for the global world matrix
+	/// </summary>
+	/// <param name="inverseTranspose"></param>
+	/// <returns></returns>
 	DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const override;
+
+	/// <summary>
+	/// Maybe misleading name, but returns the forward vector of the object in global space
+	/// </summary>
+	/// <returns></returns>
+	virtual DirectX::XMVECTOR GetGlobalForward() const;
+
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual void SaveToJson(nlohmann::json& data) override;
+private:
+	enum TransformComponent {
+		SCALE,
+		ROTATION,
+		TRANSLATAION
+	};
+
+	DirectX::XMVECTOR GetDecomposedWorldMatrix(const TransformComponent& component) const;
 };

@@ -9,7 +9,7 @@
 #include <windowsx.h>
 #include <memory>
 
-#include "core/inputManager.h"
+#include "core/input/inputManager.h"
 #include <functional>
 
 class Window
@@ -24,7 +24,7 @@ private:
     bool showIMGui;
 	bool cursorVisible;
 
-	std::unique_ptr<InputManager> inputManager;
+	
 
     DEVMODE originalDisplayMode{};
     bool hasOriginalDisplayMode;
@@ -45,7 +45,6 @@ public:
     HWND GetHWND() const;
     UINT GetWidth() const;
     UINT GetHeight() const;
-    InputManager* GetInputManager() const;
     bool IsFullscreen() const;
     void Show(int nCmdShow) const;
 

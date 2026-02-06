@@ -3,12 +3,13 @@
 #include "scene/sceneManager.h"
 #include "utilities/time.h"
 #include <memory>
-#include "core/inputManager.h"
+
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     Window window(hInstance, nCmdShow, "Game Window");
 
     this->renderer.Init(window);
+    AssetManager::GetInstance().setDevicePointer(this->renderer.GetDevice());
     this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
     this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
@@ -41,7 +42,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     SoundSourceObject speaker;
     speaker.transform.SetPosition(DirectX::XMVectorZero());
     speaker.SetGain(0.7f);
-
+   
     MSG msg = {};
 
     while (msg.message != WM_QUIT)

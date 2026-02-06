@@ -7,7 +7,6 @@ Renderer::Renderer() : viewport(), maximumSpotlights(16)
 
 void Renderer::Init(const Window& window)
 {
-	ObjectLoader objectLoader;
 	SetViewport(window);
 
 	CreateDeviceAndSwapChain(window);
@@ -140,7 +139,7 @@ void Renderer::CreateStandardRasterizerState()
 {
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(rastDesc));
-	rastDesc.CullMode = D3D11_CULL_NONE;
+	rastDesc.CullMode = D3D11_CULL_BACK;
 	rastDesc.DepthClipEnable = TRUE;
 	rastDesc.FillMode = D3D11_FILL_SOLID;
 	this->standardRasterizerState = std::make_unique<RasterizerState>();
@@ -193,7 +192,7 @@ void Renderer::LoadShaders(std::string& vShaderByteCode)
 	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
 	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
 
-	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 0, {1,1} };
+	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
 
 	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
 	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get(), sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
@@ -404,13 +403,22 @@ void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 void Renderer::RenderMeshObject(MeshObject* meshObject)
 {
 	// Bind mesh
-	VertexBuffer vBuf = meshObject->GetMesh()->GetVertexBuffer();
+	MeshObjData data = meshObject->GetMesh();
+	std::weak_ptr<Mesh> weak_mesh = data.GetMesh();
+	if (weak_mesh.expired()) {
+		Logger::Error("Trying to render with expired mesh");
+		return;
+	}
+
+	std::shared_ptr<Mesh> mesh = weak_mesh.lock();
+
+	VertexBuffer vBuf = mesh->GetVertexBuffer();
 
 	UINT stride = vBuf.GetVertexSize();
 	UINT offset = 0;
 	ID3D11Buffer* vBuff = vBuf.GetBuffer();
 	this->immediateContext->IASetVertexBuffers(0, 1, &vBuff, &stride, &offset);
-	this->immediateContext->IASetIndexBuffer(meshObject->GetMesh()->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
+	this->immediateContext->IASetIndexBuffer(mesh->GetIndexBuffer().GetBuffer(), DXGI_FORMAT_R32_UINT, 0);
 
 
 
@@ -425,13 +433,44 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
 	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
 
-
-	for (auto subMesh : meshObject->GetMesh()->GetSubMeshes())
+	size_t index = 0;
+	for (auto& subMesh : mesh->GetSubMeshes())
 	{
-		ID3D11ShaderResourceView* textureSrv = subMesh.GetTexture().GetSrv();
-		this->immediateContext->PSSetShaderResources(0, 1, &textureSrv);
+		std::weak_ptr<BaseMaterial> weak_material = data.GetMaterial(index);
+		if (weak_material.expired()) {
+			Logger::Error("Trying to render expired material, trying to continue...");
+			continue;
+		}
+
+		std::shared_ptr<BaseMaterial> material = weak_material.lock();
+		RenderData renderData = material->GetRenderData();
+
+		if (renderData.pixelShader) {
+			if (/*current ps ! renderData.pixelShader*/ 0) {
+				//this->immediateContext->PSSetShader();
+			}
+		}
+		else {
+			if (/*current ps != default ps*/ 0) {
+				//this->immediateContext->PSSetShader(default);
+			}
+		}
+
+		if (renderData.vertexShader) {
+			if (/*current vs ! renderData.vertexShader*/ 0) {
+				//this->immediateContext->VSSetShader();
+			}
+		}
+		else {
+			if (/*current vs != default vs*/ 0) {
+				//this->immediateContext->VSSetShader(default);
+			}
+		}
+
+		this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 		// Draw to screen
 		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
+		index++;
 	}
 }

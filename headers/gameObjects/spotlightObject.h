@@ -1,4 +1,9 @@
 #pragma once
+
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+
 #include "gameObjects/gameObject3D.h"
 #include <DirectXMath.h>
 #include "rendering/renderQueue.h"
@@ -21,6 +26,9 @@ public:
 	SpotLightContainer data;
 
 	virtual void Tick() override;
+
+	virtual void LoadFromJson(const nlohmann::json& data) override;
+	virtual void SaveToJson(nlohmann::json& data) override;
 
 private:
 	

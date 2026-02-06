@@ -121,6 +121,11 @@ AssetManager& AssetManager::GetInstance()
 	return instance;
 }
 
+AssetManager::AssetManager()
+{
+	CreateDefaultAssets();
+}
+
 std::string AssetManager::getCleanPath(std::string pathToFix)
 {
 	int point = pathToFix.find(":");
@@ -131,4 +136,8 @@ std::string AssetManager::getCleanPath(std::string pathToFix)
 	{
 		return pathToFix;
 	}
+}
+
+void AssetManager::CreateDefaultAssets()
+{
 }

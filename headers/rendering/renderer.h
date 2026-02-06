@@ -83,6 +83,7 @@ private:
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
+	std::unique_ptr<RasterizerState> wireframeRasterizerState;
 
 	// Temporary:
 
@@ -112,6 +113,7 @@ private:
 	// ImGui variables
 
 	bool isVSyncEnabled = false;
+	bool allWireframe = false;
 
 	void SetViewport(const Window &window);
 	void CreateDeviceAndSwapChain(const Window &window);
@@ -119,7 +121,7 @@ private:
 	void CreateDepthBuffer(const Window &window);
 	void CreateInputLayout(const std::string &vShaderByteCode);
 	void CreateSampler();
-	void CreateStandardRasterizerState();
+	void CreateRasterizerStates();
 
 	/// <summary>
 	/// Creates required constant buffers. The renderer needs a cameraBuffer and worldMatrixBuffer.

@@ -41,7 +41,7 @@ private:
 	SoundBank soundBank;
 	ObjectLoader objectLoader;
 
-	AssetManager() = default;
+	AssetManager();
 	~AssetManager() = default;
 
 	std::unordered_map<std::string, std::shared_ptr<BaseMaterial>> materials;
@@ -55,5 +55,9 @@ private:
 
 	std::string getCleanPath(std::string pathToFix);
 
+	/// <summary>
+	/// Until we get automatic file loading of materials, shaders, textures etc, this is where it's done
+	/// </summary>
+	void CreateDefaultAssets();
 };
 

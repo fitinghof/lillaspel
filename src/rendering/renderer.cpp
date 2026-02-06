@@ -18,7 +18,7 @@ void Renderer::Init(const Window& window)
 	LoadShaders(vShaderByteCode);
 	CreateInputLayout(vShaderByteCode);
 
-	CreateStandardRasterizerState();
+	CreateRasterizerStates();
 
 	CreateRenderQueue();
 
@@ -135,7 +135,7 @@ void Renderer::CreateSampler()
 	this->sampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_WRAP);
 }
 
-void Renderer::CreateStandardRasterizerState()
+void Renderer::CreateRasterizerStates()
 {
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(rastDesc));
@@ -144,6 +144,14 @@ void Renderer::CreateStandardRasterizerState()
 	rastDesc.FillMode = D3D11_FILL_SOLID;
 	this->standardRasterizerState = std::make_unique<RasterizerState>();
 	this->standardRasterizerState->Init(this->device.Get(), &rastDesc);
+
+	D3D11_RASTERIZER_DESC wireframeRastDesc;
+	ZeroMemory(&wireframeRastDesc, sizeof(wireframeRastDesc));
+	wireframeRastDesc.CullMode = D3D11_CULL_BACK;
+	wireframeRastDesc.DepthClipEnable = TRUE;
+	wireframeRastDesc.FillMode = D3D11_FILL_WIREFRAME; // Wireframe
+	this->wireframeRasterizerState = std::make_unique<RasterizerState>();
+	this->wireframeRasterizerState->Init(this->device.Get(), &wireframeRastDesc);
 }
 
 void Renderer::CreateRendererConstantBuffers()
@@ -242,7 +250,12 @@ void Renderer::RenderPass()
 	BindInputLayout();
 	BindRenderTarget();
 	BindViewport();
-	BindRasterizerState(this->standardRasterizerState.get());
+
+	if (!allWireframe) {
+		BindRasterizerState(this->standardRasterizerState.get());
+	} else {
+		BindRasterizerState(this->wireframeRasterizerState.get());
+	}
 
 	// Bind frame specific stuff
 	BindMaterial(this->defaultMat.get());

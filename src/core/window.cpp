@@ -30,7 +30,7 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     if (this->showIMGui) {
         ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
     }
-	return this->ReadMessage(hWnd, message, wParam, lParam);
+	return this->inputManager->ReadMessage(hWnd, message, wParam, lParam);
 }
 
 void Window::UpdateClientSize()
@@ -122,107 +122,107 @@ Window::~Window() {
     UnregisterClass(L"WINDOW_CLASS", this->instance);
 }
 
-LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-	const unsigned char key = static_cast<unsigned char>(wParam);
-	switch (message) {
-
-	/// Handle keyboard events
-	case WM_KEYDOWN: {
-		switch (key) {
-			case VK_ESCAPE: {
-				PostQuitMessage(0);
-				break;
-			}
-			case VK_F11: {
-				this->ToggleFullscreen(!this->isFullscreen);
-				break;
-			}
-			case VK_TAB: {
-				// So far does nothing with the actual IMGui window, but is set up for toggling
-				this->showIMGui = !this->showIMGui;
-				Logger::Log("Toggling IMGui " + std::string(this->showIMGui ? "on" : "off"));
-
-				// Can also be set to its own keybind
-				this->cursorVisible = !this->cursorVisible;
-				ShowCursor(this->cursorVisible);
-				break;
-			}
-
-			default: {
-				const bool wasDown = lParam & (1 << 30);
-				if (!wasDown)
-					InputManager::GetInstance().SetKeyState(key, KEY_DOWN | KEY_PRESSED);
-				break;
-			}
-		}
-		return 0;
-	}
-                   
-	case WM_KEYUP: {
-		InputManager::GetInstance().SetKeyState(key, KEY_RELEASED);
-		return 0;
-	}
-
-	/// Handle mouse events
-	case WM_MOUSEMOVE: {
-		const int xPos = GET_X_LPARAM(lParam);
-		const int yPos = GET_Y_LPARAM(lParam);
-		InputManager::GetInstance().SetMousePosition(xPos, yPos);
-		return 0;
-	}
-
-	case WM_LBUTTONDOWN: {
-		if (!InputManager::GetInstance().IsLMDown())
-			InputManager::GetInstance().SetLMouseKeyState(KEY_DOWN | KEY_PRESSED);
-		return 0;
-	}
-
-	case WM_LBUTTONUP: {
-		InputManager::GetInstance().SetLMouseKeyState(KEY_RELEASED);
-		return 0;
-	}
-
-	case WM_RBUTTONDOWN: {
-		if (!InputManager::GetInstance().IsRMDown())
-			InputManager::GetInstance().SetRMouseKeyState(KEY_DOWN | KEY_PRESSED);
-		return 0;
-	}
-
-	case WM_RBUTTONUP: {
-		InputManager::GetInstance().SetRMouseKeyState(KEY_RELEASED);
-		return 0;
-	}
-
-	/// Handle window events
-    case WM_SIZE: {
-        if (wParam != SIZE_MINIMIZED) {
-            UINT clientWidth = LOWORD(lParam);
-            UINT clientHeight = HIWORD(lParam);
-
-            if (clientWidth > 0 && clientHeight > 0) {
-                if (!this->isFullscreen) {
-                    this->width = clientWidth;
-                    this->height = clientHeight;
-
-                    if (this->resizeCallback) {
-                        this->resizeCallback(this->width, this->height);
-                    }
-                }
-            }
-        }
-        return 0;
-    }
-
-	case WM_DESTROY: {
-		PostQuitMessage(0);
-		return 0;
-	}
-
-	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
-	}
-}
+//LRESULT Window::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+//{
+//	const unsigned char key = static_cast<unsigned char>(wParam);
+//	switch (message) {
+//
+//	/// Handle keyboard events
+//	case WM_KEYDOWN: {
+//		switch (key) {
+//			case VK_ESCAPE: {
+//				PostQuitMessage(0);
+//				break;
+//			}
+//			case VK_F11: {
+//				this->ToggleFullscreen(!this->isFullscreen);
+//				break;
+//			}
+//			case VK_TAB: {
+//				// So far does nothing with the actual IMGui window, but is set up for toggling
+//				this->showIMGui = !this->showIMGui;
+//				Logger::Log("Toggling IMGui " + std::string(this->showIMGui ? "on" : "off"));
+//
+//				// Can also be set to its own keybind
+//				this->cursorVisible = !this->cursorVisible;
+//				ShowCursor(this->cursorVisible);
+//				break;
+//			}
+//
+//			default: {
+//				const bool wasDown = lParam & (1 << 30);
+//				if (!wasDown)
+//					this->inputManager->SetKeyState(key, KEY_DOWN | KEY_PRESSED);
+//				break;
+//			}
+//		}
+//		return 0;
+//	}
+//
+//	case WM_KEYUP: {
+//		this->inputManager->SetKeyState(key, KEY_RELEASED);
+//		return 0;
+//	}
+//
+//	/// Handle mouse events
+//	case WM_MOUSEMOVE: {
+//		const int xPos = GET_X_LPARAM(lParam);
+//		const int yPos = GET_Y_LPARAM(lParam);
+//		this->inputManager->SetMousePosition(xPos, yPos);
+//		return 0;
+//	}
+//
+//	case WM_LBUTTONDOWN: {
+//		if (!this->inputManager->IsLMDown())
+//			this->inputManager->SetLMouseKeyState(KEY_DOWN | KEY_PRESSED);
+//		return 0;
+//	}
+//
+//	case WM_LBUTTONUP: {
+//		this->inputManager->SetLMouseKeyState(KEY_RELEASED);
+//		return 0;
+//	}
+//
+//	case WM_RBUTTONDOWN: {
+//		if (!this->inputManager->IsRMDown())
+//			this->inputManager->SetRMouseKeyState(KEY_DOWN | KEY_PRESSED);
+//		return 0;
+//	}
+//
+//	case WM_RBUTTONUP: {
+//		this->inputManager->SetRMouseKeyState(KEY_RELEASED);
+//		return 0;
+//	}
+//
+//	/// Handle window events
+//    case WM_SIZE: {
+//        if (wParam != SIZE_MINIMIZED) {
+//            UINT clientWidth = LOWORD(lParam);
+//            UINT clientHeight = HIWORD(lParam);
+//
+//            if (clientWidth > 0 && clientHeight > 0) {
+//                if (!this->isFullscreen) {
+//                    this->width = clientWidth;
+//                    this->height = clientHeight;
+//
+//                    if (this->resizeCallback) {
+//                        this->resizeCallback(this->width, this->height);
+//                    }
+//                }
+//            }
+//        }
+//        return 0;
+//    }
+//
+//	case WM_DESTROY: {
+//		PostQuitMessage(0);
+//		return 0;
+//	}
+//
+//	default:
+//		return DefWindowProc(hWnd, message, wParam, lParam);
+//	}
+//}
 
 HWND Window::GetHWND() const { return this->hWnd; }
 

@@ -14,6 +14,25 @@
 
 class Window
 {
+public:
+    Window(const HINSTANCE instance, int nCmdShow, const std::string name = "Window", const UINT width = 1024, const UINT height = 576);
+    ~Window();
+
+    HWND GetHWND() const;
+    UINT GetWidth() const;
+    UINT GetHeight() const;
+    InputManager* GetInputManager() const;
+    bool IsFullscreen() const;
+    void Show(int nCmdShow) const;
+
+    bool IsIMGuiShown() const;
+    void SetIMGuiShown(const bool show);
+    void Show(int nCmdShow);
+    void Resize(UINT width, UINT height);
+    void ToggleFullscreen(bool fullscreen);
+
+    void SetResizeCallback(std::function<void(UINT, UINT)> callback);
+
 private:
     HWND hWnd;
     UINT width;
@@ -40,7 +59,6 @@ private:
 public:
     Window(const HINSTANCE instance, int nCmdShow, const std::string name = "Window", const UINT width = 1024, const UINT height = 576);
     ~Window();
-
 
     HWND GetHWND() const;
     UINT GetWidth() const;

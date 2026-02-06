@@ -38,27 +38,17 @@ private:
 	std::array<unsigned char, 256> keyStates;
 
 	std::array<Controller, XUSER_MAX_COUNT> controllers;
+	std::array<ControllerInput, XUSER_MAX_COUNT> inputs;
+
 	std::vector<Controller> GetConnectedControllers();
-	ControllerInput input;
 
 	std::pair<unsigned int, unsigned int> mousePosition;
 	std::pair<int, int> mouseMovement;
 	unsigned char LM;
 	unsigned char RM;
 
-
-	InputManager();
-	~InputManager() = default;
-	InputManager(InputManager& inputManager) = delete;
-public:
-	static InputManager& GetInstance();
-	void Reset();
-
 	// Keyboard
 	void SetKeyState(const unsigned char key, const unsigned char state);
-	bool IsKeyDown(const unsigned char key) const;
-	bool WasKeyPressed(const unsigned char key) const;
-	bool WasKeyReleased(const unsigned char key) const;
 
 	// Mouse
 	void SetLMouseKeyState(const unsigned char state);
@@ -66,6 +56,19 @@ public:
 
 	void SetMousePosition(const int x, const int y);
 
+public:
+	InputManager();
+	~InputManager() = default;
+	void Reset();
+
+	LRESULT ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+	// Keyboard
+	bool IsKeyDown(const unsigned char key) const;
+	bool WasKeyPressed(const unsigned char key) const;
+	bool WasKeyReleased(const unsigned char key) const;
+
+	// Mouse
 	std::pair<unsigned int, unsigned int> GetMouseMovement() const;
 	std::pair<int, int> GetMousePosition() const;
 
@@ -80,9 +83,9 @@ public:
 	// Controllers
 	void ReadControllerInputs();
 
-	std::array<float, 2> GetLeftThumbMovement() const;
-	std::array<float, 2> GetRightThumbMovement() const;
-	bool IsLeftBackTriggerPressed() const;
-	bool IsRightBackTriggerPressed() const;
-	bool IsControllerButtonPressed(const ControllerInputBinMask button) const;
+	std::array<float, 2> GetLeftThumbMovement(DWORD index) const;
+	std::array<float, 2> GetRightThumbMovement(DWORD index) const;
+	bool IsLeftBackTriggerPressed(DWORD index) const;
+	bool IsRightBackTriggerPressed(DWORD index) const;
+	bool IsControllerButtonPressed(DWORD index, const ControllerInputBinMask button) const;
 };

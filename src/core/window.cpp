@@ -30,7 +30,32 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
     if (this->showIMGui) {
         ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
     }
-	return this->inputManager->ReadMessage(hWnd, message, wParam, lParam);
+
+	bool result = this->inputManager->ReadMessage(hWnd, message, wParam, lParam);
+
+    if (!result) {
+        // Check for window resize
+        if (message == WM_SIZE) {
+            if (wParam != SIZE_MINIMIZED) {
+                UINT clientWidth = LOWORD(lParam);
+                UINT clientHeight = HIWORD(lParam);
+
+                if (clientWidth > 0 && clientHeight > 0) {
+                    if (!this->isFullscreen) {
+                        this->width = clientWidth;
+                        this->height = clientHeight;
+
+                        if (this->resizeCallback) {
+                            this->resizeCallback(this->width, this->height);
+                        }
+                    }
+                }
+            }
+            return 0;
+        }
+    }
+	
+	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
 void Window::UpdateClientSize()
@@ -230,7 +255,7 @@ UINT Window::GetWidth() const { return this->width; }
 
 UINT Window::GetHeight() const { return this->height; }
 
-
+InputManager* Window::GetInputManager() const { return this->inputManager.get(); }
 
 bool Window::IsFullscreen() const { return this->isFullscreen; }
 

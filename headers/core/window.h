@@ -43,7 +43,7 @@ private:
     bool showIMGui;
 	bool cursorVisible;
 
-	
+	std::unique_ptr<InputManager> inputManager;
 
     DEVMODE originalDisplayMode{};
     bool hasOriginalDisplayMode;
@@ -55,7 +55,7 @@ private:
 
     std::function<void(UINT, UINT)> resizeCallback;
 
-	LRESULT ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	//LRESULT ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 public:
     Window(const HINSTANCE instance, int nCmdShow, const std::string name = "Window", const UINT width = 1024, const UINT height = 576);
     ~Window();

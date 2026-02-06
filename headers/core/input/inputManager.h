@@ -61,7 +61,7 @@ public:
 	~InputManager() = default;
 	void Reset();
 
-	LRESULT ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+	bool ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	// Keyboard
 	bool IsKeyDown(const unsigned char key) const;

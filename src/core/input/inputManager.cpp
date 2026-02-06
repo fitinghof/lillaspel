@@ -14,13 +14,6 @@ void InputManager::SetMousePosition(const int x, const int y) {
 	this->mousePosition = { x, y };
 }
 
-InputManager& InputManager::GetInstance()
-{
-	static InputManager instance;
-	return instance;
-
-}
-
 void InputManager::Reset() {
 	for (unsigned char& state : keyStates)
 	{
@@ -31,7 +24,7 @@ void InputManager::Reset() {
 	}
 }
 
-LRESULT InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+bool InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	const unsigned char key = static_cast<unsigned char>(wParam);
 	switch (message) {
@@ -79,33 +72,13 @@ LRESULT InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM
 		return 0;
 	}
 
-	/// Handle window events
-	/*case WM_SIZE: {
-		if (wParam != SIZE_MINIMIZED) {
-			UINT clientWidth = LOWORD(lParam);
-			UINT clientHeight = HIWORD(lParam);
-
-			if (clientWidth > 0 && clientHeight > 0) {
-				if (!this->isFullscreen) {
-					this->width = clientWidth;
-					this->height = clientHeight;
-
-					if (this->resizeCallback) {
-						this->resizeCallback(this->width, this->height);
-					}
-				}
-			}
-		}
-		return 0;
-	}*/
-
 	case WM_DESTROY: {
 		PostQuitMessage(0);
 		return 0;
 	}
 
 	default:
-		return DefWindowProc(hWnd, message, wParam, lParam);
+		return 1;
 	}
 }
 

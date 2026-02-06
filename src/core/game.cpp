@@ -25,9 +25,10 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
     //Play music example
     this->audioManager.InitializeMusicTrackManager("../../assets/audio/music/");
     this->audioManager.AddMusicTrackStandardFolder("Sneak16.wav", "sneak");
+    this->audioManager.SetMusicGain(1.0f);
     this->audioManager.SetGain("sneak", 0.1f);
     this->audioManager.SetPitch("sneak", 1.05f);
-    //this->audioManager.FadeInPlay("sneak", 0, 6.0f); //un-comment to listen
+    this->audioManager.FadeInPlay("sneak", 0, 6.0f); //un-comment to listen
 
     //Play 3D sound effect example
     SetListenerPosition(3, 0, -1);
@@ -84,7 +85,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
             speaker.transform.SetPosition(pos);
             speaker.SetRandomPitch(0.8f, 1.2f);
-            //speaker.Play(soundClip); //un-comment to listen
+            speaker.Play(soundClip); //un-comment to listen
 
             timer2 = 2;
         }

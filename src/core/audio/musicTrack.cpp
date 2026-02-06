@@ -32,6 +32,11 @@ bool MusicTrack::Initialize(std::string filepath, std::string id)
 	return this->LoadTrack();
 }
 
+void MusicTrack::LinkMusicGain(float* gainLink)
+{
+	this->pMusicGain = gainLink;
+}
+
 void MusicTrack::Play()
 {
 	alGetError();
@@ -81,7 +86,10 @@ void MusicTrack::FadeIn(float startGain, float seconds)
 	this->currentGain = startGain;
 	this->startGain = startGain;
 
-	alSourcef(this->source, AL_GAIN, startGain);
+	float musicGain = 1.0f;
+	if (this->pMusicGain) musicGain = *pMusicGain;
+
+	alSourcef(this->source, AL_GAIN, startGain * musicGain);
 }
 
 void MusicTrack::FadeOut(float seconds)
@@ -95,8 +103,12 @@ bool MusicTrack::LoadTrack()
 	alGenSources(1, &this->source);
 	alGenBuffers(NUM_BUFFERS, this->buffers);
 
+	float musicGain = 1.0f;
+	if (this->pMusicGain) musicGain = *pMusicGain;
+	else Logger::Error("music gain was not linked (using default master volume)");
+
 	alSourcef(this->source, AL_PITCH, this->pitch);
-	alSourcef(this->source, AL_GAIN, this->currentGain);
+	alSourcef(this->source, AL_GAIN, this->currentGain * musicGain);
 	alSource3f(this->source, AL_POSITION, this->position[0], this->position[1], this->position[2]);
 	alSource3f(this->source, AL_VELOCITY, this->velocity[0], this->velocity[1], this->velocity[2]);
 	alSourcei(this->source, AL_LOOPING, this->audioInstruction.loopSound);
@@ -148,7 +160,12 @@ void MusicTrack::SetGain(float gain)
 {
 	this->currentGain = gain;
 	this->targetGain = gain;
-	alSourcef(this->source, AL_GAIN, gain);
+
+	float musicGain = 1.0f;
+	if (this->pMusicGain) musicGain = *pMusicGain;
+	else Logger::Error("music gain was not linked (using default master volume)");
+
+	alSourcef(this->source, AL_GAIN, gain * musicGain);
 }
 
 void MusicTrack::SetAudioInstruction(AudioInstruction audioInstruction)
@@ -222,12 +239,16 @@ void MusicTrack::UpdateBufferStream()
 		float deltaTime = Time::GetInstance().GetDeltaTime();
 		this->playTime += deltaTime;
 
+		float musicGain = 1.0f;
+		if (this->pMusicGain) musicGain = *pMusicGain;
+		else Logger::Error("music gain was not linked (using default master volume)");
+
 		if (this->fadeInTime > 0 && this->currentFadeInTime < this->fadeInTime)
 		{
 			this->currentFadeInTime += deltaTime;
 			this->currentGain = (this->targetGain - this->startGain) * (this->currentFadeInTime / this->fadeInTime) + this->startGain;
 
-			alSourcef(this->source, AL_GAIN, this->currentGain);
+			alSourcef(this->source, AL_GAIN, this->currentGain * musicGain);
 		}
 
 		if (this->fadeOutTime > 0 && this->currentFadeOutTime < this->fadeOutTime)
@@ -241,7 +262,7 @@ void MusicTrack::UpdateBufferStream()
 				this->Stop();
 			}
 
-			alSourcef(this->source, AL_GAIN, this->currentGain);
+			alSourcef(this->source, AL_GAIN, this->currentGain * musicGain);
 		}
 	}
 }

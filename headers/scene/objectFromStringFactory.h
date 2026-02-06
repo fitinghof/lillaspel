@@ -1,5 +1,8 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 #include <unordered_map>
 #include <string>
 #include "utilities/logger.h"

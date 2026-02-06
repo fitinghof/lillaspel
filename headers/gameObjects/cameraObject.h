@@ -1,5 +1,8 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 #include "gameObjects/gameObject3D.h"
 #include <DirectXMath.h>
 #include "utilities/logger.h"
@@ -27,6 +30,7 @@ public:
 	virtual ~CameraObject() = default;
 
 	virtual void Tick() override;
+	virtual void LateTick() override;
 
 	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 	static CameraObject& GetMainCamera();

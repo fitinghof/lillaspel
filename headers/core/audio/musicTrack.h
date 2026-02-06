@@ -24,6 +24,7 @@ public:
 	void Restart();
 
 	bool Initialize(std::string filepath, std::string id);
+	void LinkMusicGain(float* gainLink);
 	void UpdateBufferStream();
 	bool LoadTrack();
 	void SetPitch(float pitch);
@@ -55,6 +56,8 @@ private:
 	SF_INFO sfInfo;
 	short* membuf = nullptr;
 	ALenum format;
+
+	float* pMusicGain = nullptr;
 
 	void SetTargetGain(float gain);
 };

@@ -1,5 +1,8 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
 #include "gameObjects/gameObject3D.h"
 #include "gameObjects/mesh.h"
 #include "rendering/renderQueue.h"

@@ -1,5 +1,9 @@
 #pragma once
 
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+
+
 #include "gameObjects/gameObject.h"
 #include "gameObjects/transform.h"
 

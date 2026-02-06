@@ -18,6 +18,8 @@ public:
 	static void RemoveMeshObject();
 
 	static void AddLightObject(SpotlightObject* newSpotlightObject);
+
+	static void ClearAllQueues();
 private:
 	static RenderQueue* instance;
 

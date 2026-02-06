@@ -51,6 +51,59 @@ void SceneManager::LoadScene(Scenes scene)
 	default:
 		break;
 	}
+
+	//Temp
+
+	CreateNewScene(this->mainScene);
+
+	auto cam = this->mainScene->CreateGameObjectOfType<CameraObject>();
+
+	DirectX::XMVECTOR pos1;
+	pos1.m128_f32[0] = -2.0f;
+	pos1.m128_f32[1] = 0;
+	pos1.m128_f32[2] = 0;
+
+	DirectX::XMVECTOR pos2;
+	pos2.m128_f32[0] = 2;
+	pos2.m128_f32[1] = 0;
+	pos2.m128_f32[2] = 0;
+
+	auto coll1 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	auto coll2 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+
+	std::shared_ptr<BoxCollider> Coll1 = coll1.lock();
+	Coll1->solid = false;
+	Coll1->dynamic = true;
+	Coll1->SetPosition(DirectX::XMFLOAT3(4, 0, 0));
+	Coll1->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+
+	std::shared_ptr<BoxCollider> Coll2 = coll2.lock();
+	Coll2->solid = false;
+	Coll2->dynamic = true;
+	Coll2->SetPosition(DirectX::XMFLOAT3(-4, 0, 0));
+	Coll2->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+
+	if (Coll1->Collision(Coll2.get())) Logger::Log("true");
+	else Logger::Log("false");
+
+	////////////////////////////////////////////////////////
+
+	//auto rb1 = this->mainScene->CreateGameObjectOfType<RigidBody>();
+	//auto coll1 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	//coll1.lock()->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+	//coll1.lock()->SetParent(rb1);
+	//coll1.lock()->SetPosition(DirectX::XMFLOAT3(0, 0, 0)); //to make sure cornersArray is rebuilt
+	//rb1.lock()->transform.SetPosition(pos1);
+
+	//auto rb2 = this->mainScene->CreateGameObjectOfType<RigidBody>();
+	//auto coll2 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	//coll2.lock()->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+	//coll2.lock()->SetParent(rb2);
+	//coll2.lock()->SetPosition(DirectX::XMFLOAT3(0, 0, 0));
+	//rb2.lock()->transform.SetPosition(pos2);
+
+	//if (rb1.lock()->Collision(rb2)) Logger::Log("true");
+	//else Logger::Log("false");
 }
 
 void SceneManager::CreateNewScene(std::shared_ptr<Scene>& scene)

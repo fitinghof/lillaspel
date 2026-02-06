@@ -32,6 +32,14 @@ bool Collider::Collision(Collider* otherCollider)
 	float mtvDistance = 0;
 
 	return this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
+
+	Logger::Log(":::::::::::::::::After CollisionHandling::::::::::::::::");
+
+	std::string o = "mtvAxis: " + std::to_string(mtvAxis.x) + ", " + std::to_string(mtvAxis.y) + ", " + std::to_string(mtvAxis.z);
+	Logger::Log(o);
+
+	std::string b = "mtvDistance: " + std::to_string(mtvDistance);
+	Logger::Log(b);
 }
 
 bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNormal)
@@ -203,6 +211,8 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 	//	}
 	//}
 
+	Logger::Log(":::::::::::::::::About to do DoubleDispatchCollision::::::::::::::::");
+
 	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
 
 	if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE)
@@ -210,8 +220,20 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 		mtvDistance = -mtvDistance;
 	}
 
+	Logger::Log(":::::::::::::::::after DoubleDispatchCollision::::::::::::::::");
+
+	Logger::Log("collision: " + collision);
+
+	std::string o = "mtvAxis: " + std::to_string(mtvAxis.x) + ", " + std::to_string(mtvAxis.y) + ", " + std::to_string(mtvAxis.z);
+	Logger::Log(o);
+
+	std::string b = "mtvDistance: " + std::to_string(mtvDistance);
+	Logger::Log(b);
+
 	if (!collision) return false;
 	if (!this->solid || !otherCollider->solid) return collision;
+
+	Logger::Log(":::::::::::::::::Made it past solid checks, resolve will be performed::::::::::::::::");
 
 	// Determine who moves
 	if (this->dynamic && otherCollider->dynamic)

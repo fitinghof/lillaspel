@@ -236,12 +236,6 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 
 	Logger::Log("collision: " + collision);
 
-	std::string o = "mtvAxis: " + std::to_string(mtvAxis.x) + ", " + std::to_string(mtvAxis.y) + ", " + std::to_string(mtvAxis.z);
-	Logger::Log(o);
-
-	std::string b = "mtvDistance: " + std::to_string(mtvDistance);
-	Logger::Log(b);
-
 	if (!collision) return false;
 	if (!this->solid || !otherCollider->solid) return collision;
 

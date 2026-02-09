@@ -16,6 +16,8 @@
 #include "gameObjects/debugCamera.h"
 #include "core/audio/soundEngine.h"
 
+#include "core/physics/testPlayer.h"
+
 #include <fstream>
 #include <nlohmann/json.hpp>
 

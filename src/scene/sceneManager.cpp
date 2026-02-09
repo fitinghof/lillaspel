@@ -58,8 +58,16 @@ void SceneManager::LoadScene(Scenes scene)
 
 	auto cam = this->mainScene->CreateGameObjectOfType<CameraObject>();
 
+	//////////////////////////////////////////////////
+
+	std::shared_ptr<MeshObject> mesh = this->mainScene->CreateGameObjectOfType<MeshObject>().lock();
+	std::shared_ptr<TestPlayer> player = this->mainScene->CreateGameObjectOfType<TestPlayer>().lock();
+	mesh->SetParent(player);
+
+	//////////////////////////////////////////////////
+
 	DirectX::XMVECTOR pos1;
-	pos1.m128_f32[0] = -2.0f;
+	pos1.m128_f32[0] = -3.0f;
 	pos1.m128_f32[1] = 0;
 	pos1.m128_f32[2] = 0;
 

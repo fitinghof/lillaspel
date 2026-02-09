@@ -12,17 +12,21 @@ void Renderer::Init(const Window& window)
 	CreateDeviceAndSwapChain(window);
 	CreateRenderTarget();
 	CreateDepthBuffer(window);
+
+	CreateRenderQueue();
+}
+
+void Renderer::SetAllDefaults()
+{
 	CreateSampler();
 
-	std::string vShaderByteCode;
-	LoadShaders(vShaderByteCode);
-	CreateInputLayout(vShaderByteCode);
+	CreateInputLayout(AssetManager::GetInstance().GetShaderPtr("VSStandard")->GetShaderByteCode());
 
 	CreateRasterizerStates();
 
-	CreateRenderQueue();
-
 	CreateRendererConstantBuffers();
+
+	LoadShaders();
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -162,7 +166,7 @@ void Renderer::CreateRendererConstantBuffers()
 
 	Renderer::WorldMatrixBufferContainer worldMatrix = {};
 	this->worldMatrixBuffer = std::make_unique<ConstantBuffer>();
-	worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	this->worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
 	SpotlightObject::SpotLightContainer defaultSpotlights[1];
 	this->spotlightBuffer = std::make_unique<StructuredBuffer>();
@@ -180,30 +184,14 @@ void Renderer::CreateRenderQueue()
 	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->lightRenderQueue));
 }
 
-void Renderer::LoadShaders(std::string& vShaderByteCode)
+void Renderer::LoadShaders()
 {
-	// This shouldn't be directly hardcoded into the renderer
+	this->vertexShader = AssetManager::GetInstance().GetShaderPtr("VSStandard");
+	this->pixelShaderLit = AssetManager::GetInstance().GetShaderPtr("PSLit");
+	this->pixelShaderUnlit = AssetManager::GetInstance().GetShaderPtr("PSUnlit");
 
-	this->vertexShader = std::shared_ptr<Shader>(new Shader());
-	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
-	vShaderByteCode = this->vertexShader->GetShaderByteCode();
-
-	this->pixelShaderLit = std::shared_ptr<Shader>(new Shader());
-	this->pixelShaderLit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psLit.cso");
-
-	this->pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
-	this->pixelShaderUnlit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psUnlit.cso");
-
-	this->defaultMat = std::unique_ptr<Material>(new Material);
-	this->defaultMat->Init(this->vertexShader, this->pixelShaderLit);
-
-	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
-	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
-
-	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
-
-	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
-	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get(), sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
+	this->defaultMat = AssetManager::GetInstance().GetMaterialWeakPtr("defaultLitMaterial");
+	this->defaultUnlitMat = AssetManager::GetInstance().GetMaterialWeakPtr("defaultUnlitMaterial");
 }
 
 void Renderer::Render()
@@ -243,30 +231,38 @@ IDXGISwapChain* Renderer::GetSwapChain() const
 
 void Renderer::RenderPass()
 {
+	// Bind basic stuff (it probably doesn't need to be set every frame)
+	if (!this->hasBoundStatic) {
+		BindSampler();
+		BindInputLayout();
+		BindRenderTarget();
+		BindViewport();
+
+		this->hasBoundStatic = true;
+	}
+
+	// Clear last frame
 	ClearRenderTargetViewAndDepthStencilView();
 
-	// Bind standard stuff (most of it probably doesn't need to be set every frame)
-	BindSampler();
-	BindInputLayout();
-	BindRenderTarget();
-	BindViewport();
-
-	if (!allWireframe) {
+	// Bind rasterizerState
+	if (!this->renderAllWireframe) {
 		BindRasterizerState(this->standardRasterizerState.get());
 	} else {
 		BindRasterizerState(this->wireframeRasterizerState.get());
+		BindMaterial(this->defaultUnlitMat.lock().get());
 	}
 
 	// Bind frame specific stuff
-	BindMaterial(this->defaultMat.get());
 	BindCameraMatrix();
 	BindLights();
 
 	// Bind meshes
 	for (size_t i = 0; i < meshRenderQueue->size(); i++)
 	{
+		// This check has to be better
 		if ((*meshRenderQueue)[i] == nullptr)
 		{
+			Logger::Error("nullptr in Render Queue");
 			throw std::runtime_error("nullptr in render queue");
 		}
 
@@ -348,7 +344,7 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 	this->immediateContext->RSSetState(rastState->GetRasterizerState());
 }
 
-void Renderer::BindMaterial(Material* material)
+void Renderer::BindMaterial(BaseMaterial* material)
 {
 	// Bind shaders
 	material->vertexShader->BindShader(this->immediateContext.Get());

@@ -17,7 +17,7 @@ void AssetManager::AddSoundClip(std::string path, std::string id)
 	this->soundBank.AddSoundClip(path, id);
 }
 
-void AssetManager::setDevicePointer(ID3D11Device* device)
+void AssetManager::SetDevicePointer(ID3D11Device* device)
 {
 	this->d3d11Device = device;
 }
@@ -121,11 +121,6 @@ AssetManager& AssetManager::GetInstance()
 	return instance;
 }
 
-AssetManager::AssetManager()
-{
-	CreateDefaultAssets();
-}
-
 std::string AssetManager::getCleanPath(std::string pathToFix)
 {
 	int point = pathToFix.find(":");
@@ -140,4 +135,37 @@ std::string AssetManager::getCleanPath(std::string pathToFix)
 
 void AssetManager::CreateDefaultAssets()
 {
+	// Shaders
+
+	auto vertexShader = std::shared_ptr<Shader>(new Shader());
+	vertexShader->Init(this->d3d11Device, ShaderType::VERTEX_SHADER, "VSTest.cso");
+	AddShader("VSStandard", vertexShader);
+
+	auto pixelShaderLit = std::shared_ptr<Shader>(new Shader());
+	pixelShaderLit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSLit.cso");
+	AddShader("PSLit", pixelShaderLit);
+
+	auto pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
+	pixelShaderUnlit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSUnlit.cso");
+	AddShader("PSUnlit", pixelShaderUnlit);
+
+	// Materials
+
+	auto defaultMat = std::shared_ptr<Material>(new Material);
+	defaultMat->Init(vertexShader, pixelShaderLit);
+	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
+
+	defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
+	defaultMat->pixelShaderBuffers[0]->Init(this->d3d11Device, sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
+
+	AddShader("defaultLitMaterial", pixelShaderUnlit);
+
+	auto defaultUnlitMat = std::unique_ptr<Material>(new Material);
+	defaultUnlitMat->Init(vertexShader, pixelShaderUnlit);
+	AddShader("defaultUnlitMaterial", pixelShaderUnlit);
+}
+
+void AssetManager::AddShader(std::string identifier, std::shared_ptr<Shader> shader)
+{
+	this->meshes.emplace(identifier, shader);
 }

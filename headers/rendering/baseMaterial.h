@@ -29,4 +29,6 @@ public:
 	virtual RenderData GetRenderData() = 0;
 
 	std::string identifier;
+
+	bool wireframe = false;
 };

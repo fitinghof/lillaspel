@@ -38,6 +38,12 @@ public:
 	void Init(const Window &window);
 
 	/// <summary>
+	/// Set all default material stuff,
+	/// and set some stuff that requires defaults
+	/// </summary>
+	void SetAllDefaults();
+
+	/// <summary>
 	/// Render a frame
 	/// </summary>
 	void Render();
@@ -47,8 +53,16 @@ public:
 	/// </summary>
 	void Present();
 
+	/// <summary>
+	/// Resizes swapchain to fit window
+	/// </summary>
+	/// <param name="window"></param>
 	void Resize(const Window &window);
 
+	/// <summary>
+	/// Toggles VSync
+	/// </summary>
+	/// <param name="enable"></param>
 	void ToggleVSync(bool enable);
 
 	ID3D11Device *GetDevice() const;
@@ -85,10 +99,11 @@ private:
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 	std::unique_ptr<RasterizerState> wireframeRasterizerState;
 
-	// Temporary:
+	// Default stuff
+	// Avoids calling the assetmanager every frame
 
-	std::unique_ptr<Material> defaultMat;
-	std::unique_ptr<Material> defaultUnlitMat;
+	std::weak_ptr<BaseMaterial> defaultMat;
+	std::weak_ptr<BaseMaterial> defaultUnlitMat;
 
 	std::shared_ptr<Shader> vertexShader;
 	std::shared_ptr<Shader> pixelShaderLit;
@@ -113,7 +128,8 @@ private:
 	// ImGui variables
 
 	bool isVSyncEnabled = false;
-	bool allWireframe = false;
+	bool renderAllWireframe = false;
+	bool hasBoundStatic = false;
 
 	void SetViewport(const Window &window);
 	void CreateDeviceAndSwapChain(const Window &window);
@@ -130,7 +146,7 @@ private:
 
 	void CreateRenderQueue();
 
-	void LoadShaders(std::string &vShaderByteCode);
+	void LoadShaders();
 
 	/// <summary>
 	/// This is where the actual rendering logic is done
@@ -150,7 +166,7 @@ private:
 	void BindViewport();
 	void BindRasterizerState(RasterizerState *rastState);
 
-	void BindMaterial(Material *material);
+	void BindMaterial(BaseMaterial *material);
 	void BindLights();
 
 	void BindCameraMatrix();

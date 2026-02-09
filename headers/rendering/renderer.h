@@ -131,7 +131,7 @@ private:
 	// ImGui variables
 
 	bool isVSyncEnabled = false;
-	bool renderAllWireframe = false;
+	bool renderAllWireframe = true;
 	bool hasBoundStatic = false;
 
 	void SetViewport(const Window &window);

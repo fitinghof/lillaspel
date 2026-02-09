@@ -12,6 +12,7 @@
 #include "rendering/shader.h"
 
 #include "rendering/genericMaterial.h"
+#include "rendering/unlitMaterial.h"
 
 
 class AssetManager

@@ -346,7 +346,7 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 
 void Renderer::BindMaterial(BaseMaterial* material)
 {
-	RenderData renderData = material->GetRenderData();
+	RenderData renderData = material->GetRenderData(this->immediateContext.Get());
 
 	// Bind shaders
 	// Checks to avoid making unnecessary GPU calls
@@ -355,7 +355,7 @@ void Renderer::BindMaterial(BaseMaterial* material)
 	{
 		if (this->currentVertexShader != renderData.vertexShader.get())
 		{
-			renderData.vertexShader->BindShader();
+			renderData.vertexShader->BindShader(this->immediateContext.Get());
 			this->currentVertexShader = renderData.vertexShader.get();
 		}
 	}
@@ -363,7 +363,7 @@ void Renderer::BindMaterial(BaseMaterial* material)
 	{
 		if (this->currentVertexShader != this->vertexShader.get())
 		{
-			this->vertexShader->BindShader();
+			this->vertexShader->BindShader(this->immediateContext.Get());
 			this->currentVertexShader = this->vertexShader.get();
 		}
 	}
@@ -372,7 +372,7 @@ void Renderer::BindMaterial(BaseMaterial* material)
 	{
 		if (this->currentPixelShader != renderData.pixelShader.get())
 		{
-			renderData.pixelShader->BindShader();
+			renderData.pixelShader->BindShader(this->immediateContext.Get());
 			this->currentPixelShader = renderData.pixelShader.get();
 		}
 	}
@@ -380,7 +380,7 @@ void Renderer::BindMaterial(BaseMaterial* material)
 	{
 		if (this->currentPixelShader != this->pixelShaderLit.get())
 		{
-			this->pixelShaderLit->BindShader();
+			this->pixelShaderLit->BindShader(this->immediateContext.Get());
 			this->currentPixelShader = this->pixelShaderLit.get();
 		}
 	}
@@ -389,15 +389,15 @@ void Renderer::BindMaterial(BaseMaterial* material)
 	this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 	// Also bind constant buffers
-	for (size_t i = 0; i < material->pixelShaderBuffers.size(); i++)
+	for (size_t i = 0; i < renderData.pixelBuffers.size(); i++)
 	{
-		ID3D11Buffer* buf = material->pixelShaderBuffers[i]->GetBuffer();
+		ID3D11Buffer* buf = renderData.pixelBuffers[i]->GetBuffer();
 		this->immediateContext->PSSetConstantBuffers(i + 1, 1, &buf); // i + 1 because first slot is always occupied
 	}
 
-	for (size_t i = 0; i < material->vertexShaderBuffers.size(); i++)
+	for (size_t i = 0; i < renderData.pixelBuffers.size(); i++)
 	{
-		ID3D11Buffer* buf = material->vertexShaderBuffers[i]->GetBuffer();
+		ID3D11Buffer* buf = renderData.pixelBuffers[i]->GetBuffer();
 		this->immediateContext->VSSetConstantBuffers(i + 2, 1, &buf); // i + 2 because the first two slots are always occupied
 	}
 }

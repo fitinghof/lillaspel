@@ -9,7 +9,7 @@ struct PixelShaderInput
     float3 cameraPosition : CAMERA_POSITION;
 };
 
-cbuffer MaterialBuffer : register(b0)
+cbuffer SptolightCountBuffer : register(b0)
 {
     int spotlightCount;
 };
@@ -63,7 +63,7 @@ float4 main(PixelShaderInput input) : SV_TARGET
     // Goofy way to allow for textureless materials without using an if-statement
     float4 textureColor = float4(1, 1, 1, 1);
     textureColor += min(textureCount, 1) * (diffuseTexture.Sample(mainSampler, float2(input.uv.x, 1 - input.uv.y)) - float4(1, 1, 1, 1));
-    
+        
     // Clamp color between 0 and 1
     return min(textureColor * (ambientColor + diffuseColor) + specularColor, 1);
 }

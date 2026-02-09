@@ -101,7 +101,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			auto& baseColorTexture = material.pbrData.baseColorTexture;
 
-			std::shared_ptr<GenericMaterial> materialOut = std::make_shared<GenericMaterial>();
+			std::shared_ptr<GenericMaterial> materialOut = std::make_shared<GenericMaterial>(device);
 			
 			if (baseColorTexture.has_value() && asset.textures[baseColorTexture->textureIndex].imageIndex.has_value()) {
 				auto& texture = asset.textures[baseColorTexture->textureIndex];

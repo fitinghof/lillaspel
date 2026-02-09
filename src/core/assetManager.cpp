@@ -154,24 +154,17 @@ void AssetManager::CreateDefaultAssets()
 
 	// Materials
 
-	auto defaultMat = std::make_shared<GenericMaterial>();
-	BaseMaterial::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
-
-	defaultMat->in
-	defaultMat->pixelBuffers.push_back(std::make_unique<ConstantBuffer>());
-	defaultMat->pixelBuffers[0]->Init(this->d3d11Device, sizeof(BaseMaterial::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
-
+	auto defaultMat = std::make_shared<GenericMaterial>(this->d3d11Device);
 	AddMaterial("defaultLitMaterial", defaultMat);
 
 
-	auto defaultUnlitMat = std::make_shared<BaseMaterial>();
-	defaultUnlitMat->Init(vertexShader, pixelShaderUnlit);
+	auto defaultUnlitMat = std::make_shared<UnlitMaterial>(this->d3d11Device);
 	AddMaterial("defaultUnlitMaterial", defaultUnlitMat);
 }
 
 void AssetManager::AddShader(std::string identifier, std::shared_ptr<Shader> shader)
 {
-	this->meshes.emplace(identifier, shader);
+	this->shaders.emplace(identifier, shader);
 }
 
 void AssetManager::AddMaterial(std::string identifier, std::shared_ptr<BaseMaterial> material)

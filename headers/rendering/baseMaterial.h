@@ -3,10 +3,11 @@
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 
+#include "rendering/constantBuffer.h"
 #include "rendering/shader.h"
 #include <d3d11.h>
 #include <memory>
-#include "rendering/constantBuffer.h"
+#include <vector>
 
 struct RenderData {
 	std::shared_ptr<Shader> pixelShader;

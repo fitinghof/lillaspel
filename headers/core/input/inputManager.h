@@ -6,11 +6,7 @@
 
 #include "core/input/controller.h"
 
-enum KeyStateBinMask {
-	KEY_DOWN = 1,
-	KEY_PRESSED = 2,
-	KEY_RELEASED = 4
-};
+enum KeyStateBinMask { KEY_DOWN = 1, KEY_PRESSED = 2, KEY_RELEASED = 4 };
 
 enum ControllerInputBinMask {
 	DPAD_UP = 0x0001,
@@ -32,7 +28,6 @@ enum ControllerInputBinMask {
 	Y_BUTTON = 0x8000
 };
 
-
 class InputManager {
 private:
 	std::array<unsigned char, 256> keyStates;
@@ -46,10 +41,10 @@ private:
 	unsigned char LM;
 	unsigned char RM;
 
-
 	InputManager();
 	~InputManager() = default;
 	InputManager(InputManager& inputManager) = delete;
+
 public:
 	static InputManager& GetInstance();
 	void Reset();

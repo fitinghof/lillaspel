@@ -95,7 +95,7 @@
           "type": "MeshObject"
         }
       ],
-      "meshIdentifier": "CS/sas__cs2_agent_model_blue.glb:Mesh_2",
+      "meshIdentifier": "CS/cs2.glb:Mesh_0",
       "transform": {
         "position": [
           0.0,

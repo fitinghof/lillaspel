@@ -60,11 +60,6 @@ void AudioManager::AddMusicTrack(std::string path, std::string id)
 	this->musicTrackManager.AddMusicTrack(path, id);
 }
 
-void AudioManager::SetMusicGain(float gain)
-{
-	this->musicTrackManager.SetMusicGain(gain);
-}
-
 void AudioManager::Play(std::string id)
 {
 	this->musicTrackManager.Play(id);

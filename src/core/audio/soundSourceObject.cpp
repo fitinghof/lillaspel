@@ -17,7 +17,7 @@ SoundSourceObject::SoundSourceObject()
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
 		alSourcef(this->sources[i], AL_PITCH, this->pitch);
-		alSourcef(this->sources[i], AL_GAIN, this->gain);
+		alSourcef(this->sources[i], AL_GAIN, this->gain * MasterVolume::GetInstance().GetSoundEffectsGain());
 		alSource3f(this->sources[i], AL_POSITION, (ALfloat)pos.m128_f32[0], (ALfloat)pos.m128_f32[1], (ALfloat)pos.m128_f32[2]);
 		alSource3f(this->sources[i], AL_VELOCITY, this->velocity[0], this->velocity[1], this->velocity[2]);
 		alSourcei(this->sources[i], AL_LOOPING, this->currentInstructionSet.loopSound);
@@ -116,7 +116,7 @@ void SoundSourceObject::SetGain(float gain)
 
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
-		alSourcef(this->sources[i], AL_GAIN, this->gain);
+		alSourcef(this->sources[i], AL_GAIN, this->gain * MasterVolume::GetInstance().GetSoundEffectsGain());
 	}
 }
 
@@ -146,7 +146,7 @@ void SoundSourceObject::ChangeGain(float gainChange)
 
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
-		alSourcef(this->sources[i], AL_GAIN, this->gain);
+		alSourcef(this->sources[i], AL_GAIN, this->gain * MasterVolume::GetInstance().GetSoundEffectsGain());
 	}
 }
 

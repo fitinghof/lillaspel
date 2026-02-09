@@ -25,7 +25,6 @@ void MusicTrackManager::Initialize(std::string pathToMusicFolder)
 void MusicTrackManager::AddMusicTrackStandardFolder(std::string filename, std::string id)
 {
 	MusicTrack* newTrack = new MusicTrack();
-	newTrack->LinkMusicGain(&this->musicGain);
 
 	if (!newTrack->Initialize(this->pathToMusicFolder + filename, id))
 	{
@@ -99,11 +98,6 @@ void MusicTrackManager::GetMusicTrackSourceState(std::string id, ALint& sourceSt
 	this->musicTracks[id]->GetSourceState(sourceState);
 }
 
-void MusicTrackManager::SetMusicGain(float gain)
-{
-	this->musicGain = gain;
-}
-
 void MusicTrackManager::SetGain(std::string id, float gain)
 {
 	MusicTrack* track = this->musicTracks[id];
@@ -160,7 +154,6 @@ void MusicTrackManager::Tick()
 void MusicTrackManager::AddMusicTrack(std::string path, std::string id)
 {
 	MusicTrack* newTrack = new MusicTrack();
-	newTrack->LinkMusicGain(&this->musicGain);
 
 	if (!newTrack->Initialize(path, id))
 	{

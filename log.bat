@@ -1,6 +1,5 @@
 @echo off
 cd build
-cd Debug
 if /i "%1"=="clear" (
     type /dev/null > log.txt
     echo Log cleared
@@ -8,4 +7,3 @@ if /i "%1"=="clear" (
 ) else (
     start notepad.exe "log.txt"
 )
-pause

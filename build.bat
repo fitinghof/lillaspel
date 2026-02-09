@@ -6,4 +6,3 @@ cd build
 cmake .. -A Win32 || exit /b %errorlevel%
 :: build binary app
 cmake --build . || exit /b %errorlevel%
-pause

@@ -4,58 +4,59 @@
 #include "utilities/time.h"
 #include <memory>
 
+#include "UI/widget.h"
+
 // Game Loop
-void Game::Run(HINSTANCE hInstance, int nCmdShow)
-{
-    Window window(hInstance, nCmdShow, "Game Window");
+void Game::Run(HINSTANCE hInstance, int nCmdShow) {
+	Window window(hInstance, nCmdShow, "Game Window");
 
-    this->renderer.Init(window);
-    AssetManager::GetInstance().setDevicePointer(this->renderer.GetDevice());
-    this->sceneManager = std::make_unique<SceneManager>(&renderer);
+	this->renderer.Init(window);
+	AssetManager::GetInstance().setDevicePointer(this->renderer.GetDevice());
+	this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
-    this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
-    this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height)
-                                                   { window.Resize(width, height); });
-    this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen)
-                                                   { window.ToggleFullscreen(fullscreen); });
-    window.SetResizeCallback([&](UINT, UINT)
-                             { this->renderer.Resize(window); });
-    this->imguiManager.SetVSyncChangeCallback([&](bool enable)
-                                              { this->renderer.ToggleVSync(enable); });
-    this->imguiManager.SetSaveSceneChangeCallback([&](const std::string &filepath)
-                                                  {
-                                                    if (filepath.empty())
-                                                    {
-                                                        this->sceneManager->SaveSceneToCurrentFile();
-                                                        return;
-                                                    }
-                                                    this->sceneManager->SaveSceneToFile(filepath); });
-    this->imguiManager.SetSaveSceneAsChangeCallback([&](const std::string &filepath)
-                                                    { this->sceneManager->SaveSceneToFile(filepath); });
-    this->imguiManager.SetLoadSceneChangeCallback([&](const std::string &filepath)
-                                                  { this->sceneManager->LoadSceneFromFile(filepath); });
+	this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
+	this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height) { window.Resize(width, height); });
+	this->imguiManager.SetFullscreenChangeCallback([&](bool fullscreen) { window.ToggleFullscreen(fullscreen); });
+	window.SetResizeCallback([&](UINT, UINT) { this->renderer.Resize(window); });
+	this->imguiManager.SetVSyncChangeCallback([&](bool enable) { this->renderer.ToggleVSync(enable); });
+	this->imguiManager.SetSaveSceneChangeCallback([&](const std::string& filepath) {
+		if (filepath.empty()) {
+			this->sceneManager->SaveSceneToCurrentFile();
+			return;
+		}
+		this->sceneManager->SaveSceneToFile(filepath);
+	});
+	this->imguiManager.SetSaveSceneAsChangeCallback(
+		[&](const std::string& filepath) { this->sceneManager->SaveSceneToFile(filepath); });
+	this->imguiManager.SetLoadSceneChangeCallback(
+		[&](const std::string& filepath) { this->sceneManager->LoadSceneFromFile(filepath); });
 
-    this->sceneManager->LoadScene(SceneManager::Scenes::DEMO);
+	this->sceneManager->LoadScene(SceneManager::Scenes::DEMO);
 
+	UI::Widget w;
+	w.SetPosition({10.0f, 20.0f});
+	w.SetSize({100.0f, 50.0f});
 
-   
-    MSG msg = {};
+	const bool inside = w.HitTest({15.0f, 25.0f});	  // expected true
+	const bool outside = w.HitTest({200.0f, 200.0f}); // expected false
 
-    while (msg.message != WM_QUIT)
-    {
-        this->imguiManager.ImguiAtFrameStart();
+	Logger::Log("Inside: ", std::to_string(inside), " Outside: ", std::to_string(outside));
 
-        if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
+	MSG msg = {};
 
-        Time::GetInstance().Tick();
-        this->sceneManager->SceneTick();
+	while (msg.message != WM_QUIT) {
+		this->imguiManager.ImguiAtFrameStart();
 
-        this->renderer.Render();
-        this->imguiManager.ImguiAtFrameEnd();
-        this->renderer.Present();
-    }
+		if (PeekMessage(&msg, NULL, 0, 0, PM_REMOVE)) {
+			TranslateMessage(&msg);
+			DispatchMessage(&msg);
+		}
+
+		Time::GetInstance().Tick();
+		this->sceneManager->SceneTick();
+
+		this->renderer.Render();
+		this->imguiManager.ImguiAtFrameEnd();
+		this->renderer.Present();
+	}
 }

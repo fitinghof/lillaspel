@@ -85,6 +85,10 @@ Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, c
     DWORD style = WS_OVERLAPPEDWINDOW;
     DWORD exStyle = 0;
 
+    // Disable manual resizing
+    style &= ~WS_THICKFRAME;
+    style &= ~WS_MAXIMIZEBOX;
+
     WNDCLASSEX wc = { .cbSize = sizeof(WNDCLASSEX),
                      .lpfnWndProc = Window::StaticWindowProc,
                      .hInstance = this->instance,

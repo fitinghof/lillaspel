@@ -7,4 +7,3 @@ cmake --build . || exit /b %errorlevel%
 
 cd Debug
 lillaspel.exe
-pause

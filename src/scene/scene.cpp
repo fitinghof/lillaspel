@@ -7,6 +7,7 @@ Scene::Scene() : gameObjects()
 void Scene::SceneTick()
 {
 	for (auto& gameObject : this->gameObjects) {
+
 		gameObject->Tick();
 		gameObject->LateTick();
 	}

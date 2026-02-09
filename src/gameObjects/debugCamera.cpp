@@ -1,5 +1,9 @@
 #include "gameObjects/debugCamera.h"
 #include "imgui.h"
+#include "core/input/inputManager.h"
+#include "utilities/time.h"
+#include "core/assetManager.h"
+#include "gameObjects/meshObject.h"
 void DebugCamera::Tick()
 {
 	this->CameraObject::Tick();
@@ -70,6 +74,16 @@ void DebugCamera::Tick()
 	if (GetAsyncKeyState('S'))
 	{
 		this->transform.Move(this->transform.GetDirectionVector(), Time::GetInstance().GetDeltaTime() * -15);
+	}
+
+	static int test = 0;
+	if (test < 10) {
+		test++;
+		Logger::Log("Test", test);
+		auto meshObj = this->factory->CreateGameObjectOfType<MeshObject>();
+		meshObj.lock()->SetMesh(AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0"));
+		meshObj.lock()->transform.SetPosition(DirectX::XMVectorSet(test * 6, 0, 0, 0));
+		//meshObj.lock()->SetParent(this->GetPtr());
 	}
 
 	

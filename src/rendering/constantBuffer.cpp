@@ -2,6 +2,7 @@
 
 void ConstantBuffer::Init(ID3D11Device* device, size_t byteSize, void* initialData, D3D11_USAGE usage, UINT cpuAccess)
 {
+	assert(byteSize % 16 == 0 && "ConstantBuffer byte size must be 16 byte aligned");
 	D3D11_BUFFER_DESC bufferDesc;
 	bufferDesc.ByteWidth = byteSize;
 	bufferDesc.Usage = usage;

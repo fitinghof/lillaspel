@@ -11,6 +11,7 @@ SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
 	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
+	this->objectFromString.RegisterType<SpaceShip>(NAMEOF(SpaceShip));
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();

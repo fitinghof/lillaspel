@@ -69,7 +69,7 @@ private:
 	/// <param name="dest"></param>
 	/// <param name="offset"></param>
 	/// <returns> If indices load was successful</returns>
-	bool LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset);
+	bool LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset, size_t vertexOffset);
 
 	/// <summary>
 	/// Loads a texture

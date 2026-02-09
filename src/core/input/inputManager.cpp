@@ -1,7 +1,8 @@
 #include "core/input/inputManager.h"
 
-InputManager::InputManager() : keyStates{}, controllers{ { Controller(DWORD(0)), Controller(DWORD(1)), Controller(DWORD(2)), Controller(DWORD(3)) } }, 
-inputs{}, mousePosition{ 0, 0 }, mouseMovement{ 0, 0 }, LM{ 0 }, RM{ 0 } {}
+#include "utilities/logger.h"
+
+InputManager::InputManager() : keyStates{}, controllers{ { Controller(DWORD(0)), Controller(DWORD(1)), Controller(DWORD(2)), Controller(DWORD(3)) } }, mousePosition{ 0, 0 }, mouseMovement{ 0, 0 }, LM{ 0 }, RM{ 0 } {}
 
 void InputManager::SetKeyState(const unsigned char key, const unsigned char state) { keyStates[key] = state; }
 
@@ -10,8 +11,8 @@ void InputManager::SetLMouseKeyState(const unsigned char state) { this->LM = sta
 void InputManager::SetRMouseKeyState(const unsigned char state) { this->RM = state; }
 
 void InputManager::SetMousePosition(const int x, const int y) {
-	this->mouseMovement = { (int)x - this->mousePosition.first, (int)y - this->mousePosition.second };
-	this->mousePosition = { x, y };
+	this->mouseMovement = { x - static_cast<int>(this->mousePosition.at(0)), y - static_cast<int>(this->mousePosition.at(1)) };
+	this->mousePosition = { static_cast<unsigned int>(x), static_cast<unsigned int>(y) };
 }
 
 void InputManager::Reset() {
@@ -82,9 +83,11 @@ bool InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	}
 }
 
-std::pair<unsigned int, unsigned int> InputManager::GetMouseMovement() const { return this->mouseMovement; }
+std::array<int, 2> InputManager::GetMouseMovement() const { return this->mouseMovement; }
 
-std::pair<int, int> InputManager::GetMousePosition() const { return this->mousePosition; }
+std::array<int, 2> InputManager::GetMousePosition() const { 
+    return { static_cast<int>(this->mousePosition[0]), static_cast<int>(this->mousePosition[1]) }; 
+}
 
 bool InputManager::IsKeyDown(const unsigned char key) const { return keyStates[key] & KEY_DOWN; }
 
@@ -114,20 +117,31 @@ std::vector<Controller> InputManager::GetConnectedControllers() {
 	return connectedControllers;
 }
 
+const size_t InputManager::GetConnectedControllerCount() { return this->GetConnectedControllers().size(); }
+
 void InputManager::ReadControllerInputs() {
 	
 	std::vector<Controller> connectedControllers = this->GetConnectedControllers();
 	for (DWORD i = 0; i < connectedControllers.size(); ++i) {
-		this->inputs[i] = connectedControllers[i].ReadInput();
+		connectedControllers[i].ReadInput();
 	}
 }
 
-std::array<float, 2> InputManager::GetLeftThumbMovement(DWORD index) const { return this->inputs[index].leftThumb; }
+void InputManager::ReadControllerInput(DWORD index)
+{
+	if (index < XUSER_MAX_COUNT) {
+		if (this->controllers[index].IsConnected()) {
+			this->controllers[index].ReadInput();
+		}
+	}
+}
 
-std::array<float, 2> InputManager::GetRightThumbMovement(DWORD index) const { return this->inputs[index].rightThumb; }
+std::array<float, 2> InputManager::GetLeftThumbMovement(DWORD index) const { return this->controllers[index].GetInput().leftThumb; }
 
-bool InputManager::IsLeftBackTriggerPressed(DWORD index) const { return this->inputs[index].leftBackTrigger; }
+std::array<float, 2> InputManager::GetRightThumbMovement(DWORD index) const { return this->controllers[index].GetInput().rightThumb; }
 
-bool InputManager::IsRightBackTriggerPressed(DWORD index) const { return this->inputs[index].rightBackTrigger; }
+bool InputManager::IsLeftBackTriggerPressed(DWORD index) const { return this->controllers[index].GetInput().leftBackTrigger; }
 
-bool InputManager::IsControllerButtonPressed(DWORD index, const ControllerInputBinMask button) const { return (this->inputs[index].buttons & button) != 0; }
+bool InputManager::IsRightBackTriggerPressed(DWORD index) const { return this->controllers[index].GetInput().rightBackTrigger; }
+
+bool InputManager::IsControllerButtonPressed(DWORD index, const int button) const { return (this->controllers[index].GetInput().buttons & button) != 0; }

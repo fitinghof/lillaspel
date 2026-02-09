@@ -6,13 +6,13 @@
 #include <xinput.h>
 #include <array>
 
-typedef struct {
-	WORD buttons;					 // Bitmask of pressed buttons
-	std::array<float, 2> leftThumb;	 // [-1.0f, 1.0f]
-	std::array<float, 2> rightThumb; // [-1.0f, 1.0f]
-	bool leftBackTrigger;			 // ON / OFF
-	bool rightBackTrigger;			 // ON / OFF
-} ControllerInput;
+struct RawControllerInput {
+	WORD buttons = 0;							// Bitmask of pressed buttons
+	std::array<float, 2> leftThumb = { 0, 0 };	// [-1.0f, 1.0f]
+	std::array<float, 2> rightThumb = { 0, 0 };	// [-1.0f, 1.0f]
+	bool leftBackTrigger = false;				// ON / OFF
+	bool rightBackTrigger = false;				// ON / OFF
+};
 
 class Controller {
 public:
@@ -20,7 +20,9 @@ public:
 	~Controller() = default;
 
 	const bool IsConnected();
-	ControllerInput& ReadInput();
+	void ReadInput();
+
+	const RawControllerInput& GetInput() const;
 
 	void PrintInputState();
 
@@ -29,5 +31,5 @@ private:
 	XINPUT_STATE state;
 	XINPUT_STATE previousState;
 
-	ControllerInput input;
+	RawControllerInput input;
 };

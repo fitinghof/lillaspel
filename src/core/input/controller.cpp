@@ -19,7 +19,7 @@ const bool Controller::IsConnected() {
 	return true;
 }
 
-ControllerInput& Controller::ReadInput()
+void Controller::ReadInput()
 {
 	XINPUT_GAMEPAD gamepad = this->state.Gamepad;
 	this->input.buttons = gamepad.wButtons;
@@ -93,9 +93,9 @@ ControllerInput& Controller::ReadInput()
 		RT = 0.0f;
 	}
 	this->input.rightBackTrigger = bool(RT);
-
-	return this->input;
 }
+
+const RawControllerInput& Controller::GetInput() const { return this->input; }
 
 void Controller::PrintInputState() {
 	Logger::Log("Left Thumb: " + std::to_string(this->input.leftThumb[0]) + std::to_string(this->input.leftThumb[1]));

@@ -329,7 +329,7 @@ bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitiv
 
 		fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, texCoordAccessor, [&](fastgltf::math::fvec2 uv, std::size_t idx) {
 			dest[offset + idx].uv[0] = uv.x();
-			dest[offset + idx].uv[1] = uv.y();
+			dest[offset + idx].uv[1] = 1 - uv.y();
 		});
 	}
 	return true;

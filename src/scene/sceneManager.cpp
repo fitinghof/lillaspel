@@ -72,19 +72,55 @@ void SceneManager::LoadScene(Scenes scene)
 	auto coll2 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
 
 	std::shared_ptr<BoxCollider> Coll1 = coll1.lock();
-	Coll1->solid = false;
+	Coll1->solid = true;
 	Coll1->dynamic = true;
 	Coll1->SetPosition(DirectX::XMFLOAT3(4, 0, 0));
 	Coll1->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
 
 	std::shared_ptr<BoxCollider> Coll2 = coll2.lock();
-	Coll2->solid = false;
+	Coll2->solid = true;
 	Coll2->dynamic = true;
-	Coll2->SetPosition(DirectX::XMFLOAT3(-4, 0, 0));
+	Coll2->SetPosition(DirectX::XMFLOAT3(2.5f, 0, 0));
 	Coll2->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+
+	///////////////////////////////////////////////////////////////////
+
+	//auto coll1 = this->mainScene->CreateGameObjectOfType<SphereCollider>();
+	//auto coll2 = this->mainScene->CreateGameObjectOfType<SphereCollider>();
+
+	//std::shared_ptr<SphereCollider> Coll1 = coll1.lock();
+	//Coll1->solid = true;
+	//Coll1->dynamic = true;
+	//Coll1->SetPosition(DirectX::XMFLOAT3(4, 0, 0));
+	//Coll1->SetDiameter(1);
+
+	//std::shared_ptr<SphereCollider> Coll2 = coll2.lock();
+	//Coll2->solid = true;
+	//Coll2->dynamic = true;
+	//Coll2->SetPosition(DirectX::XMFLOAT3(3.4f, 0, 0));
+	//Coll2->SetDiameter(1);
+
+	//Logger::Log("sphere1 center: " + std::to_string(Coll1->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[2]));
+	//Logger::Log("sphere2 center: " + std::to_string(Coll2->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[2]));
 
 	if (Coll1->Collision(Coll2.get())) Logger::Log("true");
 	else Logger::Log("false");
+
+	Coll1->Tick();
+	Coll2->Tick();
+
+	Logger::Log("*********** END ************");
+
+	if (Coll1->Collision(Coll2.get())) Logger::Log("true");
+	else Logger::Log("false");
+
+	Coll1->Tick();
+	Coll2->Tick();
+
+	Logger::Log("*********** END ************");
+
+	//Logger::Log("sphere1 center: " + std::to_string(Coll1->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[2]));
+	//Logger::Log("sphere2 center: " + std::to_string(Coll2->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[2]));
 
 	////////////////////////////////////////////////////////
 

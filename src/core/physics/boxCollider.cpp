@@ -19,12 +19,19 @@ BoxCollider::~BoxCollider()
 	delete[] this->satData.positionData;
 }
 
+void BoxCollider::Tick()
+{
+	this->GameObject::Tick();
+
+	this->BuildCornersArray(this->satData.positionData);
+	DirectX::XMStoreFloat3(&this->satData.center, this->GetGlobalPosition());
+}
+
 bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
 {
 	Logger::Log(":::::::::::::::::Entered boxVSbox and sat-check::::::::::::::::");
 
 	bool collision = SAT(this->satData, box->satData, resolveAxis, resolveDistance);
-	return collision;
 
 	Logger::Log(":::::::::::::::::After sat-check::::::::::::::::");
 
@@ -39,6 +46,8 @@ bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& res
 
 	std::string k = "other->satData center: " + std::to_string(box->satData.center.x) + ", " + std::to_string(box->satData.center.y) + ", " + std::to_string(box->satData.center.z);
 	Logger::Log(k);
+
+	return collision;
 }
 
 bool BoxCollider::CollidesWithSphere(SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
@@ -51,7 +60,7 @@ void BoxCollider::BuildCornersArray(DirectX::XMFLOAT3*& positionArray)
 	using namespace DirectX;
 
 	XMMATRIX worldMatrix = this->GetGlobalWorldMatrix(false); //iverse transpose?
-	worldMatrix = XMMatrixTranspose(worldMatrix);
+	//worldMatrix = XMMatrixTranspose(worldMatrix);
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -75,6 +84,15 @@ void BoxCollider::SetExtents(DirectX::XMFLOAT3 extents)
 	if (extents.x < this->shortestExtent) this->shortestExtent = extents.x;
 	if (extents.y < this->shortestExtent) this->shortestExtent = extents.y;
 	if (extents.z < this->shortestExtent) this->shortestExtent = extents.z;
+
+	Logger::Log("----------SAT-DATA---------");
+
+	for (int i = 0; i < 8; i++)
+	{
+		Logger::Log("positions: " + std::to_string(this->satData.positionData[i].x), +", " + std::to_string(this->satData.positionData[i].y) + std::to_string(this->satData.positionData[i].z));
+	}
+
+	Logger::Log("----------||---------");
 }
 
 DirectX::XMFLOAT3 BoxCollider::GetExtents()

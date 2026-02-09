@@ -57,11 +57,20 @@ bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNorm
 void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)
 {
 	std::shared_ptr<RigidBody> parent = this->castedParent.lock();
+	GameObject3D* moveTarget = parent.get();
 
 	if (!parent)
 	{
-		Logger::Error("Collider didn't have RigidBody parent");
-		return;
+		if (!this->GetParent().expired())
+		{
+			//collider has a parent but it's not a rigidbody
+			Logger::Error("Collider didn't have RigidBody as parent!");
+			return;
+		}
+
+		//collider has no parent at all, it's a single collider
+		Logger::Log("collider has no parent at all");
+		moveTarget = this;
 	}
 
 	//while (!parent)
@@ -72,15 +81,17 @@ void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDist
 	DirectX::XMFLOAT3 resolveVector = FLOAT3MULT1(resolveAxis, resolveDistance);
 	DirectX::XMVECTOR moveDistance = DirectX::XMLoadFloat3(&resolveVector);
 
-	DirectX::XMVECTOR oldPosition = parent->transform.GetPosition();
+	DirectX::XMVECTOR oldPosition = moveTarget->transform.GetPosition();
 	DirectX::XMVECTOR newPosition = DirectX::XMVectorAdd(oldPosition, moveDistance);
 
-	parent->transform.SetPosition(newPosition);
+	moveTarget->transform.SetPosition(newPosition);
 }
 
 bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
 {
 	using namespace DirectX;
+
+	//CHECK MATRIX TRANSPOSE's!
 
 	XMVECTOR boxCenter = box->GetGlobalPosition();
 	XMVECTOR sphereCenter = sphere->GetGlobalPosition();
@@ -88,7 +99,8 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 	XMVECTOR vExtents = XMLoadFloat3(&fExtents);
 
 	//inverse transpose?
-	XMMATRIX boxWorldMatrix = XMMatrixTranspose(box->GetGlobalWorldMatrix(false)); //worldMatrix is pre-transposed, so needs to get un-transposed again here
+	//XMMATRIX boxWorldMatrix = XMMatrixTranspose(box->GetGlobalWorldMatrix(false)); //worldMatrix is pre-transposed, so needs to get un-transposed again here
+	XMMATRIX boxWorldMatrix = box->GetGlobalWorldMatrix(false);
 
 	//we get the inverse of the rotation and translation matrices, scale should not be included
 	XMVECTOR scale, rotation, translation;

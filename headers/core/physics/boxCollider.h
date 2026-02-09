@@ -13,6 +13,8 @@ public:
 	BoxCollider();
 	~BoxCollider();
 
+	void Tick() override;
+
 	//Center and Size is only in the transform
 	bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) override;
 

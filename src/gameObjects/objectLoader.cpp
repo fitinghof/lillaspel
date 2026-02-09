@@ -88,11 +88,13 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 
 			}
 
+			size_t vertexOffset = bufferOffsets.at(positionIt->accessorIndex);
+
 			uint32_t indexStart = indexOffset;
-			if (!this->LoadIndices(asset, *it, indices, indexOffset)) {
+			if (!this->LoadIndices(asset, *it, indices, indexOffset, vertexOffset)) {
 				Logger::Error("Loading indices failed");
 				return false;
-			}				
+			}
 
 			submeshes.emplace_back(indexStart, indexOffset - indexStart);
 			
@@ -266,7 +268,7 @@ size_t ObjectLoader::LoadVerticiesAndNormals(const fastgltf::Asset& asset, const
 	return static_cast<uint32_t>(positionAccessor.count);
 }
 
-bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset)
+bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive& primitive, std::vector<uint32_t>& dest, uint32_t& offset, size_t vertexOffset)
 {
 	Logger::Log("Loading indices");
 	// Parse Indicies
@@ -288,7 +290,7 @@ bool ObjectLoader::LoadIndices(fastgltf::Asset& asset, const fastgltf::Primitive
 		std::vector<uint16_t> temp(indexAccessor.count);
 		fastgltf::copyFromAccessor<std::uint16_t>(asset, indexAccessor, temp.data());
 		for (size_t index = 0; index < temp.size(); index++) {
-			dest[offset + index] = temp[index];
+			dest[offset + index] = temp[index] + vertexOffset;
 		}
 	}
 	else {
@@ -329,7 +331,7 @@ bool ObjectLoader::LoadUV(const fastgltf::Asset& asset, const fastgltf::Primitiv
 
 		fastgltf::iterateAccessorWithIndex<fastgltf::math::fvec2>(asset, texCoordAccessor, [&](fastgltf::math::fvec2 uv, std::size_t idx) {
 			dest[offset + idx].uv[0] = uv.x();
-			dest[offset + idx].uv[1] = uv.y();
+			dest[offset + idx].uv[1] = 1 - uv.y();
 		});
 	}
 	return true;

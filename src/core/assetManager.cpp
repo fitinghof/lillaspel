@@ -159,6 +159,7 @@ void AssetManager::CreateDefaultAssets()
 
 
 	auto defaultUnlitMat = std::make_shared<UnlitMaterial>(this->d3d11Device);
+	defaultUnlitMat->unlitShader = pixelShaderUnlit;
 	AddMaterial("defaultUnlitMaterial", defaultUnlitMat);
 }
 

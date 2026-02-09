@@ -231,6 +231,7 @@ IDXGISwapChain* Renderer::GetSwapChain() const
 
 void Renderer::RenderPass()
 {
+	// THIS IS THE ISSUE WITH SCALING PROBABLY
 	// Bind basic stuff (it probably doesn't need to be set every frame)
 	if (!this->hasBoundStatic) {
 		BindSampler();
@@ -248,7 +249,7 @@ void Renderer::RenderPass()
 	if (!this->renderAllWireframe) {
 		BindRasterizerState(this->standardRasterizerState.get());
 	} else {
-		BindRasterizerState(this->wireframeRasterizerState.get());
+		//BindRasterizerState(this->wireframeRasterizerState.get());
 		BindMaterial(this->defaultUnlitMat.lock().get());
 	}
 

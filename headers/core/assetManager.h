@@ -7,10 +7,11 @@
 #include "gameObjects/meshObjData.h"
 
 #include "../headers/core/audio/soundEngine.h"
-#include "rendering/material.h"
 #include "gameObjects/objectLoader.h"
 #include "rendering/texture.h"
 #include "rendering/shader.h"
+
+#include "rendering/genericMaterial.h"
 
 
 class AssetManager
@@ -46,6 +47,7 @@ public:
 
 	void AddShader(std::string identifier, std::shared_ptr<Shader> shader);
 	std::shared_ptr<Shader> GetShaderPtr(std::string ident) { return ident != "" ? this->shaders.at(ident) : nullptr; }
+	void AddMaterial(std::string identifier, std::shared_ptr<BaseMaterial> material);
 
 private:
 	SoundBank soundBank;

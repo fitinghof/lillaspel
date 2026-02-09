@@ -109,6 +109,9 @@ private:
 	std::shared_ptr<Shader> pixelShaderLit;
 	std::shared_ptr<Shader> pixelShaderUnlit;
 
+	Shader* currentPixelShader;
+	Shader* currentVertexShader;
+
 	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;

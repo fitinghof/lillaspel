@@ -1,7 +1,7 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
 
-Renderer::Renderer() : viewport(), maximumSpotlights(16)
+Renderer::Renderer() : viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), maximumSpotlights(16)
 {
 }
 
@@ -346,9 +346,47 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 
 void Renderer::BindMaterial(BaseMaterial* material)
 {
+	RenderData renderData = material->GetRenderData();
+
 	// Bind shaders
-	material->vertexShader->BindShader(this->immediateContext.Get());
-	material->pixelShader->BindShader(this->immediateContext.Get());
+	// Checks to avoid making unnecessary GPU calls
+	// Since shaders will almost always be the same
+	if (renderData.vertexShader)
+	{
+		if (this->currentVertexShader != renderData.vertexShader.get())
+		{
+			renderData.vertexShader->BindShader();
+			this->currentVertexShader = renderData.vertexShader.get();
+		}
+	}
+	else
+	{
+		if (this->currentVertexShader != this->vertexShader.get())
+		{
+			this->vertexShader->BindShader();
+			this->currentVertexShader = this->vertexShader.get();
+		}
+	}
+
+	if (renderData.pixelShader)
+	{
+		if (this->currentPixelShader != renderData.pixelShader.get())
+		{
+			renderData.pixelShader->BindShader();
+			this->currentPixelShader = renderData.pixelShader.get();
+		}
+	}
+	else
+	{
+		if (this->currentPixelShader != this->pixelShaderLit.get())
+		{
+			this->pixelShaderLit->BindShader();
+			this->currentPixelShader = this->pixelShaderLit.get();
+		}
+	}
+
+	// FIX
+	this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 	// Also bind constant buffers
 	for (size_t i = 0; i < material->pixelShaderBuffers.size(); i++)
@@ -374,7 +412,6 @@ void Renderer::BindLights()
 	const size_t lightCount = std::min<size_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
-		//Logger::Log("No light. Please add a light to the scene.");
 
 		// Inefficient, should be fixed
 		std::vector<SpotlightObject::SpotLightContainer> spotlights;
@@ -442,44 +479,28 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
 	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
 
+
+	// Draw submeshes
 	size_t index = 0;
 	for (auto& subMesh : mesh->GetSubMeshes())
 	{
 		std::weak_ptr<BaseMaterial> weak_material = data.GetMaterial(index);
-		if (weak_material.expired()) {
+
+		if (weak_material.expired())
+		{
 			Logger::Error("Trying to render expired material, trying to continue...");
-			continue;
 		}
-
-		std::shared_ptr<BaseMaterial> material = weak_material.lock();
-		RenderData renderData = material->GetRenderData();
-
-		if (renderData.pixelShader) {
-			if (/*current ps ! renderData.pixelShader*/ 0) {
-				//this->immediateContext->PSSetShader();
+		else
+		{
+			if (!this->renderAllWireframe)
+			{
+				BindMaterial(weak_material.lock().get());
 			}
-		}
-		else {
-			if (/*current ps != default ps*/ 0) {
-				//this->immediateContext->PSSetShader(default);
-			}
+
+			// Draw to screen
+			this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
 		}
 
-		if (renderData.vertexShader) {
-			if (/*current vs ! renderData.vertexShader*/ 0) {
-				//this->immediateContext->VSSetShader();
-			}
-		}
-		else {
-			if (/*current vs != default vs*/ 0) {
-				//this->immediateContext->VSSetShader(default);
-			}
-		}
-
-		this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
-
-		// Draw to screen
-		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
 		index++;
 	}
 }

@@ -17,7 +17,9 @@ public:
 	std::shared_ptr<Texture> specularTexture;
 	std::shared_ptr<Texture> normalTexture;
 
-	RenderData GetRenderData() override {
+	GenericMaterial(ID3D11Device* device) : BaseMaterial(device) {}
+
+	RenderData GetRenderData(ID3D11DeviceContext* context) override {
 		return RenderData{
 			.pixelShader {nullptr},
 			.vertexShader {nullptr},

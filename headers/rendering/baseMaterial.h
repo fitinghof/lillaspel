@@ -26,7 +26,8 @@ public:
 		float padding[3];
 	};
 
-	virtual RenderData GetRenderData() = 0;
+	BaseMaterial(ID3D11Device* device) = 0;
+	virtual RenderData GetRenderData(ID3D11DeviceContext* context) = 0;
 
 	std::string identifier;
 

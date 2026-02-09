@@ -141,31 +141,41 @@ void AssetManager::CreateDefaultAssets()
 	vertexShader->Init(this->d3d11Device, ShaderType::VERTEX_SHADER, "VSTest.cso");
 	AddShader("VSStandard", vertexShader);
 
+
 	auto pixelShaderLit = std::shared_ptr<Shader>(new Shader());
 	pixelShaderLit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSLit.cso");
 	AddShader("PSLit", pixelShaderLit);
+
 
 	auto pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
 	pixelShaderUnlit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSUnlit.cso");
 	AddShader("PSUnlit", pixelShaderUnlit);
 
+
 	// Materials
 
-	auto defaultMat = std::shared_ptr<Material>(new Material);
-	defaultMat->Init(vertexShader, pixelShaderLit);
-	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
+	auto defaultMat = std::make_shared<GenericMaterial>();
+	BaseMaterial::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
 
-	defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
-	defaultMat->pixelShaderBuffers[0]->Init(this->d3d11Device, sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
+	defaultMat->in
+	defaultMat->pixelBuffers.push_back(std::make_unique<ConstantBuffer>());
+	defaultMat->pixelBuffers[0]->Init(this->d3d11Device, sizeof(BaseMaterial::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
 
-	AddShader("defaultLitMaterial", pixelShaderUnlit);
+	AddMaterial("defaultLitMaterial", defaultMat);
 
-	auto defaultUnlitMat = std::unique_ptr<Material>(new Material);
+
+	auto defaultUnlitMat = std::make_shared<BaseMaterial>();
 	defaultUnlitMat->Init(vertexShader, pixelShaderUnlit);
-	AddShader("defaultUnlitMaterial", pixelShaderUnlit);
+	AddMaterial("defaultUnlitMaterial", defaultUnlitMat);
 }
 
 void AssetManager::AddShader(std::string identifier, std::shared_ptr<Shader> shader)
 {
 	this->meshes.emplace(identifier, shader);
+}
+
+void AssetManager::AddMaterial(std::string identifier, std::shared_ptr<BaseMaterial> material)
+{
+	material->identifier = identifier;
+	this->materials.emplace(identifier, std::move(material));
 }

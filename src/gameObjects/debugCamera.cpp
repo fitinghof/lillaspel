@@ -1,35 +1,24 @@
 #include "gameObjects/debugCamera.h"
-#include "imgui.h"
+
 #include "core/input/inputManager.h"
 #include "utilities/time.h"
-#include "core/assetManager.h"
-#include "gameObjects/meshObject.h"
+#include "utilities/logger.h"
+
+#include "imgui.h"
 void DebugCamera::Tick()
 {
 	this->CameraObject::Tick();
 
-	// Until we get input
-	InputManager::GetInstance().ReadControllerInputs();
-	static bool useMouseMovment = false;
-	int centerX = 1000;
-	int centerY = 500;
-	static bool mouseInput = false;
-	static bool relesedSpace = true;
-
-	if (!GetAsyncKeyState(VK_SPACE)) {
-		relesedSpace = true;
+	// Skip game input if ImGui is capturing mouse or keyboard
+	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard) {
+		return;
 	}
 
-	if (GetAsyncKeyState(VK_SPACE) && relesedSpace)
-	{
-		relesedSpace = false;
-		if (mouseInput)mouseInput = false;
-		else
-		{
-			mouseInput = true;
-		}
-
+	if (keyboardInput.Quit()) {
+		PostQuitMessage(0);
 	}
+
+	InputManager::GetInstance().ReadControllerInput(this->controllerInput.GetControllerIndex());
 
 	if (mouseInput) {
 		POINT cursorPos;
@@ -74,5 +63,7 @@ void DebugCamera::Tick()
 	if (GetAsyncKeyState('S'))
 	{
 		this->transform.Move(this->transform.GetDirectionVector(), Time::GetInstance().GetDeltaTime() * -15);
-	}	
+	}
+
+	
 }

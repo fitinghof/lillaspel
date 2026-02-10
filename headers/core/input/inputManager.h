@@ -3,6 +3,7 @@
 #include <Windows.h>
 #include <array>
 #include <vector>
+#include <type_traits>
 
 #include "core/input/controller.h"
 
@@ -32,42 +33,29 @@ enum ControllerInputBinMask {
 	Y_BUTTON = 0x8000
 };
 
-
 class InputManager {
-private:
-	std::array<unsigned char, 256> keyStates;
-
-	std::array<Controller, XUSER_MAX_COUNT> controllers;
-	std::vector<Controller> GetConnectedControllers();
-	ControllerInput input;
-
-	std::pair<unsigned int, unsigned int> mousePosition;
-	std::pair<int, int> mouseMovement;
-	unsigned char LM;
-	unsigned char RM;
-
-
-	InputManager();
-	~InputManager() = default;
-	InputManager(InputManager& inputManager) = delete;
 public:
-	static InputManager& GetInstance();
+	InputManager(InputManager& other) = delete;
+	InputManager& operator=(const InputManager&) = delete;
+
+	static InputManager& GetInstance() {
+		static InputManager instance;
+		return instance;
+	}
+
+	~InputManager() = default;
 	void Reset();
 
+	bool ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 	// Keyboard
-	void SetKeyState(const unsigned char key, const unsigned char state);
 	bool IsKeyDown(const unsigned char key) const;
 	bool WasKeyPressed(const unsigned char key) const;
 	bool WasKeyReleased(const unsigned char key) const;
 
 	// Mouse
-	void SetLMouseKeyState(const unsigned char state);
-	void SetRMouseKeyState(const unsigned char state);
-
-	void SetMousePosition(const int x, const int y);
-
-	std::pair<unsigned int, unsigned int> GetMouseMovement() const;
-	std::pair<int, int> GetMousePosition() const;
+	std::array<int, 2> GetMouseMovement() const;
+	std::array<int, 2> GetMousePosition() const;
 
 	bool IsLMDown() const;
 	bool WasLMPressed() const;
@@ -78,11 +66,39 @@ public:
 	bool WasRMReleased() const;
 
 	// Controllers
+	const size_t GetConnectedControllerCount();
 	void ReadControllerInputs();
+	void ReadControllerInput(DWORD index);
 
-	std::array<float, 2> GetLeftThumbMovement() const;
-	std::array<float, 2> GetRightThumbMovement() const;
-	bool IsLeftBackTriggerPressed() const;
-	bool IsRightBackTriggerPressed() const;
-	bool IsControllerButtonPressed(const ControllerInputBinMask button) const;
+	std::array<float, 2> GetLeftThumbMovement(DWORD index) const;
+	std::array<float, 2> GetRightThumbMovement(DWORD index) const;
+	bool IsLeftBackTriggerDown(DWORD index) const;
+	bool IsRightBackTriggerDown(DWORD index) const;
+	bool WasLeftBackTriggerPressed(DWORD index) const;
+	bool WasRightBackTriggerPressed(DWORD index) const;
+	bool IsControllerButtonDown(DWORD index, const int button) const;
+	bool WasControllerButtonPressed(DWORD index, const int button) const;
+	bool WasControllerButtonReleased(DWORD index, const int button) const;
+private:
+	InputManager();
+
+	std::array<unsigned char, 256> keyStates;
+
+	std::array<Controller, XUSER_MAX_COUNT> controllers;
+
+	std::vector<Controller> GetConnectedControllers();
+
+	std::array<unsigned int, 2> mousePosition;
+	std::array<int, 2> mouseMovement;
+	unsigned char LM;
+	unsigned char RM;
+
+	// Keyboard
+	void SetKeyState(const unsigned char key, const unsigned char state);
+
+	// Mouse
+	void SetLMouseKeyState(const unsigned char state);
+	void SetRMouseKeyState(const unsigned char state);
+
+	void SetMousePosition(const int x, const int y);
 };

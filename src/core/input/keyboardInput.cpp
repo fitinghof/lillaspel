@@ -35,12 +35,12 @@ std::array<float, 2> KeyboardInput::GetLookVector() const
     float lookX = static_cast<float>(mouseMovement[0]);
     float lookY = static_cast<float>(mouseMovement[1]);
 
-    // Normalize the look vector
-    float magnitude = sqrt(lookX * lookX + lookY * lookY);
-    if (magnitude > 0.0f) {
-        lookX /= magnitude;
-        lookY /= magnitude;
-    }
+    //// Normalize the look vector
+    //float magnitude = sqrt(lookX * lookX + lookY * lookY);
+    //if (magnitude > 0.0f) {
+    //    lookX /= magnitude;
+    //    lookY /= magnitude;
+    //}
 	return { lookX, lookY };
 }
 

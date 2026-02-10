@@ -13,10 +13,14 @@ static constexpr float maxTriggerMagnitude = 255.0f; // May not be needed
 
 const bool Controller::IsConnected() {
 	this->previousState = this->state;
-
-	if (this->previousState.dwPacketNumber == this->state.dwPacketNumber)
-		return false;
-	return true;
+	
+	DWORD result = XInputGetState(this->controllerIndex, &this->state);
+	
+	if (result == ERROR_SUCCESS) {
+		return true;
+	}
+	
+	return false;
 }
 
 void Controller::ReadInput()

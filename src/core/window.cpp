@@ -31,6 +31,13 @@ LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam
         ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
     }
 
+    if(message == WM_KEYDOWN) {
+        if (wParam == VK_F11) {
+            this->ToggleFullscreen(!this->isFullscreen);
+            return 0;
+        }
+	}
+
 	bool result = InputManager::GetInstance().ReadMessage(hWnd, message, wParam, lParam);
 
     if (!result) {

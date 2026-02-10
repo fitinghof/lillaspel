@@ -7,6 +7,7 @@
 #include <d3d11.h>
 #include <memory>
 #include "rendering/constantBuffer.h"
+#include <vector>
 
 struct RenderData {
 	std::shared_ptr<Shader> pixelShader;

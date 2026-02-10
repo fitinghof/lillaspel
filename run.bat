@@ -1,4 +1,3 @@
 @echo off
-cd build
-cd Debug
-lillaspel.exe
+cd out\build\x64-debug\Debug
+lillaspel

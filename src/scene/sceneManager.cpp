@@ -11,6 +11,7 @@ SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
 	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
+	this->objectFromString.RegisterType<SpaceShip>(NAMEOF(SpaceShip));
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();
@@ -46,7 +47,7 @@ void SceneManager::LoadScene(Scenes scene)
 		Logger::Warn("There is no end credits scene.");
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile("../../assets/scenes/testresult.json");
+		LoadSceneFromFile("../../../../assets/scenes/testresult.json");
 		break;
 	default:
 		break;

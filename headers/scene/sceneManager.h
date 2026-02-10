@@ -12,6 +12,7 @@
 #include "rendering/renderer.h"
 #include "scene/objectFromStringFactory.h"
 #include "gameObjects/debugCamera.h"
+#include "gameObjects/SpaceShipObj.h"
 #include "core/audio/soundEngine.h"
 #include "utilities/masterVolume.h"
 

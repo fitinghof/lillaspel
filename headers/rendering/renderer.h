@@ -66,7 +66,7 @@ private:
 
 	struct LightCountBufferContainer
 	{
-		size_t spotlightCount;
+		uint32_t spotlightCount;
 		float padding[3];
 	};
 

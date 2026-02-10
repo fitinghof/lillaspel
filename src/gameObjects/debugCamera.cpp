@@ -1,13 +1,12 @@
 #include "gameObjects/debugCamera.h"
 
 #include "core/input/inputManager.h"
-#include "utilities/time.h"
 #include "utilities/logger.h"
+#include "utilities/time.h"
 
 #include "imgui.h"
 
-void DebugCamera::Tick()
-{
+void DebugCamera::Tick() {
 	this->CameraObject::Tick();
 
 	// Skip game input if ImGui is capturing mouse or keyboard

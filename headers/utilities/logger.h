@@ -53,7 +53,7 @@ private:
 
     static void PrintToFile(std::string info)
     {
-        std::ofstream file("../../build/log.txt", std::ios::app);
+        std::ofstream file("../../log.txt", std::ios::app);
         file << info << "\n";
         file.close();
     }

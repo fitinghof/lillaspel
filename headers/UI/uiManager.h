@@ -4,6 +4,7 @@
 #include "UI/canvas.h"
 
 namespace UI {
+
 class UIManager {
 public:
 	UIManager() = default;
@@ -12,6 +13,7 @@ public:
 	void AddCanvas(const std::shared_ptr<Canvas>& canvas);
 	void RemoveCanvas(const std::shared_ptr<Canvas>& canvas);
 	void ClearCanvases();
+	const std::vector<std::shared_ptr<Canvas>>& GetCanvases() const;
 
 	// Main loop
 	void Update(float dt);
@@ -33,4 +35,7 @@ private:
 	void HandlePress(const std::shared_ptr<Widget>& target);
 	void HandleRelease(const std::shared_ptr<Widget>& target);
 };
+
+extern UIManager* uiManager;
+
 } // namespace UI

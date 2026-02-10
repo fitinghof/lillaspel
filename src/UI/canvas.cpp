@@ -1,4 +1,4 @@
-#include "canvas.h"
+#include "UI/canvas.h"
 
 #include <algorithm>
 
@@ -16,6 +16,8 @@ void UI::Canvas::RemoveChild(const std::shared_ptr<Widget>& child) {
 }
 
 void UI::Canvas::Clear() { this->children.clear(); }
+
+const std::vector<std::shared_ptr<UI::Widget>>& UI::Canvas::GetChildren() const { return this->children; }
 
 void UI::Canvas::Update(float dt) {
 	for (auto& child : children) {

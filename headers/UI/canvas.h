@@ -20,6 +20,7 @@ public:
 	void AddChild(const std::shared_ptr<Widget>& child);
 	void RemoveChild(const std::shared_ptr<Widget>& child);
 	void Clear();
+	const std::vector<std::shared_ptr<Widget>>& GetChildren() const;
 
 	void Update(float dt);
 	void Draw();

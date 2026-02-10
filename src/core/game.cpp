@@ -5,6 +5,7 @@
 #include <memory>
 
 #include "UI/widget.h"
+#include "core/game.h"
 
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow) {
@@ -13,6 +14,8 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 	this->renderer.Init(window);
 	AssetManager::GetInstance().setDevicePointer(this->renderer.GetDevice());
 	this->sceneManager = std::make_unique<SceneManager>(&renderer);
+	this->uiManager = std::make_unique<UI::UIManager>();
+	UI::uiManager = this->uiManager.get();
 
 	this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
 	this->imguiManager.SetResolutionChangeCallback([&](UINT width, UINT height) { window.Resize(width, height); });
@@ -33,15 +36,6 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 
 	this->sceneManager->LoadScene(SceneManager::Scenes::DEMO);
 
-	UI::Widget w;
-	w.SetPosition({10.0f, 20.0f});
-	w.SetSize({100.0f, 50.0f});
-
-	const bool inside = w.HitTest({15.0f, 25.0f});	  // expected true
-	const bool outside = w.HitTest({200.0f, 200.0f}); // expected false
-
-	Logger::Log("Inside: ", std::to_string(inside), " Outside: ", std::to_string(outside));
-
 	MSG msg = {};
 
 	while (msg.message != WM_QUIT) {
@@ -60,3 +54,5 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow) {
 		this->renderer.Present();
 	}
 }
+
+UI::UIManager* Game::GetUIManager() { return this->uiManager.get(); }

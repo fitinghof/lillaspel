@@ -23,7 +23,18 @@ public:
 		float diffuse[4];
 		float specular[4];
 		float shininess;
-		float padding[3];
+		unsigned int textureSlots;
+		float padding[2];
+	};
+
+	enum TextureSlots : unsigned int
+	{ 
+		none = 0,
+		first = 1,
+		second = 2,
+		third = 4,
+		fourth = 8,
+		fifth = 16,
 	};
 
 	BaseMaterial(ID3D11Device* device) {}

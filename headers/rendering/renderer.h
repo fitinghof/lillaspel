@@ -98,6 +98,7 @@ private:
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 	std::unique_ptr<RasterizerState> wireframeRasterizerState;
+	RasterizerState* currentRasterizerState;
 
 	// Default stuff
 	// Avoids calling the assetmanager every frame
@@ -115,8 +116,8 @@ private:
 	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;
-	std::shared_ptr<std::vector<MeshObject *>> meshRenderQueue;
-	std::shared_ptr<std::vector<SpotlightObject *>> lightRenderQueue;
+	std::shared_ptr<std::vector<std::weak_ptr<MeshObject>>> meshRenderQueue;
+	std::shared_ptr<std::vector<std::weak_ptr<SpotlightObject>>> lightRenderQueue;
 
 	// Constant buffers:
 	// The renderer keeps these constant buffers since only one is ever required
@@ -131,7 +132,7 @@ private:
 	// ImGui variables
 
 	bool isVSyncEnabled = false;
-	bool renderAllWireframe = true;
+	bool renderAllWireframe = false;
 	bool hasBoundStatic = false;
 
 	void SetViewport(const Window &window);

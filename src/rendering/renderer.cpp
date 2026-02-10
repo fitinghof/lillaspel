@@ -1,8 +1,9 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
 
-Renderer::Renderer() : viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), maximumSpotlights(16)
-{
+Renderer::Renderer()
+	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),
+	  maximumSpotlights(16) {
 }
 
 void Renderer::Init(const Window& window)
@@ -151,7 +152,7 @@ void Renderer::CreateRasterizerStates()
 
 	D3D11_RASTERIZER_DESC wireframeRastDesc;
 	ZeroMemory(&wireframeRastDesc, sizeof(wireframeRastDesc));
-	wireframeRastDesc.CullMode = D3D11_CULL_BACK;
+	wireframeRastDesc.CullMode = D3D11_CULL_NONE;
 	wireframeRastDesc.DepthClipEnable = TRUE;
 	wireframeRastDesc.FillMode = D3D11_FILL_WIREFRAME; // Wireframe
 	this->wireframeRasterizerState = std::make_unique<RasterizerState>();
@@ -179,8 +180,8 @@ void Renderer::CreateRendererConstantBuffers()
 
 void Renderer::CreateRenderQueue()
 {
-	this->meshRenderQueue = this->meshRenderQueue = std::make_shared<std::vector<MeshObject*>>();
-	this->lightRenderQueue = this->lightRenderQueue = std::make_shared<std::vector<SpotlightObject*>>();
+	this->meshRenderQueue = std::make_shared<std::vector<std::weak_ptr<MeshObject>>>();
+	this->lightRenderQueue = std::make_shared<std::vector<std::weak_ptr<SpotlightObject>>>();
 	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->lightRenderQueue));
 }
 
@@ -207,6 +208,9 @@ void Renderer::Present()
 void Renderer::Resize(const Window& window)
 {
 	this->ResizeSwapChain(window);
+
+	BindRenderTarget();
+	BindViewport();
 }
 
 void Renderer::ToggleVSync(bool enable)
@@ -246,10 +250,13 @@ void Renderer::RenderPass()
 	ClearRenderTargetViewAndDepthStencilView();
 
 	// Bind rasterizerState
-	if (!this->renderAllWireframe) {
+	if (!this->renderAllWireframe) 
+	{
 		BindRasterizerState(this->standardRasterizerState.get());
-	} else {
-		//BindRasterizerState(this->wireframeRasterizerState.get());
+	} 
+	else
+	{
+		BindRasterizerState(this->wireframeRasterizerState.get());
 		BindMaterial(this->defaultUnlitMat.lock().get());
 	}
 
@@ -258,16 +265,18 @@ void Renderer::RenderPass()
 	BindLights();
 
 	// Bind meshes
-	for (size_t i = 0; i < meshRenderQueue->size(); i++)
+	for (size_t i = 0; i < this->meshRenderQueue->size(); i++)
 	{
-		// This check has to be better
-		if ((*meshRenderQueue)[i] == nullptr)
+		if ((*this->meshRenderQueue)[i].expired())
 		{
-			Logger::Error("nullptr in Render Queue");
-			throw std::runtime_error("nullptr in render queue");
+			// This should get rid of empty objects
+			Logger::Log("The renderer deleted a meshObject");
+			this->meshRenderQueue->erase(this->meshRenderQueue->begin() + i);
+			i--;
+			continue;
 		}
 
-		RenderMeshObject((*meshRenderQueue)[i]);
+		RenderMeshObject((*this->meshRenderQueue)[i].lock().get());
 	}
 }
 
@@ -343,11 +352,27 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 	}
 
 	this->immediateContext->RSSetState(rastState->GetRasterizerState());
+
+	this->currentRasterizerState = rastState;
 }
 
 void Renderer::BindMaterial(BaseMaterial* material)
 {
 	RenderData renderData = material->GetRenderData(this->immediateContext.Get());
+
+	if (material->wireframe) 
+	{
+		if (this->currentRasterizerState != this->wireframeRasterizerState.get()) {
+			BindRasterizerState(this->wireframeRasterizerState.get());
+		}
+	} 
+	else 
+	{
+		if (this->currentRasterizerState == this->wireframeRasterizerState.get()) 
+		{
+			BindRasterizerState(this->standardRasterizerState.get());
+		}
+	}
 
 	// Bind shaders
 	// Checks to avoid making unnecessary GPU calls
@@ -387,7 +412,7 @@ void Renderer::BindMaterial(BaseMaterial* material)
 	}
 
 	// FIX
-	this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
+	this->immediateContext->PSSetShaderResources(1, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 	// Also bind constant buffers
 	for (size_t i = 0; i < renderData.pixelBuffers.size(); i++)
@@ -418,13 +443,22 @@ void Renderer::BindLights()
 		std::vector<SpotlightObject::SpotLightContainer> spotlights;
 		for (size_t i = 0; i < lightCount; i++)
 		{
-			spotlights.push_back((*this->lightRenderQueue)[i]->data);
+			if ((*this->lightRenderQueue)[i].expired()) 
+			{
+				// This should remove deleted lights
+				Logger::Log("The renderer deleted a light");
+				this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
+				i--;
+				continue;
+			}
+
+			spotlights.push_back((*this->lightRenderQueue)[i].lock()->data);
 		}
 
 		// Updates and binds buffer
 		this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights.data());
 		ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
-		this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
+		this->immediateContext->PSSetShaderResources(0, 1, &lightSrv);
 	}
 
 	// Updates and binds light count constant buffer

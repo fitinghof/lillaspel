@@ -161,6 +161,11 @@ void AssetManager::CreateDefaultAssets()
 	auto defaultUnlitMat = std::make_shared<UnlitMaterial>(this->d3d11Device);
 	defaultUnlitMat->unlitShader = pixelShaderUnlit;
 	AddMaterial("defaultUnlitMaterial", defaultUnlitMat);
+
+	auto wireframeMaterial = std::make_shared<UnlitMaterial>(this->d3d11Device);
+	wireframeMaterial->unlitShader = pixelShaderUnlit;
+	wireframeMaterial->wireframe = true;
+	AddMaterial("wireframeWhite", wireframeMaterial);
 }
 
 void AssetManager::AddShader(std::string identifier, std::shared_ptr<Shader> shader)

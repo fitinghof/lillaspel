@@ -11,7 +11,7 @@ void MeshObject::SetMesh(MeshObjData newMesh)
 
 	// Should do a check to make sure it isn't already in render queue
 
-	RenderQueue::AddMeshObject(this);
+	RenderQueue::AddMeshObject(this->GetPtr());
 }
 
 MeshObjData MeshObject::GetMesh()
@@ -25,6 +25,15 @@ void MeshObject::Tick()
 
 	//static float rot = 0;
 	//this->transform.SetRotationRPY(0,0,rot += 0.0005f);
+
+	//ImGui::Begin("Object" + this->tempId);
+	//if (ImGui::Button("Add")) {
+	//	auto newCam = this->factory->CreateGameObjectOfType<GameObject>();
+	//}
+	//if (ImGui::Button("Delete")) {
+	//	this->factory->QueueDeleteGameObject(this->GetPtr());
+	//}
+	//ImGui::End();
 }
 
 void MeshObject::LoadFromJson(const nlohmann::json& data)

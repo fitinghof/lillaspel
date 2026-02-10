@@ -9,7 +9,7 @@ struct PixelShaderInput
     float3 cameraPosition : CAMERA_POSITION;
 };
 
-cbuffer SptolightCountBuffer : register(b0)
+cbuffer SpotlightCountBuffer : register(b0)
 {
     int spotlightCount;
 };
@@ -20,7 +20,7 @@ cbuffer MaterialBuffer : register(b1)
     float4 diffuse;
     float4 specular;
     float shininess;
-    int textureCount;
+    int textureSlots;
 };
 
 struct Spotlight
@@ -34,9 +34,12 @@ struct Spotlight
     float spotAngle;
 };
 
-Texture2D diffuseTexture : register(t0);
+Texture2D diffuseTexture : register(t1);
+Texture2D ambientTexture : register(t2);
+Texture2D specularTexture : register(t3);
+Texture2D normalTexture : register(t4);
 
-StructuredBuffer<Spotlight> spotlightBuffer : register(t1);
+StructuredBuffer<Spotlight> spotlightBuffer : register(t0);
 
 SamplerState mainSampler : register(s0);
 
@@ -60,10 +63,33 @@ float4 main(PixelShaderInput input) : SV_TARGET
         specularColor += BlinnPhongSpecularComponent(input.worldPosition.xyz, spotlightBuffer[i].position, input.cameraPosition, normal, specular, shininess, surfaceLightIntensity, spotlightBuffer[i].color);
     }
     
-    // Goofy way to allow for textureless materials without using an if-statement
-    float4 textureColor = float4(1, 1, 1, 1);
-    textureColor += min(textureCount, 1) * (diffuseTexture.Sample(mainSampler, float2(input.uv.x, 1 - input.uv.y)) - float4(1, 1, 1, 1));
-        
-    // Clamp color between 0 and 1
-    return min(textureColor * (ambientColor + diffuseColor) + specularColor, 1);
+    
+    // Read textures
+    // It's done in a way to avoid if-statements
+    
+    float2 uv = float2(input.uv.x, 1 - input.uv.y);
+    
+    float hasDiffuse = (textureSlots & 1) != 0;
+    float hasAmbient = (textureSlots & 2) != 0;
+    float hasSpecular = (textureSlots & 4) != 0;
+    //float hasNormal = (textureSlots & 8) != 0;
+
+    float4 diffuseSample = diffuseTexture.Sample(mainSampler, uv);
+    float4 ambientSample = ambientTexture.Sample(mainSampler, uv);
+    float4 specularSample = specularTexture.Sample(mainSampler, uv);
+    //float4 normalSample = normalTexture.Sample(mainSampler, uv);
+
+    float4 diffuseTextureColor =
+    lerp(float4(1, 1, 1, 1), diffuseSample, hasDiffuse);
+
+    // Ambient falls back to diffuse if there is no dedicated ambient texture
+    float4 ambientTextureColor =
+    lerp(diffuseTextureColor, ambientSample, hasAmbient); 
+
+    float4 specularTextureColor =
+    lerp(float4(1, 1, 1, 1), specularSample, hasSpecular);
+
+    float4 color = diffuseTextureColor * diffuseColor + ambientTextureColor * ambientColor + specularTextureColor * specularColor;
+    
+    return color;
 }

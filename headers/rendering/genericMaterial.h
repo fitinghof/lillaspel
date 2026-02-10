@@ -23,13 +23,21 @@ public:
 
 	GenericMaterial(ID3D11Device* device) : BaseMaterial(device) 
 	{
-		BaseMaterial::BasicMaterialStruct data = { {0.3,0.3,0.3,0.3}, {1,1,1,1}, {1,1,1,1}, 100, {0,0,0} };
+		BaseMaterial::BasicMaterialStruct data = { {0.1,0.1,0.1,0.1}, {1,1,1,1}, {1,1,1,1}, 100, 0, {0,0} };
 		basicData = data;
 		this->materialInfo = std::make_unique<ConstantBuffer>();
 		this->materialInfo->Init(device, sizeof(BaseMaterial::BasicMaterialStruct), &data, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 	}
 
 	RenderData GetRenderData(ID3D11DeviceContext* context) override {
+		unsigned int newTextureSlots = 0;
+		newTextureSlots += this->diffuseTexture ? TextureSlots::first : TextureSlots::none;
+		newTextureSlots += this->ambientTexture ? TextureSlots::second : TextureSlots::none;
+		newTextureSlots += this->specularTexture ? TextureSlots::third : TextureSlots::none;
+		newTextureSlots += this->normalTexture ? TextureSlots::fourth : TextureSlots::none;
+
+		basicData.textureSlots = newTextureSlots;
+
 		this->materialInfo->UpdateBuffer(context, &basicData);
 
 		return RenderData{

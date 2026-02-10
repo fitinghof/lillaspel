@@ -18,6 +18,7 @@ void Scene::RegisterGameObject(std::shared_ptr<GameObject> gameObject)
 {
 	this->gameObjects.push_back(gameObject);
 	gameObject->factory = this;
+	gameObject->myPtr = gameObject;
 	gameObject->Start();
 }
 

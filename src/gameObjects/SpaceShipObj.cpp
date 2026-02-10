@@ -3,22 +3,20 @@
 #include "gameObjects/meshObject.h"
 #include "imgui.h"
 
-SpaceShip::SpaceShip() : GameObject3D() {}
+SpaceShip::SpaceShip() : GameObject3D() { 
+	Room::SetSize(this->ROOM_SIZE); 
+}
 
 void SpaceShip::CreateRoom(size_t x, size_t y) {
 	if (x < SHIP_MAX_SIZE_X && y < SHIP_MAX_SIZE_Y && rooms[x][y].expired()) {
 
-		std::weak_ptr<MeshObject> room = this->factory->CreateGameObjectOfType<MeshObject>();
-
-		MeshObjData meshdata = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0");
-
+		std::weak_ptr<Room> room = this->factory->CreateGameObjectOfType<Room>();
+		
 		if (room.expired()) {
 			Logger::Error("What just happend??");
 		}
 
 		auto roomMesh = room.lock();
-
-		roomMesh->SetMesh(meshdata);
 
 		roomMesh->transform.SetPosition(DirectX::XMVectorSet(x * 2, 0, y * 2, 0));
 

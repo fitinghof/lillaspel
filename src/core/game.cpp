@@ -2,6 +2,7 @@
 #include "core/imguiManager.h"
 #include "scene/sceneManager.h"
 #include "utilities/time.h"
+#include "core/input/inputManager.h"
 #include <memory>
 
 // Game Loop
@@ -59,5 +60,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow)
         this->renderer.Render();
         this->imguiManager.ImguiAtFrameEnd();
         this->renderer.Present();
+        
+        InputManager::GetInstance().Reset();
     }
 }

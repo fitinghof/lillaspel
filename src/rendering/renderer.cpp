@@ -483,6 +483,7 @@ void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 
 void Renderer::RenderMeshObject(MeshObject* meshObject)
 {
+	
 	// Bind mesh
 	MeshObjData data = meshObject->GetMesh();
 	std::weak_ptr<Mesh> weak_mesh = data.GetMesh();

@@ -7,6 +7,7 @@
 #include "audioInstruction.h"
 #include "utilities/logger.h"
 #include "utilities/time.h"
+#include "utilities/masterVolume.h"
 
 class MusicTrack
 {
@@ -24,7 +25,6 @@ public:
 	void Restart();
 
 	bool Initialize(std::string filepath, std::string id);
-	void LinkMusicGain(float* gainLink);
 	void UpdateBufferStream();
 	bool LoadTrack();
 	void SetPitch(float pitch);

@@ -144,6 +144,59 @@
         ]
       },
       "type": "SpotlightObject"
+    },
+    {
+      "angleRadians": 6.2831854820251465,
+      "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+      ],
+      "intensity": 5.0,
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          5.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "SpaceShip",
+      "children": [
+        {
+          "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",
+          "transform": {
+            "position": [
+              0.0,
+              2.0,
+              0.0
+            ],
+            "rotation": [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "scale": [
+              1.0,
+              1.0,
+              1.0
+            ]
+          },
+          "type": "MeshObject"
+        }
+      ]
     }
   ]
 }

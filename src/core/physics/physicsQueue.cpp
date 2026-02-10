@@ -22,10 +22,31 @@ void PhysicsQueue::AddRigidBody(std::weak_ptr<RigidBody> rigidBody)
     this->rigidBodyIdCounter++;
 }
 
-void PhysicsQueue::AddStrayCollider(std::weak_ptr<Collider> collider) 
+void PhysicsQueue::AddStrayCollider(std::weak_ptr<Collider> collider)
 {
     collider.lock()->SetId(this->colliderIdCounter);
     this->strayColliders.push_back(collider);
 
     this->colliderIdCounter++;
+}
+
+void PhysicsQueue::SolveCollisions()
+{
+    //what about filtering?
+
+    for(int i = this->rigidBodies.size(); i++;)
+    {
+        for (int j = 1; j < this->rigidBodies.size() - i; j++)
+        {
+            this->rigidBodies[i].lock()->Collision(this->rigidBodies[j]);
+        }
+    }
+
+    for(int i = this->strayColliders.size(); i++;)
+    {
+        for (int j = 1; j < this->strayColliders.size() - i; j++)
+        {
+            this->strayColliders[i].lock()->Collision(this->strayColliders[j].lock().get());
+        }
+    }
 }

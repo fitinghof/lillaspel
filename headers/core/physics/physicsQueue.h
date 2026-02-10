@@ -11,6 +11,7 @@ public:
 
     void AddRigidBody(std::weak_ptr<RigidBody> rigidBody);
     void AddStrayCollider(std::weak_ptr<Collider> collider);
+    void SolveCollisions();
 
 private:
     PhysicsQueue();

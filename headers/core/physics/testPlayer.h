@@ -2,7 +2,7 @@
 #include "core/physics/collision.h"
 #include "gameObjects/meshObject.h"
 
-class TestPlayer : public BoxCollider
+class TestPlayer : public GameObject3D
 {
 public:
 	TestPlayer();

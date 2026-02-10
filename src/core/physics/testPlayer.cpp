@@ -6,29 +6,36 @@ TestPlayer::~TestPlayer() {}
 
 void TestPlayer::Tick()
 { 
-	this->BoxCollider::Tick();
+	this->GameObject3D::Tick();
 	DirectX::XMFLOAT3 oldPos;
 	DirectX::XMStoreFloat3(&oldPos, this->transform.GetPosition());
+	float deltaTime = Time::GetInstance().GetDeltaTime();
 
-	if (GetAsyncKeyState('W'))
+	DirectX::XMFLOAT3 moveVector = DirectX::XMFLOAT3(0, 0, 0);
+	float speed = 5;
+
+	if (GetAsyncKeyState('I'))
 	{
-		this->SetPosition(FLOAT3ADD(oldPos, DirectX::XMFLOAT3(0, 0, 1)));
+		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(0, 0, speed));
 	}
 
-	if (GetAsyncKeyState('A'))
+	if (GetAsyncKeyState('J'))
 	{
-		this->SetPosition(FLOAT3ADD(oldPos, DirectX::XMFLOAT3(-1, 0, 0)));
+		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(-speed, 0, 0));
 	}
 
-	if (GetAsyncKeyState('S'))
+	if (GetAsyncKeyState('K'))
 	{
-		this->SetPosition(FLOAT3ADD(oldPos, DirectX::XMFLOAT3(0, 0, -1)));
+		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(0, 0, -speed));
 	}
 
-	if (GetAsyncKeyState('D'))
+	if (GetAsyncKeyState('L'))
 	{
-		this->SetPosition(FLOAT3ADD(oldPos, DirectX::XMFLOAT3(1, 0, 0)));
+		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(speed, 0, 0));
 	}
+
+	DirectX::XMFLOAT3 newPos = FLOAT3ADD(oldPos, FLOAT3MULT1(moveVector, deltaTime));
+	this->transform.SetPosition(DirectX::XMLoadFloat3(&newPos));
 
 	// std::vector<std::weak_ptr<GameObject>> children = this->GetChildren();
 	// std::shared_ptr<BoxCollider> box = children[0].lock(); ?????????????????????

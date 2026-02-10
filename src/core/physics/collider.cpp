@@ -20,15 +20,15 @@ void Collider::SetParent(std::weak_ptr<GameObject> newParent)
 		return;
 	}
 
-	std::shared_ptr<Collider> colliderParent = std::dynamic_pointer_cast<Collider>(newParent.lock()->shared_from_this());
-	if(colliderParent)
+	std::shared_ptr<Collider> colliderParent = std::dynamic_pointer_cast<Collider>(newParent.lock());
+	if(colliderParent != nullptr)
 	{
 		Logger::Error("Tried to set Collider as parent to a Collider");
 		return;
 	}
 
 	this->GameObject3D::SetParent(newParent);
-	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent.lock()->shared_from_this());
+	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent.lock());
 	std::weak_ptr<Collider> thisCollider = std::dynamic_pointer_cast<Collider>(this->shared_from_this());
 
 	if (rigidBodyParent)

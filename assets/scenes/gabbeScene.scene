@@ -41,7 +41,7 @@
           1.0
         ]
       },
-      "type": "GameObject",
+      "type": "TestPlayer",
       "children": [
       {
       "transform": {

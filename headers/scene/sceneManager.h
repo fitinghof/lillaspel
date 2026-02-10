@@ -15,6 +15,7 @@
 #include "scene/objectFromStringFactory.h"
 #include "gameObjects/debugCamera.h"
 #include "core/audio/soundEngine.h"
+#include "core/physics/rigidBody.h"
 
 #include "core/physics/testPlayer.h"
 

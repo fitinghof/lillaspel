@@ -47,11 +47,15 @@ public:
 
 	float shortestExtent = 1;
 
+	virtual void Tick() override;
+	void SetId(int id);
+	int GetId();
+
 	void ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance);
 	bool Collision(Collider* other);
 	bool Collision(Collider* other, DirectX::XMVECTOR& contactNormal);
 
-	void SetParent(std::weak_ptr<RigidBody> newParent); //this isn't an override since it only accepts RigidBody parents
+	void SetParent(std::weak_ptr<GameObject> newParent); //this isn't an override since it only accepts RigidBody parents
 
 	virtual bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) = 0;
 	virtual bool CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) = 0;
@@ -71,7 +75,8 @@ public:
 	bool hasInitializedPreviousPosition = false;
 
 private:
-	std::weak_ptr<GameObject> meshObjectChild; //reference to the mesh visual representation of the collider
+	int id = -1;
+	std::weak_ptr<GameObject> meshObjectChild; //reference to the mesh visual representation of the collider (remove?)
 	std::weak_ptr<RigidBody> castedParent;
 
 	bool CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance);

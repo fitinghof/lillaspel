@@ -1,12 +1,28 @@
 #include "core/physics/rigidBody.h"
 #include "core/physics/collider.h"
+#include "core/physics/physicsQueue.h" //here to avoid circular dependencies
 
 RigidBody::RigidBody()
 {
+	PhysicsQueue::GetInstance().AddRigidBody(std::dynamic_pointer_cast<RigidBody>(this->shared_from_this()));
+	Logger::Log("Added Rigidbody to physics queue");
 }
 
 RigidBody::~RigidBody()
 {
+}
+
+void RigidBody::SetParent(std::weak_ptr<GameObject> parent)
+{
+	//do we need to add other things?
+	
+	if(parent.expired())
+	{
+		Logger::Error("tried setting an expired game object as parent to rigidbody");
+		return;
+	}
+
+	this->GameObject3D::SetParent(parent);
 }
 
 void RigidBody::AddColliderChild(std::weak_ptr<Collider> collider)
@@ -17,6 +33,16 @@ void RigidBody::AddColliderChild(std::weak_ptr<Collider> collider)
 void RigidBody::RemoveExpiredColliderChild()
 {
 	//japp
+}
+
+void RigidBody::SetId(int id)
+{
+	this->id = id;
+}
+
+int RigidBody::GetId()
+{ 
+	return this->id; 
 }
 
 int RigidBody::GetNrOfColliderChildren()

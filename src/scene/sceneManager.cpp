@@ -11,6 +11,12 @@ SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
 	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
+	this->objectFromString.RegisterType<BoxCollider>(NAMEOF(BoxCollider));
+	this->objectFromString.RegisterType<SphereCollider>(NAMEOF(SphereCollider));
+	this->objectFromString.RegisterType<RigidBody>(NAMEOF(RigidBody));
+	this->objectFromString.RegisterType<SoundSourceObject>(NAMEOF(SoundSourceObject));
+
+	this->objectFromString.RegisterType<TestPlayer>(NAMEOF(TestPlayer));
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();
@@ -60,36 +66,36 @@ void SceneManager::LoadScene(Scenes scene)
 
 	//////////////////////////////////////////////////
 
-	std::shared_ptr<MeshObject> mesh = this->mainScene->CreateGameObjectOfType<MeshObject>().lock();
-	std::shared_ptr<TestPlayer> player = this->mainScene->CreateGameObjectOfType<TestPlayer>().lock();
-	mesh->SetParent(player);
+	// std::shared_ptr<MeshObject> mesh = this->mainScene->CreateGameObjectOfType<MeshObject>().lock();
+	// std::shared_ptr<TestPlayer> player = this->mainScene->CreateGameObjectOfType<TestPlayer>().lock();
+	// mesh->SetParent(player);
 
-	//////////////////////////////////////////////////
+	// //////////////////////////////////////////////////
 
-	DirectX::XMVECTOR pos1;
-	pos1.m128_f32[0] = -3.0f;
-	pos1.m128_f32[1] = 0;
-	pos1.m128_f32[2] = 0;
+	// DirectX::XMVECTOR pos1;
+	// pos1.m128_f32[0] = -3.0f;
+	// pos1.m128_f32[1] = 0;
+	// pos1.m128_f32[2] = 0;
 
-	DirectX::XMVECTOR pos2;
-	pos2.m128_f32[0] = 2;
-	pos2.m128_f32[1] = 0;
-	pos2.m128_f32[2] = 0;
+	// DirectX::XMVECTOR pos2;
+	// pos2.m128_f32[0] = 2;
+	// pos2.m128_f32[1] = 0;
+	// pos2.m128_f32[2] = 0;
 
-	auto coll1 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
-	auto coll2 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	// auto coll1 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
+	// auto coll2 = this->mainScene->CreateGameObjectOfType<BoxCollider>();
 
-	std::shared_ptr<BoxCollider> Coll1 = coll1.lock();
-	Coll1->solid = true;
-	Coll1->dynamic = true;
-	Coll1->SetPosition(DirectX::XMFLOAT3(4, 0, 0));
-	Coll1->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+	// std::shared_ptr<BoxCollider> Coll1 = coll1.lock();
+	// Coll1->solid = true;
+	// Coll1->dynamic = true;
+	// Coll1->SetPosition(DirectX::XMFLOAT3(4, 0, 0));
+	// Coll1->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
 
-	std::shared_ptr<BoxCollider> Coll2 = coll2.lock();
-	Coll2->solid = true;
-	Coll2->dynamic = true;
-	Coll2->SetPosition(DirectX::XMFLOAT3(2.5f, 0, 0));
-	Coll2->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
+	// std::shared_ptr<BoxCollider> Coll2 = coll2.lock();
+	// Coll2->solid = true;
+	// Coll2->dynamic = true;
+	// Coll2->SetPosition(DirectX::XMFLOAT3(2.5f, 0, 0));
+	// Coll2->SetExtents(DirectX::XMFLOAT3(1, 1, 1));
 
 	///////////////////////////////////////////////////////////////////
 
@@ -111,21 +117,21 @@ void SceneManager::LoadScene(Scenes scene)
 	//Logger::Log("sphere1 center: " + std::to_string(Coll1->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[2]));
 	//Logger::Log("sphere2 center: " + std::to_string(Coll2->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[2]));
 
-	if (Coll1->Collision(Coll2.get())) Logger::Log("true");
-	else Logger::Log("false");
+	// if (Coll1->Collision(Coll2.get())) Logger::Log("true");
+	// else Logger::Log("false");
 
-	Coll1->Tick();
-	Coll2->Tick();
+	// Coll1->Tick();
+	// Coll2->Tick();
 
-	Logger::Log("*********** END ************");
+	// Logger::Log("*********** END ************");
 
-	if (Coll1->Collision(Coll2.get())) Logger::Log("true");
-	else Logger::Log("false");
+	// if (Coll1->Collision(Coll2.get())) Logger::Log("true");
+	// else Logger::Log("false");
 
-	Coll1->Tick();
-	Coll2->Tick();
+	// Coll1->Tick();
+	// Coll2->Tick();
 
-	Logger::Log("*********** END ************");
+	// Logger::Log("*********** END ************");
 
 	//Logger::Log("sphere1 center: " + std::to_string(Coll1->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll1->GetGlobalPosition().m128_f32[2]));
 	//Logger::Log("sphere2 center: " + std::to_string(Coll2->GetGlobalPosition().m128_f32[0]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[1]) + ", " + std::to_string(Coll2->GetGlobalPosition().m128_f32[2]));

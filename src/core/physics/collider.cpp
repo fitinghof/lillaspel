@@ -2,6 +2,7 @@
 #include "core/physics/boxCollider.h"
 #include "core/physics/sphereCollider.h"
 #include "core/physics/rigidBody.h"
+#include "core/physics/physicsQueue.h" //are here to prevent circular dependecies
 
 Collider::Collider()
 {
@@ -11,19 +12,44 @@ Collider::~Collider()
 {
 }
 
-void Collider::SetParent(std::weak_ptr<RigidBody> newParent)
+void Collider::SetParent(std::weak_ptr<GameObject> newParent)
 {
-	this->GameObject::SetParent(newParent);
-
 	if (newParent.expired())
 	{
 		Logger::Error("Tried to set expired gameobject as parent");
 		return;
 	}
 
-	this->castedParent = newParent;
+	std::shared_ptr<Collider> colliderParent = std::dynamic_pointer_cast<Collider>(newParent.lock()->shared_from_this());
+	if(colliderParent)
+	{
+		Logger::Error("Tried to set Collider as parent to a Collider");
+		return;
+	}
+
+	this->GameObject3D::SetParent(newParent);
+	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent.lock()->shared_from_this());
 	std::weak_ptr<Collider> thisCollider = std::dynamic_pointer_cast<Collider>(this->shared_from_this());
-	newParent.lock()->AddColliderChild(thisCollider);
+
+	if (rigidBodyParent)
+	{
+		PhysicsQueue::GetInstance().AddRigidBody(rigidBodyParent);
+		this->castedParent = rigidBodyParent;
+
+		if(!thisCollider.expired())
+		{
+			rigidBodyParent->AddColliderChild(thisCollider);
+		}
+		else
+		{
+			Logger::Error("The impossible happened, a Collider couldn't be casted as a Collider");
+		}
+	}
+	else
+	{
+		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
+		Logger::Log("Added stray Collider to physics queue");
+	}
 }
 
 bool Collider::Collision(Collider* otherCollider)
@@ -54,29 +80,30 @@ bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNorm
 	return collision;
 }
 
+void Collider::Tick()
+{
+	this->GameObject3D::Tick();
+}
+
+void Collider::SetId(int id) 
+{
+	this->id = id;
+}
+
+int Collider::GetId()
+{ 
+	return this->id; 
+}
+
 void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)
 {
-	std::shared_ptr<RigidBody> parent = this->castedParent.lock();
-	GameObject3D* moveTarget = parent.get();
+	std::shared_ptr<RigidBody> rigidBodyParent = this->castedParent.lock();
+	GameObject3D* moveTarget = this;
 
-	if (!parent)
+	if (rigidBodyParent)
 	{
-		if (!this->GetParent().expired())
-		{
-			//collider has a parent but it's not a rigidbody
-			Logger::Error("Collider didn't have RigidBody as parent!");
-			return;
-		}
-
-		//collider has no parent at all, it's a single collider
-		Logger::Log("collider has no parent at all");
-		moveTarget = this;
+		moveTarget = rigidBodyParent.get();
 	}
-
-	//while (!parent)
-	//{
-	//	//loop to root parent??
-	//}
 
 	DirectX::XMFLOAT3 resolveVector = FLOAT3MULT1(resolveAxis, resolveDistance);
 	DirectX::XMVECTOR moveDistance = DirectX::XMLoadFloat3(&resolveVector);

@@ -21,10 +21,18 @@ BoxCollider::~BoxCollider()
 
 void BoxCollider::Tick()
 {
-	this->GameObject::Tick();
+	this->Collider::Tick();
 
 	this->BuildCornersArray(this->satData.positionData);
 	DirectX::XMStoreFloat3(&this->satData.center, this->GetGlobalPosition());
+}
+
+void BoxCollider::LoadFromJson(const nlohmann::json& data)
+{
+	this->GameObject3D::LoadFromJson(data);
+
+	DirectX::XMStoreFloat3(&this->satData.center, this->GetGlobalPosition()); //check positions later
+	this->BuildCornersArray(this->satData.positionData);
 }
 
 bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)

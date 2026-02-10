@@ -228,11 +228,6 @@ void SceneManager::SetMusicTrackGain(std::string id, float gain)
 	this->audioManager.SetGain(id, gain);
 }
 
-void SceneManager::SetMasterMusicGain(float gain)
-{
-	this->audioManager.SetMusicGain(gain);
-}
-
 MusicTrack* SceneManager::GetMusicTrack(std::string id)
 {
 	return this->audioManager.GetMusicTrack(id);

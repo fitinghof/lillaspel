@@ -8,6 +8,8 @@ struct MusicLayer
 	float time = 0;
 };
 
+static float masterMusicGain = 1.0f;
+
 class MusicTrackManager
 {
 public:
@@ -31,7 +33,6 @@ public:
 	void FadeBetween(std::string id1, std::string id2, float seconds);
 
 	void GetMusicTrackSourceState(std::string id, ALint& sourceState);
-	void SetMusicGain(float gain);
 	void SetGain(std::string id, float gain);
 	void SetPitch(std::string id, float pitch);
 	MusicTrack* GetMusicTrack(std::string id);
@@ -39,8 +40,6 @@ public:
 	void Tick();
 
 private:
-	float musicGain = 1.0f;
-
 	std::unordered_map<std::string, MusicTrack*> musicTracks;
 	std::vector<MusicTrack*> activeTracks;
 	std::string pathToMusicFolder = "";

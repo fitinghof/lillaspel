@@ -435,13 +435,13 @@ void Renderer::BindLights()
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
-	const size_t lightCount = std::min<size_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
 
 		// Inefficient, should be fixed
 		std::vector<SpotlightObject::SpotLightContainer> spotlights;
-		for (size_t i = 0; i < lightCount; i++)
+		for (uint32_t i = 0; i < lightCount; i++)
 		{
 			if ((*this->lightRenderQueue)[i].expired()) 
 			{

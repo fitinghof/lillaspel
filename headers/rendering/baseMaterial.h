@@ -12,8 +12,8 @@
 struct RenderData {
 	std::shared_ptr<Shader> pixelShader;
 	std::shared_ptr<Shader> vertexShader;
-	std::vector<ConstantBuffer> pixelBuffers;
-	std::vector<ConstantBuffer> vertexBuffers;
+	std::vector<ConstantBuffer*> pixelBuffers;
+	std::vector<ConstantBuffer*> vertexBuffers;
 	std::vector<ID3D11ShaderResourceView*> textures;
 };
 
@@ -24,10 +24,24 @@ public:
 		float diffuse[4];
 		float specular[4];
 		float shininess;
-		float padding[3];
+		unsigned int textureSlots;
+		float padding[2];
 	};
 
-	virtual RenderData GetRenderData() = 0;
+	enum TextureSlots : unsigned int
+	{ 
+		none = 0,
+		first = 1,
+		second = 2,
+		third = 4,
+		fourth = 8,
+		fifth = 16,
+	};
+
+	BaseMaterial(ID3D11Device* device) {}
+	virtual RenderData GetRenderData(ID3D11DeviceContext* context) = 0;
 
 	std::string identifier;
+
+	bool wireframe = false;
 };

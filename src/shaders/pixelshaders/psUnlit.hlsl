@@ -7,20 +7,28 @@ struct PixelShaderInput
     float3 cameraPosition : CAMERA_POSITION;
 };
 
-cbuffer MaterialBuffer : register(b0)
+cbuffer MaterialBuffer : register(b1)
 {
     float4 ambient;
     float4 diffuse;
     float4 specular;
     float shininess;
-    int textureCount;
+    int textureSlots;
 };
+
+Texture2D diffuseTexture : register(t0);
 
 SamplerState mainSampler : register(s0);
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
-    return diffuse;
-    //return float4(abs(input.normal), 1);
-    //return float4(input.uv, 0, 1);
+    // so idk if "Sample()" or "if" is most expensive, I just guessed.
+    
+    float4 textureColor = float4(1, 1, 1, 1);
+    if (textureSlots > 0)
+    {
+        textureColor = diffuseTexture.Sample(mainSampler, float2(input.uv.x, 1 - input.uv.y));
+    }
+        
+    return textureColor * diffuse;
 }

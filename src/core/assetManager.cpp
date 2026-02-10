@@ -17,7 +17,7 @@ void AssetManager::AddSoundClip(std::string path, std::string id)
 	this->soundBank.AddSoundClip(path, id);
 }
 
-void AssetManager::setDevicePointer(ID3D11Device* device)
+void AssetManager::SetDevicePointer(ID3D11Device* device)
 {
 	this->d3d11Device = device;
 }
@@ -131,4 +131,50 @@ std::string AssetManager::getCleanPath(std::string pathToFix)
 	{
 		return pathToFix;
 	}
+}
+
+void AssetManager::CreateDefaultAssets()
+{
+	// Shaders
+
+	auto vertexShader = std::shared_ptr<Shader>(new Shader());
+	vertexShader->Init(this->d3d11Device, ShaderType::VERTEX_SHADER, "VSTest.cso");
+	AddShader("VSStandard", vertexShader);
+
+
+	auto pixelShaderLit = std::shared_ptr<Shader>(new Shader());
+	pixelShaderLit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSLit.cso");
+	AddShader("PSLit", pixelShaderLit);
+
+
+	auto pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
+	pixelShaderUnlit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSUnlit.cso");
+	AddShader("PSUnlit", pixelShaderUnlit);
+
+
+	// Materials
+
+	auto defaultMat = std::make_shared<GenericMaterial>(this->d3d11Device);
+	AddMaterial("defaultLitMaterial", defaultMat);
+
+
+	auto defaultUnlitMat = std::make_shared<UnlitMaterial>(this->d3d11Device);
+	defaultUnlitMat->unlitShader = pixelShaderUnlit;
+	AddMaterial("defaultUnlitMaterial", defaultUnlitMat);
+
+	auto wireframeMaterial = std::make_shared<UnlitMaterial>(this->d3d11Device);
+	wireframeMaterial->unlitShader = pixelShaderUnlit;
+	wireframeMaterial->wireframe = true;
+	AddMaterial("wireframeWhite", wireframeMaterial);
+}
+
+void AssetManager::AddShader(std::string identifier, std::shared_ptr<Shader> shader)
+{
+	this->shaders.emplace(identifier, shader);
+}
+
+void AssetManager::AddMaterial(std::string identifier, std::shared_ptr<BaseMaterial> material)
+{
+	material->identifier = identifier;
+	this->materials.emplace(identifier, std::move(material));
 }

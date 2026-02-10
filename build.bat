@@ -1,8 +1,9 @@
 @echo off
 :: Create a build directory
-mkdir build 
-cd build
+:: cd build
 :: cmake config CMakeLists.txt
-cmake .. -A Win32 || exit /b %errorlevel%
+:: cmake .. -A Win32 || exit /b %errorlevel%
 :: build binary app
-cmake --build . || exit /b %errorlevel%
+cmake --preset x64-debug || exit /b %errorlevel%
+
+cmake --build --preset x64-debug || exit /b %errorlevel%

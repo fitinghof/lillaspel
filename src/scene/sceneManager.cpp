@@ -47,7 +47,7 @@ void SceneManager::LoadScene(Scenes scene)
 		Logger::Warn("There is no end credits scene.");
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile("../../assets/scenes/testresult.json");
+		LoadSceneFromFile("../../../../assets/scenes/testresult.json");
 		break;
 	default:
 		break;

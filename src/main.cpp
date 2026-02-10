@@ -7,6 +7,7 @@
 #include "utilities/logger.h"
 #include "core/game.h"
 #include "gameObjects/objectLoader.h"
+#include <filesystem>
 
 // Main code
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
@@ -14,6 +15,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 	_In_ LPWSTR    lpCmdLine,
 	_In_ int       nCmdShow) 
 {
+	// Normal batchfile run "C:\\Users\\Simon Nilsson\\source\\repos\\lillaspel\\build\\Debug" 
+	//					          C:\Users\Simon Nilsson\source\repos\LillaSpel\out\build\x64-debug\Debug\lillaspel.exe
+	// Visual studio run "C:\\Users\\Simon Nilsson\\source\\repos\\LillaSpel\\out\\build\\x64-debug"
 	// Some memory leak flags here
 	//_CrtDumpMemoryLeaks();
 	//_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);

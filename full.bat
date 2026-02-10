@@ -1,8 +1,9 @@
 @echo off
-setlocal
 
-call "%~dp0build.bat"
-if errorlevel 1 exit /b %errorlevel%
+mkdir build 
+cd build
+cmake .. -A Win32 || exit /b %errorlevel%
+cmake --build . || exit /b %errorlevel%
 
-call "%~dp0run.bat"
-exit /b %errorlevel%
+cd Debug
+lillaspel.exe

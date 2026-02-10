@@ -5,6 +5,7 @@
 #include <iostream>
 #include "utilities/logger.h"
 #include "core/audio/musicTrackManager.h"
+#include "utilities/masterVolume.h"
 
 //ALuint's can be safely copied according to AI
 
@@ -25,7 +26,7 @@ public:
 	void FadeInPlay(std::string id, float startGain, float seconds);
 	void FadeOutStop(std::string id, float seconds);
 	void GetMusicTrackSourceState(std::string id, ALint& sourceState);
-	void SetGain(std::string id, float gain);
+	void SetGain(std::string id, float gain); //sets gain for individual music track
 	void SetPitch(std::string id, float pitch);
 	MusicTrack* GetMusicTrack(std::string id);
 
@@ -34,4 +35,5 @@ private:
 	ALCcontext* ALCContext;
 
 	MusicTrackManager musicTrackManager;
+
 };

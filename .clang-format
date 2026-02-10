@@ -1,0 +1,47 @@
+# Google style base.
+BasedOnStyle: LLVM # Start from LLVM base style
+
+# Indentation
+IndentWidth: 4 # 4 spaces.
+TabWidth: 4 # Tab width.
+UseTab: Always # Use tabs.
+
+# Line length
+ColumnLimit: 120 # Max line length.
+
+# Braces
+BreakBeforeBraces: Attach # Attach braces.
+BraceWrapping:
+  AfterStruct: true # Newline after struct init.
+  AfterEnum: true # Newline after enum init.
+  AfterClass: true # Newline after class init.
+
+# Spaces
+SpaceBeforeParens: ControlStatements # Space in control statements.
+SpacesInParentheses: false # No inner spaces.
+SpacesInSquareBrackets: false # No inner spaces.
+SpaceAfterCStyleCast: true # Space after cast.
+
+# Alignment
+AlignTrailingComments: true # Align trailing comments.
+AlignConsecutiveAssignments: false # No assignment align.
+
+# Includes
+SortIncludes: true # Sort includes.
+
+# Pointer/reference
+DerivePointerAlignment: false # Don't infer from code; use explicit setting.
+PointerAlignment: Left # * and & on left.
+
+# Templates
+AlwaysBreakTemplateDeclarations: Yes # Always break after template declaration
+
+# Access modifiers
+IndentAccessModifiers: false # Don't indent.
+AccessModifierOffset: -4 # Align with class.
+IndentCaseLabels: false # Align with switch.
+
+# Other
+AllowShortFunctionsOnASingleLine: All # Allow short one-line funcs.
+AlwaysBreakAfterReturnType: None # Keep return type on same line.
+AllowShortIfStatementsOnASingleLine: true # Allow short one-line ifs.

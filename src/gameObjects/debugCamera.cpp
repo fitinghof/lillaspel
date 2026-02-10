@@ -4,6 +4,7 @@
 #include "utilities/time.h"
 #include "utilities/logger.h"
 
+#include "imgui.h"
 void DebugCamera::Tick()
 {
 	this->CameraObject::Tick();

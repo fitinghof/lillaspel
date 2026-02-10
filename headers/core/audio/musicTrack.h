@@ -7,6 +7,7 @@
 #include "audioInstruction.h"
 #include "utilities/logger.h"
 #include "utilities/time.h"
+#include "utilities/masterVolume.h"
 
 class MusicTrack
 {
@@ -55,6 +56,8 @@ private:
 	SF_INFO sfInfo;
 	short* membuf = nullptr;
 	ALenum format;
+
+	float* pMusicGain = nullptr;
 
 	void SetTargetGain(float gain);
 };

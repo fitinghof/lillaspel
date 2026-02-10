@@ -25,6 +25,7 @@ void MusicTrackManager::Initialize(std::string pathToMusicFolder)
 void MusicTrackManager::AddMusicTrackStandardFolder(std::string filename, std::string id)
 {
 	MusicTrack* newTrack = new MusicTrack();
+
 	if (!newTrack->Initialize(this->pathToMusicFolder + filename, id))
 	{
 		Logger::Error("Error loading music track: " + this->pathToMusicFolder + filename);
@@ -153,6 +154,7 @@ void MusicTrackManager::Tick()
 void MusicTrackManager::AddMusicTrack(std::string path, std::string id)
 {
 	MusicTrack* newTrack = new MusicTrack();
+
 	if (!newTrack->Initialize(path, id))
 	{
 		Logger::Error("Error loading music track: " + path);

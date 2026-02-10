@@ -35,9 +35,14 @@ AudioManager::~AudioManager()
 	if (!alcMakeContextCurrent(nullptr)) Logger::Error("failed to unset context during termination!");
 
 	alcDestroyContext(this->ALCContext);
-	if (this->ALCContext) Logger::Error("failed to destroy context!");
+	ALenum err = alcGetError(this->ALCDevice);
 
-	if (!alcCloseDevice(this->ALCDevice)) Logger::Error("failed to close sound device!");
+	if (err != ALC_NO_ERROR)
+	{
+		Logger::Error("error when destroying AL-context!");
+	}
+
+	if (!alcCloseDevice(this->ALCDevice)) Logger::Error("failed to close AL-device!");
 }
 
 void AudioManager::InitializeMusicTrackManager(std::string pathToMusicFolder)

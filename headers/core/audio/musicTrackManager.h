@@ -8,6 +8,8 @@ struct MusicLayer
 	float time = 0;
 };
 
+static float masterMusicGain = 1.0f;
+
 class MusicTrackManager
 {
 public:

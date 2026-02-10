@@ -7,6 +7,7 @@
 #include "audioInstruction.h"
 #include "soundClip.h"
 #include "utilities/logger.h"
+#include "utilities/masterVolume.h"
 #include "gameObjects/gameObject3D.h"
 #include <random>
 
@@ -33,6 +34,8 @@ public:
 	void GetSourceState(int index, ALint& sourceState); //for debug
 	void GetCurrentSourcePosition(ALfloat* position); //for debug
 
+	void LinkMasterSoundEffectsGain(float* masterGainLink);
+
 private:
 	int id = -1;
 	int nrOfSources = 6;
@@ -42,5 +45,6 @@ private:
 
 	float pitch = 1;
 	float gain = 1;
+	float* masterGain = nullptr;
 	float velocity[3] = { 0, 0, 0 };
 };

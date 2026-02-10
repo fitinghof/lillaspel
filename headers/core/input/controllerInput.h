@@ -32,6 +32,8 @@ public:
 	bool FullscreenToggle() const override;
 	bool Quit() const override;
 
+	DWORD GetControllerIndex() const { return this->controllerIndex; }
+
 private:
 	DWORD controllerIndex;
 };

@@ -1,4 +1,3 @@
-
 #include "core/input/controllerInput.h"
 
 std::array<float, 2> ControllerInput::GetMovementVector() const
@@ -36,16 +35,16 @@ std::array<float, 2> ControllerInput::GetLookVector() const
 	return InputManager::GetInstance().GetRightThumbMovement(this->controllerIndex);
 }
 
-bool ControllerInput::Jump() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_JUMP)); }
+bool ControllerInput::Jump() const { return InputManager::GetInstance().WasControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_JUMP)); }
 
 bool ControllerInput::Sprint() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_SPRINT)); }
 
-bool ControllerInput::LeftClick() const { return InputManager::GetInstance().IsRightBackTriggerDown(this->controllerIndex); }
+bool ControllerInput::LeftClick() const { return InputManager::GetInstance().WasRightBackTriggerPressed(this->controllerIndex); }
 
-bool ControllerInput::RightClick() const { return InputManager::GetInstance().IsLeftBackTriggerDown(this->controllerIndex); }
+bool ControllerInput::RightClick() const { return InputManager::GetInstance().WasLeftBackTriggerPressed(this->controllerIndex); }
 
-bool ControllerInput::Interact() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_INTERACT)); }
+bool ControllerInput::Interact() const { return InputManager::GetInstance().WasControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_INTERACT)); }
 
-bool ControllerInput::FullscreenToggle() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_FULLSCREEN_TOGGLE)); }
+bool ControllerInput::FullscreenToggle() const { return InputManager::GetInstance().WasControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_FULLSCREEN_TOGGLE)); }
 
-bool ControllerInput::Quit() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_QUIT)); }
+bool ControllerInput::Quit() const { return InputManager::GetInstance().WasControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_QUIT)); }

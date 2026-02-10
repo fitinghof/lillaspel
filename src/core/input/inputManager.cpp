@@ -144,4 +144,12 @@ bool InputManager::IsLeftBackTriggerDown(DWORD index) const { return this->contr
 
 bool InputManager::IsRightBackTriggerDown(DWORD index) const { return this->controllers[index].GetInput().rightBackTrigger; }
 
+bool InputManager::WasLeftBackTriggerPressed(DWORD index) const { return this->controllers[index].GetInput().leftBackTriggerPressed; }
+
+bool InputManager::WasRightBackTriggerPressed(DWORD index) const { return this->controllers[index].GetInput().rightBackTriggerPressed; }
+
 bool InputManager::IsControllerButtonDown(DWORD index, const int button) const { return (this->controllers[index].GetInput().buttons & button) != 0; }
+
+bool InputManager::WasControllerButtonPressed(DWORD index, const int button) const { return (this->controllers[index].GetInput().buttonsPressed & button) != 0; }
+
+bool InputManager::WasControllerButtonReleased(DWORD index, const int button) const { return (this->controllers[index].GetInput().buttonsReleased & button) != 0; }

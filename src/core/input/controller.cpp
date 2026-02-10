@@ -26,7 +26,15 @@ const bool Controller::IsConnected() {
 void Controller::ReadInput()
 {
 	XINPUT_GAMEPAD gamepad = this->state.Gamepad;
-	this->input.buttons = gamepad.wButtons;
+	XINPUT_GAMEPAD previousGamepad = this->previousState.Gamepad;
+	
+	// Track button state changes
+	WORD previousButtons = previousGamepad.wButtons;
+	WORD currentButtons = gamepad.wButtons;
+	
+	this->input.buttons = currentButtons;
+	this->input.buttonsPressed = (currentButtons & ~previousButtons);  // Newly pressed
+	this->input.buttonsReleased = (~currentButtons & previousButtons);  // Newly released
 
 	// Deadzone LEFT STICK
 	float LX = gamepad.sThumbLX;
@@ -79,6 +87,9 @@ void Controller::ReadInput()
 	this->input.rightThumb[1] = RY;
 
 	// Deadzone BACK TRIGGERS ( ON / OFF )
+	bool previousLT = previousGamepad.bLeftTrigger > triggerDeadzone;
+	bool previousRT = previousGamepad.bRightTrigger > triggerDeadzone;
+	
 	float LT = gamepad.bLeftTrigger;
 	if (LT > triggerDeadzone) {
 		LT = 1.f;
@@ -88,6 +99,8 @@ void Controller::ReadInput()
 	}
 
 	this->input.leftBackTrigger = bool(LT);
+	this->input.leftBackTriggerPressed = this->input.leftBackTrigger && !previousLT;
+	this->input.leftBackTriggerReleased = !this->input.leftBackTrigger && previousLT;
 
 	float RT = gamepad.bRightTrigger;
 	if (RT > triggerDeadzone) {
@@ -97,6 +110,8 @@ void Controller::ReadInput()
 		RT = 0.0f;
 	}
 	this->input.rightBackTrigger = bool(RT);
+	this->input.rightBackTriggerPressed = this->input.rightBackTrigger && !previousRT;
+	this->input.rightBackTriggerReleased = !this->input.rightBackTrigger && previousRT;
 }
 
 const RawControllerInput& Controller::GetInput() const { return this->input; }

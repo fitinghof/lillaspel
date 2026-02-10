@@ -48,4 +48,4 @@ void DebugCamera::Tick()
 		Logger::Log("Controller Left Click pressed");
 	}
 	
-	}
+}

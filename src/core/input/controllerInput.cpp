@@ -7,16 +7,16 @@ std::array<float, 2> ControllerInput::GetMovementVector() const
 
 	// If the left thumbstick is not being used, check the D-pad
 	if (movement[0] == 0.0f && movement[1] == 0.0f) {
-		if (InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_FORWARD))) {
+		if (InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_FORWARD))) {
 			movement[1] += 1.0f;
 		}
-		if (InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_BACKWARD))) {
+		if (InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_BACKWARD))) {
 			movement[1] -= 1.0f;
 		}
-		if (InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_LEFT))) {
+		if (InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_LEFT))) {
 			movement[0] -= 1.0f;
 		}
-		if (InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_RIGHT))) {
+		if (InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_MOVE_RIGHT))) {
 			movement[0] += 1.0f;
 		}
 	}
@@ -36,16 +36,16 @@ std::array<float, 2> ControllerInput::GetLookVector() const
 	return InputManager::GetInstance().GetRightThumbMovement(this->controllerIndex);
 }
 
-bool ControllerInput::Jump() const { return InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_JUMP)); }
+bool ControllerInput::Jump() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_JUMP)); }
 
-bool ControllerInput::Sprint() const { return InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_SPRINT)); }
+bool ControllerInput::Sprint() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_SPRINT)); }
 
-bool ControllerInput::LeftClick() const { return InputManager::GetInstance().IsRightBackTriggerPressed(this->controllerIndex); }
+bool ControllerInput::LeftClick() const { return InputManager::GetInstance().IsRightBackTriggerDown(this->controllerIndex); }
 
-bool ControllerInput::RightClick() const { return InputManager::GetInstance().IsLeftBackTriggerPressed(this->controllerIndex); }
+bool ControllerInput::RightClick() const { return InputManager::GetInstance().IsLeftBackTriggerDown(this->controllerIndex); }
 
-bool ControllerInput::Interact() const { return InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_INTERACT)); }
+bool ControllerInput::Interact() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_INTERACT)); }
 
-bool ControllerInput::FullscreenToggle() const { return InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_FULLSCREEN_TOGGLE)); }
+bool ControllerInput::FullscreenToggle() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_FULLSCREEN_TOGGLE)); }
 
-bool ControllerInput::Quit() const { return InputManager::GetInstance().IsControllerButtonPressed(this->controllerIndex, static_cast<int>(CONTROLLER_QUIT)); }
+bool ControllerInput::Quit() const { return InputManager::GetInstance().IsControllerButtonDown(this->controllerIndex, static_cast<int>(CONTROLLER_QUIT)); }

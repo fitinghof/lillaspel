@@ -72,9 +72,9 @@ public:
 
 	std::array<float, 2> GetLeftThumbMovement(DWORD index) const;
 	std::array<float, 2> GetRightThumbMovement(DWORD index) const;
-	bool IsLeftBackTriggerPressed(DWORD index) const;
-	bool IsRightBackTriggerPressed(DWORD index) const;
-	bool IsControllerButtonPressed(DWORD index, const int button) const;
+	bool IsLeftBackTriggerDown(DWORD index) const;
+	bool IsRightBackTriggerDown(DWORD index) const;
+	bool IsControllerButtonDown(DWORD index, const int button) const;
 private:
 	InputManager();
 

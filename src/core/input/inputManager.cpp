@@ -140,8 +140,8 @@ std::array<float, 2> InputManager::GetLeftThumbMovement(DWORD index) const { ret
 
 std::array<float, 2> InputManager::GetRightThumbMovement(DWORD index) const { return this->controllers[index].GetInput().rightThumb; }
 
-bool InputManager::IsLeftBackTriggerPressed(DWORD index) const { return this->controllers[index].GetInput().leftBackTrigger; }
+bool InputManager::IsLeftBackTriggerDown(DWORD index) const { return this->controllers[index].GetInput().leftBackTrigger; }
 
-bool InputManager::IsRightBackTriggerPressed(DWORD index) const { return this->controllers[index].GetInput().rightBackTrigger; }
+bool InputManager::IsRightBackTriggerDown(DWORD index) const { return this->controllers[index].GetInput().rightBackTrigger; }
 
-bool InputManager::IsControllerButtonPressed(DWORD index, const int button) const { return (this->controllers[index].GetInput().buttons & button) != 0; }
+bool InputManager::IsControllerButtonDown(DWORD index, const int button) const { return (this->controllers[index].GetInput().buttons & button) != 0; }

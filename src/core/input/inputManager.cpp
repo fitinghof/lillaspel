@@ -19,10 +19,10 @@ void InputManager::Reset() {
 	for (unsigned char& state : keyStates)
 	{
 		state &= KEY_DOWN;
-		this->mouseMovement = { 0, 0 };
-		this->LM &= KEY_DOWN;
-		this->RM &= KEY_DOWN;
 	}
+	this->mouseMovement = { 0, 0 };
+	this->LM &= KEY_DOWN;
+	this->RM &= KEY_DOWN;
 }
 
 bool InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

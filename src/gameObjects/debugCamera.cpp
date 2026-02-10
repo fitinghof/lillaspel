@@ -23,15 +23,15 @@ void DebugCamera::Tick()
 		Logger::Log("Jump pressed");
 	}
 	
-	std::array movementVector = keyboardInput.GetMovementVector();
+	std::array<float, 2> movementVector = keyboardInput.GetMovementVector();
 	if (movementVector[0] != 0.0f || movementVector[1] != 0.0f) {
 		Logger::Log("Movement vector: " + std::to_string(movementVector[0]) + ", " + std::to_string(movementVector[1]));
 	}
 
-	/*std::array<float, 2> lookVector = keyboardInput.GetLookVector();
+	std::array<float, 2> lookVector = keyboardInput.GetLookVector();
 	if (lookVector[0] != 0.0f || lookVector[1] != 0.0f) {
 		Logger::Log("Look vector: " + std::to_string(lookVector[0]) + ", " + std::to_string(lookVector[1]));
-	}*/
+	}
 
 
 	InputManager::GetInstance().ReadControllerInput(this->controllerInput.GetControllerIndex());
@@ -48,4 +48,13 @@ void DebugCamera::Tick()
 		Logger::Log("Controller Left Click pressed");
 	}
 	
+	movementVector = this->controllerInput.GetMovementVector();
+	if (movementVector[0] != 0.0f || movementVector[1] != 0.0f) {
+		Logger::Log("Controller Movement vector: " + std::to_string(movementVector[0]) + ", " + std::to_string(movementVector[1]));
+	}
+
+	lookVector = this->controllerInput.GetLookVector();
+	if (lookVector[0] != 0.0f || lookVector[1] != 0.0f) {
+		Logger::Log("Controller Look vector: " + std::to_string(lookVector[0]) + ", " + std::to_string(lookVector[1]));
+	}
 }

@@ -6,7 +6,10 @@
 
 Collider::Collider()
 {
-
+	//in start:
+	//add mesh
+	//set parent
+	//change material to wireframe
 }
 
 Collider::~Collider()

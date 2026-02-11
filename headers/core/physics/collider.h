@@ -68,6 +68,7 @@ public:
 
 	ColliderType type = ColliderType::NONE;
 	Tag tag = Tag::OBJECT;
+	Tag targetTag = Tag::OBJECT;
 	PhysicsMaterial physicsMaterial;
 	//DirectX::XMFLOAT3 previousPosition = {};
 	bool solid = true;

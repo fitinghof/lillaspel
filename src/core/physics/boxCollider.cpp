@@ -33,6 +33,40 @@ void BoxCollider::LoadFromJson(const nlohmann::json& data)
 
 	DirectX::XMStoreFloat3(&this->satData.center, this->GetGlobalPosition()); //check positions later
 	this->BuildCornersArray(this->satData.positionData);
+
+	if(data.contains("tag"))
+	{
+		this->tag = (Tag)data.at("tag").get<int>(); //write enum as integer in json
+		Logger::Log("tag was found in json: " + std::to_string(this->tag));
+	}
+
+	if(data.contains("targetTag"))
+	{
+		this->targetTag = (Tag)data.at("targetTag").get<int>(); //write enum as integer in json
+		Logger::Log("targetTag was found in json: " + std::to_string(this->targetTag));
+	}
+
+	if(data.contains("solid"))
+	{
+		this->solid = data.at("solid").get<bool>(); //write enum as integer in json
+		Logger::Log("solid was found in json: " + std::to_string(this->solid));
+	}
+
+	if(data.contains("dynamic"))
+	{
+		this->dynamic = data.at("dynamic").get<bool>(); //write enum as integer in json
+		Logger::Log("dynamic was found in json: " + std::to_string(this->dynamic));
+	}
+}
+
+void BoxCollider::SaveToJson(nlohmann::json& data)
+{
+	this->GameObject3D::SaveToJson(data);
+
+	data["tag"] = this->tag;
+	data["targetTag"] = this->targetTag;
+	data["solid"] = this->solid;
+	data["dynamic"] = this->dynamic;
 }
 
 bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)

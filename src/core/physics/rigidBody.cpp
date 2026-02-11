@@ -4,6 +4,7 @@
 
 RigidBody::RigidBody()
 {
+	//move to start
 	std::weak_ptr<RigidBody> rigidBody = std::static_pointer_cast<RigidBody>(this->GetPtr());
 
 	PhysicsQueue::GetInstance().AddRigidBody(rigidBody);

@@ -42,6 +42,10 @@
         ]
       },
       "type": "TestPlayer",
+      "tag" : 1,
+      "targetTag" : 0,
+      "solid" : true,
+      "dynamic" : true,
       "children": [
       {
       "transform": {

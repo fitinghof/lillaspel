@@ -15,6 +15,7 @@ public:
 
 	void Tick() override;
 	void LoadFromJson(const nlohmann::json& data) override;
+	void SaveToJson(nlohmann::json& data) override;
 
 	//Center and Size is only in the transform
 	bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) override;

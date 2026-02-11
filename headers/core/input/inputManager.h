@@ -93,6 +93,8 @@ private:
 	unsigned char LM;
 	unsigned char RM;
 
+	HWND currentWindowHandle;
+
 	// Keyboard
 	void SetKeyState(const unsigned char key, const unsigned char state);
 
@@ -100,5 +102,5 @@ private:
 	void SetLMouseKeyState(const unsigned char state);
 	void SetRMouseKeyState(const unsigned char state);
 
-	void SetMousePosition(const int x, const int y);
+	void SetMousePosition(const int x, const int y, bool reCenter = false);
 };

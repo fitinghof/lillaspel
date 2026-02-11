@@ -60,7 +60,7 @@ void Room::Start() {
 	}
 	for (size_t i = 0; i < 4; i++) {
 
-		std::array<float, 2> wallpos = {wallpositions[i][0], wallpositions[i][1]};
+		std::array<float, 2> wallpos = {static_cast<float>(wallpositions[i][0]), static_cast<float>(wallpositions[i][1])};
 
 		wallpos[0] *= this->size / 2;
 		wallpos[1] *= this->size / 2;
@@ -98,7 +98,7 @@ void Room::SetWallState(Room::WallIndex wallindex, bool active) {
 	if (active == false && !wall.expired()) {
 		this->factory->QueueDeleteGameObject(wall);
 	} else if (!active && wall.expired()) {
-		std::array<float, 2> wallpos = {wallpositions[wallindex][0], wallpositions[wallindex][1]};
+		std::array<float, 2> wallpos = {static_cast<float>(wallpositions[wallindex][0]), static_cast<float>(wallpositions[wallindex][1])};
 
 		wallpos[0] *= this->size / 2;
 		wallpos[1] *= this->size / 2;

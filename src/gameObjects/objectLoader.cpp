@@ -73,7 +73,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 			
 			// If we haven't processed these vertexes yet, do so.
 			if (bufferOffsets.find(positionIt->accessorIndex) == bufferOffsets.end()) {
-				bufferOffsets.emplace(positionIt->accessorIndex, totalOffset);
+				bufferOffsets.emplace((uint32_t)positionIt->accessorIndex, totalOffset);
 				
 				size_t loadedVertices = this->LoadVerticiesAndNormals(asset, *it, verticies, totalOffset);
 				
@@ -117,7 +117,7 @@ bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshL
 					std::string texIdent = path.generic_string() + ":Tex_" + std::to_string(loadedTextures.size());
 					std::shared_ptr<Texture> tex = std::make_shared<Texture>(textureRaw,  texIdent);
 
-					loadedTextures.emplace(texture.imageIndex.value(), tex);
+					loadedTextures.emplace((uint32_t)texture.imageIndex.value(), tex);
 					materialOut->diffuseTexture = tex;
 				}
 				else {

@@ -1,4 +1,4 @@
-#include "vector3D.h"
+#include "core/physics/vector3D.h"
 
 Vector3D::Vector3D(float xValue, float yValue, float zValue) {
 	this->x = xValue;

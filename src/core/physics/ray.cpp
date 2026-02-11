@@ -1,5 +1,5 @@
-#include "Ray.h"
+#include "core/physics/ray.h"
 
 Ray::Ray(const Vector3D& origin, const Vector3D& direction) : origin(origin), direction(direction) {
-	direction.Normalize();
+	this->direction.Normalize();
 }

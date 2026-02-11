@@ -10,7 +10,13 @@ void InputManager::SetLMouseKeyState(const unsigned char state) { this->LM = sta
 
 void InputManager::SetRMouseKeyState(const unsigned char state) { this->RM = state; }
 
-void InputManager::SetMousePosition(const int x, const int y) {
+void InputManager::SetMousePosition(const int x, const int y, bool reCenter) {
+
+	if (reCenter) {
+		this->mousePosition = {static_cast<unsigned int>(x), static_cast<unsigned int>(y)};
+		return;
+	}
+
 	this->mouseMovement = { x - static_cast<int>(this->mousePosition.at(0)), y - static_cast<int>(this->mousePosition.at(1)) };
 	this->mousePosition = { static_cast<unsigned int>(x), static_cast<unsigned int>(y) };
 }
@@ -83,7 +89,15 @@ bool InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	}
 }
 
-std::array<int, 2> InputManager::GetMouseMovement() const { return this->mouseMovement; }
+std::array<int, 2> InputManager::GetMouseMovement() const { 
+	const int centerX = GetSystemMetrics(SM_CXSCREEN) / 2;
+	const int centerY = GetSystemMetrics(SM_CYSCREEN) / 2;
+
+	const_cast<InputManager*>(this)->SetMousePosition(centerX, centerY, true);
+	SetCursorPos(centerX, centerY);
+
+	return this->mouseMovement;
+}
 
 std::array<int, 2> InputManager::GetMousePosition() const { 
     return { static_cast<int>(this->mousePosition[0]), static_cast<int>(this->mousePosition[1]) }; 

@@ -4,7 +4,9 @@
 
 RigidBody::RigidBody()
 {
-	PhysicsQueue::GetInstance().AddRigidBody(std::dynamic_pointer_cast<RigidBody>(this->shared_from_this()));
+	std::weak_ptr<RigidBody> rigidBody = std::static_pointer_cast<RigidBody>(this->GetPtr());
+
+	PhysicsQueue::GetInstance().AddRigidBody(rigidBody);
 	Logger::Log("Added Rigidbody to physics queue");
 }
 

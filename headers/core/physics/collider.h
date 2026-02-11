@@ -55,7 +55,7 @@ public:
 	bool Collision(Collider* other);
 	bool Collision(Collider* other, DirectX::XMVECTOR& contactNormal);
 
-	void SetParent(std::weak_ptr<GameObject> newParent); //this isn't an override since it only accepts RigidBody parents
+	void SetParent(std::weak_ptr<GameObject> newParent) override;
 
 	virtual bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) = 0;
 	virtual bool CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) = 0;

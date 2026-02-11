@@ -82,6 +82,8 @@ void GameObject::LatePhysicsTick()
 	// TO DO
 }
 
+void GameObject::OnDestroy() {}
+
 DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
 {
 	if (this->parent.expired()) {

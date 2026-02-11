@@ -10,6 +10,8 @@ public:
 	RigidBody();
 	~RigidBody();
 
+	void Start() override;
+
 	/// <summary>
 	/// Loops through children to find children of type collider and puts them in exclusive vector
 	/// </summary>

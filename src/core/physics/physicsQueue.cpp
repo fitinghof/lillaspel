@@ -34,19 +34,49 @@ void PhysicsQueue::SolveCollisions()
 {
     //what about filtering?
 
-    for(int i = this->rigidBodies.size(); i++;)
+    for(int i = rigidBodies.size() - 1; i >= 0; i--)
     {
-        for (int j = 1; j < this->rigidBodies.size() - i; j++)
+        std::shared_ptr<RigidBody> thisRigidBody = this->rigidBodies[i].lock();
+        if(!thisRigidBody)
         {
-            this->rigidBodies[i].lock()->Collision(this->rigidBodies[j]);
+            this->rigidBodies.erase(this->rigidBodies.begin() + i);
+            continue;
+        }
+
+        for (int j = i - 1; j >= 0; j--)
+        {
+            std::shared_ptr<RigidBody> otherRigidBody = this->rigidBodies[j].lock();
+            if(!otherRigidBody)
+            {
+                this->rigidBodies.erase(this->rigidBodies.begin() + j);
+                i--;
+                continue;
+            }
+
+            thisRigidBody->Collision(otherRigidBody);
         }
     }
 
-    for(int i = this->strayColliders.size(); i++;)
+    for(int i = strayColliders.size() - 1; i >= 0; i--)
     {
-        for (int j = 1; j < this->strayColliders.size() - i; j++)
+        std::shared_ptr<Collider> thisCollider = this->strayColliders[i].lock();
+        if(!thisCollider)
         {
-            this->strayColliders[i].lock()->Collision(this->strayColliders[j].lock().get());
+            this->strayColliders.erase(this->strayColliders.begin() + i);
+            continue;
+        }
+
+        for (int j = i - 1; j >= 0; j--)
+        {
+            std::shared_ptr<Collider> otherCollider = this->strayColliders[j].lock();
+            if(!otherCollider)
+            {
+                this->strayColliders.erase(this->strayColliders.begin() + j);
+                i--;
+                continue;
+            }
+
+            thisCollider->Collision(otherCollider.get());
         }
     }
 }

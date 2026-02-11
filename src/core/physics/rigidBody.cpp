@@ -4,12 +4,19 @@
 
 RigidBody::RigidBody()
 {
-	PhysicsQueue::GetInstance().AddRigidBody(std::dynamic_pointer_cast<RigidBody>(this->shared_from_this()));
-	Logger::Log("Added Rigidbody to physics queue");
 }
 
 RigidBody::~RigidBody()
 {
+}
+
+void RigidBody::Start()
+{
+	this->GameObject3D::Start();
+
+	std::weak_ptr<RigidBody> rigidBody = std::static_pointer_cast<RigidBody>(this->GetPtr());
+	PhysicsQueue::GetInstance().AddRigidBody(rigidBody);
+	Logger::Log("Added Rigidbody to physics queue");
 }
 
 void RigidBody::SetParent(std::weak_ptr<GameObject> parent)

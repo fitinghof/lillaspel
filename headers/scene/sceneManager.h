@@ -16,10 +16,10 @@
 #include "gameObjects/debugCamera.h"
 #include "gameObjects/SpaceShipObj.h"
 #include "core/audio/soundEngine.h"
+#include "utilities/masterVolume.h"
 #include "core/physics/rigidBody.h"
 
 #include "core/physics/testPlayer.h"
-#include "utilities/masterVolume.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>

@@ -6,6 +6,10 @@
 
 Collider::Collider()
 {
+	//in start:
+	//add mesh
+	//set parent
+	//change material to wireframe
 }
 
 Collider::~Collider()
@@ -29,21 +33,14 @@ void Collider::SetParent(std::weak_ptr<GameObject> newParent)
 
 	this->GameObject3D::SetParent(newParent);
 	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent.lock());
-	std::weak_ptr<Collider> thisCollider = std::dynamic_pointer_cast<Collider>(this->shared_from_this());
+	std::shared_ptr<Collider> thisCollider = std::static_pointer_cast<Collider>(this->GetPtr());
 
 	if (rigidBodyParent)
 	{
 		PhysicsQueue::GetInstance().AddRigidBody(rigidBodyParent);
 		this->castedParent = rigidBodyParent;
-
-		if(!thisCollider.expired())
-		{
-			rigidBodyParent->AddColliderChild(thisCollider);
-		}
-		else
-		{
-			Logger::Error("The impossible happened, a Collider couldn't be casted as a Collider");
-		}
+		rigidBodyParent->AddColliderChild(thisCollider);
+		Logger::Log("Added Rigidbody to physics queue");
 	}
 	else
 	{

@@ -39,6 +39,8 @@ void TestPlayer::Tick()
 
 	// std::vector<std::weak_ptr<GameObject>> children = this->GetChildren();
 	// std::shared_ptr<BoxCollider> box = children[0].lock(); ?????????????????????
+
+	PhysicsQueue::GetInstance().SolveCollisions(); //this is extremely temporary
 }
 
 void TestPlayer::Start()

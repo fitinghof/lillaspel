@@ -27,9 +27,7 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 
 LRESULT Window::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam) {
-    if (this->showIMGui) {
-        ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
-    }
+    ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam);
 
     if(message == WM_KEYDOWN) {
         if (wParam == VK_F11) {
@@ -111,7 +109,7 @@ void Window::ApplyFullscreenResolution(UINT width, UINT height)
 }
 
 Window::Window(const HINSTANCE instance, int nCmdShow, const std::string name, const UINT width, const UINT height)
-    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false), showIMGui(true), cursorVisible(true) {
+    : instance(instance), width(width), height(height), hWnd(nullptr), isFullscreen(false), hasOriginalDisplayMode(false) {
 
     const wchar_t CLASS_NAME[] = L"WINDOW_CLASS";
     DWORD style = WS_OVERLAPPEDWINDOW;
@@ -171,10 +169,6 @@ void Window::Show(int nCmdShow) {
     UpdateWindow(this->hWnd);
     this->UpdateClientSize();
 }
-
-bool Window::IsIMGuiShown() const { return this->showIMGui; }
-
-void Window::SetIMGuiShown(const bool show) { this->showIMGui = show; }
 
 void Window::Resize(UINT width, UINT height) {
     if (width == 0 || height == 0) {

@@ -1,5 +1,4 @@
 #pragma once
-#define NOMINMAX //tells windows to not define min/max so I can use algorithm min/max instead
 #include <algorithm>
 #include <d3d11.h>
 #include "core/tools.h"

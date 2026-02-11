@@ -16,11 +16,12 @@ ObjectLoader::~ObjectLoader() {
 }
 
 bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshLoadData, ID3D11Device* device) {
-	std::filesystem::path path = basePath / localpath;
+	//std::filesystem::path path = basePath / localpath;
 	fastgltf::Parser parser;
-	
+	std::filesystem::path path("C:\\Users\\ohlin\\source\\repos\\lillaspel\\assets\\indicators\\indicatorSphere.glb");
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
+
 	if (gltfFile.error() != fastgltf::Error::None) {
 		Logger::Error("Failed to load gltf file, error: ");
 		return false;

@@ -77,23 +77,10 @@ void BoxCollider::SaveToJson(nlohmann::json& data)
 
 bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
 {
-	Logger::Log(":::::::::::::::::Entered boxVSbox and sat-check::::::::::::::::");
 
 	bool collision = SAT(this->satData, box->satData, resolveAxis, resolveDistance);
 
-	Logger::Log(":::::::::::::::::After sat-check::::::::::::::::");
 
-	std::string o = "resolveAxis: " + std::to_string(resolveAxis.x) + ", " + std::to_string(resolveAxis.y) + ", " + std::to_string(resolveAxis.z);
-	Logger::Log(o);
-
-	std::string b = "resolveDistance: " + std::to_string(resolveDistance);
-	Logger::Log(b);
-
-	std::string a = "this->satData center: " + std::to_string(this->satData.center.x) + ", " + std::to_string(this->satData.center.y) + ", " + std::to_string(this->satData.center.z);
-	Logger::Log(a);
-
-	std::string k = "other->satData center: " + std::to_string(box->satData.center.x) + ", " + std::to_string(box->satData.center.y) + ", " + std::to_string(box->satData.center.z);
-	Logger::Log(k);
 
 	return collision;
 }

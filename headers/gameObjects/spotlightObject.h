@@ -25,6 +25,7 @@ public:
 
 	SpotLightContainer data;
 
+	virtual void Start() override;
 	virtual void Tick() override;
 
 	virtual void LoadFromJson(const nlohmann::json& data) override;

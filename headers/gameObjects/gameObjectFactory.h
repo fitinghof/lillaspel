@@ -13,7 +13,7 @@ class GameObjectFactory {
 public:
 
     /// <summary>
-    /// Creates a new GameObject and registers it in the scene.
+    /// Creates a new GameObject and registers it to the active scene.
     /// T is any type derived from GameObject.
     /// </summary>
     /// <typeparam name="T"></typeparam>

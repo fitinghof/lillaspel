@@ -1,8 +1,9 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
 
-Renderer::Renderer() : viewport(), maximumSpotlights(16)
-{
+Renderer::Renderer()
+	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),
+	  maximumSpotlights(16) {
 }
 
 void Renderer::Init(const Window& window)
@@ -12,17 +13,21 @@ void Renderer::Init(const Window& window)
 	CreateDeviceAndSwapChain(window);
 	CreateRenderTarget();
 	CreateDepthBuffer(window);
-	CreateSampler();
-
-	std::string vShaderByteCode;
-	LoadShaders(vShaderByteCode);
-	CreateInputLayout(vShaderByteCode);
-
-	CreateStandardRasterizerState();
 
 	CreateRenderQueue();
+}
+
+void Renderer::SetAllDefaults()
+{
+	CreateSampler();
+
+	CreateInputLayout(AssetManager::GetInstance().GetShaderPtr("VSStandard")->GetShaderByteCode());
+
+	CreateRasterizerStates();
 
 	CreateRendererConstantBuffers();
+
+	LoadShaders();
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -135,7 +140,7 @@ void Renderer::CreateSampler()
 	this->sampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_WRAP);
 }
 
-void Renderer::CreateStandardRasterizerState()
+void Renderer::CreateRasterizerStates()
 {
 	D3D11_RASTERIZER_DESC rastDesc;
 	ZeroMemory(&rastDesc, sizeof(rastDesc));
@@ -144,6 +149,14 @@ void Renderer::CreateStandardRasterizerState()
 	rastDesc.FillMode = D3D11_FILL_SOLID;
 	this->standardRasterizerState = std::make_unique<RasterizerState>();
 	this->standardRasterizerState->Init(this->device.Get(), &rastDesc);
+
+	D3D11_RASTERIZER_DESC wireframeRastDesc;
+	ZeroMemory(&wireframeRastDesc, sizeof(wireframeRastDesc));
+	wireframeRastDesc.CullMode = D3D11_CULL_NONE;
+	wireframeRastDesc.DepthClipEnable = TRUE;
+	wireframeRastDesc.FillMode = D3D11_FILL_WIREFRAME; // Wireframe
+	this->wireframeRasterizerState = std::make_unique<RasterizerState>();
+	this->wireframeRasterizerState->Init(this->device.Get(), &wireframeRastDesc);
 }
 
 void Renderer::CreateRendererConstantBuffers()
@@ -154,7 +167,7 @@ void Renderer::CreateRendererConstantBuffers()
 
 	Renderer::WorldMatrixBufferContainer worldMatrix = {};
 	this->worldMatrixBuffer = std::make_unique<ConstantBuffer>();
-	worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
+	this->worldMatrixBuffer->Init(this->device.Get(), sizeof(Renderer::WorldMatrixBufferContainer), &worldMatrix, D3D11_USAGE_DYNAMIC, D3D11_CPU_ACCESS_WRITE);
 
 	SpotlightObject::SpotLightContainer defaultSpotlights[1];
 	this->spotlightBuffer = std::make_unique<StructuredBuffer>();
@@ -167,35 +180,19 @@ void Renderer::CreateRendererConstantBuffers()
 
 void Renderer::CreateRenderQueue()
 {
-	this->meshRenderQueue = this->meshRenderQueue = std::make_shared<std::vector<MeshObject*>>();
-	this->lightRenderQueue = this->lightRenderQueue = std::make_shared<std::vector<SpotlightObject*>>();
+	this->meshRenderQueue = std::make_shared<std::vector<std::weak_ptr<MeshObject>>>();
+	this->lightRenderQueue = std::make_shared<std::vector<std::weak_ptr<SpotlightObject>>>();
 	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->lightRenderQueue));
 }
 
-void Renderer::LoadShaders(std::string& vShaderByteCode)
+void Renderer::LoadShaders()
 {
-	// This shouldn't be directly hardcoded into the renderer
+	this->vertexShader = AssetManager::GetInstance().GetShaderPtr("VSStandard");
+	this->pixelShaderLit = AssetManager::GetInstance().GetShaderPtr("PSLit");
+	this->pixelShaderUnlit = AssetManager::GetInstance().GetShaderPtr("PSUnlit");
 
-	this->vertexShader = std::shared_ptr<Shader>(new Shader());
-	this->vertexShader->Init(this->device.Get(), ShaderType::VERTEX_SHADER, "VSTest.cso");
-	vShaderByteCode = this->vertexShader->GetShaderByteCode();
-
-	this->pixelShaderLit = std::shared_ptr<Shader>(new Shader());
-	this->pixelShaderLit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psLit.cso");
-
-	this->pixelShaderUnlit = std::shared_ptr<Shader>(new Shader());
-	this->pixelShaderUnlit->Init(this->device.Get(), ShaderType::PIXEL_SHADER, "psUnlit.cso");
-
-	this->defaultMat = std::unique_ptr<Material>(new Material);
-	this->defaultMat->Init(this->vertexShader, this->pixelShaderLit);
-
-	this->defaultUnlitMat = std::unique_ptr<Material>(new Material);
-	this->defaultUnlitMat->Init(this->vertexShader, this->pixelShaderUnlit);
-
-	Material::BasicMaterialStruct defaultMatColor{ {0.3f,0.3f,0.3f,1}, {1,1,1,1}, {1,1,1,1}, 100, 1, {1,1} };
-
-	this->defaultMat->pixelShaderBuffers.push_back(std::make_unique<ConstantBuffer>());
-	this->defaultMat->pixelShaderBuffers[0]->Init(this->device.Get(), sizeof(Material::BasicMaterialStruct), &defaultMatColor, D3D11_USAGE_IMMUTABLE, 0);
+	this->defaultMat = AssetManager::GetInstance().GetMaterialWeakPtr("defaultLitMaterial");
+	this->defaultUnlitMat = AssetManager::GetInstance().GetMaterialWeakPtr("defaultUnlitMaterial");
 }
 
 void Renderer::Render()
@@ -211,6 +208,9 @@ void Renderer::Present()
 void Renderer::Resize(const Window& window)
 {
 	this->ResizeSwapChain(window);
+
+	BindRenderTarget();
+	BindViewport();
 }
 
 void Renderer::ToggleVSync(bool enable)
@@ -235,29 +235,48 @@ IDXGISwapChain* Renderer::GetSwapChain() const
 
 void Renderer::RenderPass()
 {
+	// THIS IS THE ISSUE WITH SCALING PROBABLY
+	// Bind basic stuff (it probably doesn't need to be set every frame)
+	if (!this->hasBoundStatic) {
+		BindSampler();
+		BindInputLayout();
+		BindRenderTarget();
+		BindViewport();
+
+		this->hasBoundStatic = true;
+	}
+
+	// Clear last frame
 	ClearRenderTargetViewAndDepthStencilView();
 
-	// Bind standard stuff (most of it probably doesn't need to be set every frame)
-	BindSampler();
-	BindInputLayout();
-	BindRenderTarget();
-	BindViewport();
-	BindRasterizerState(this->standardRasterizerState.get());
+	// Bind rasterizerState
+	if (!this->renderAllWireframe) 
+	{
+		BindRasterizerState(this->standardRasterizerState.get());
+	} 
+	else
+	{
+		BindRasterizerState(this->wireframeRasterizerState.get());
+		BindMaterial(this->defaultUnlitMat.lock().get());
+	}
 
 	// Bind frame specific stuff
-	BindMaterial(this->defaultMat.get());
 	BindCameraMatrix();
 	BindLights();
 
 	// Bind meshes
-	for (size_t i = 0; i < meshRenderQueue->size(); i++)
+	for (size_t i = 0; i < this->meshRenderQueue->size(); i++)
 	{
-		if ((*meshRenderQueue)[i] == nullptr)
+		if ((*this->meshRenderQueue)[i].expired())
 		{
-			throw std::runtime_error("nullptr in render queue");
+			// This should get rid of empty objects
+			Logger::Log("The renderer deleted a meshObject");
+			this->meshRenderQueue->erase(this->meshRenderQueue->begin() + i);
+			i--;
+			continue;
 		}
 
-		RenderMeshObject((*meshRenderQueue)[i]);
+		RenderMeshObject((*this->meshRenderQueue)[i].lock().get());
 	}
 }
 
@@ -333,24 +352,78 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 	}
 
 	this->immediateContext->RSSetState(rastState->GetRasterizerState());
+
+	this->currentRasterizerState = rastState;
 }
 
-void Renderer::BindMaterial(Material* material)
+void Renderer::BindMaterial(BaseMaterial* material)
 {
+	RenderData renderData = material->GetRenderData(this->immediateContext.Get());
+
+	if (material->wireframe) 
+	{
+		if (this->currentRasterizerState != this->wireframeRasterizerState.get()) {
+			BindRasterizerState(this->wireframeRasterizerState.get());
+		}
+	} 
+	else 
+	{
+		if (this->currentRasterizerState == this->wireframeRasterizerState.get()) 
+		{
+			BindRasterizerState(this->standardRasterizerState.get());
+		}
+	}
+
 	// Bind shaders
-	material->vertexShader->BindShader(this->immediateContext.Get());
-	material->pixelShader->BindShader(this->immediateContext.Get());
+	// Checks to avoid making unnecessary GPU calls
+	// Since shaders will almost always be the same
+	if (renderData.vertexShader)
+	{
+		if (this->currentVertexShader != renderData.vertexShader.get())
+		{
+			renderData.vertexShader->BindShader(this->immediateContext.Get());
+			this->currentVertexShader = renderData.vertexShader.get();
+		}
+	}
+	else
+	{
+		if (this->currentVertexShader != this->vertexShader.get())
+		{
+			this->vertexShader->BindShader(this->immediateContext.Get());
+			this->currentVertexShader = this->vertexShader.get();
+		}
+	}
+
+	if (renderData.pixelShader)
+	{
+		if (this->currentPixelShader != renderData.pixelShader.get())
+		{
+			renderData.pixelShader->BindShader(this->immediateContext.Get());
+			this->currentPixelShader = renderData.pixelShader.get();
+		}
+	}
+	else
+	{
+		if (this->currentPixelShader != this->pixelShaderLit.get())
+		{
+			this->pixelShaderLit->BindShader(this->immediateContext.Get());
+			this->currentPixelShader = this->pixelShaderLit.get();
+		}
+	}
+
+	// FIX
+	this->immediateContext->PSSetShaderResources(1, 1/*renderData.textures.size()*/, renderData.textures.data());
 
 	// Also bind constant buffers
-	for (size_t i = 0; i < material->pixelShaderBuffers.size(); i++)
+	for (size_t i = 0; i < renderData.pixelBuffers.size(); i++)
 	{
-		ID3D11Buffer* buf = material->pixelShaderBuffers[i]->GetBuffer();
+		ID3D11Buffer* buf = renderData.pixelBuffers[i]->GetBuffer();
 		this->immediateContext->PSSetConstantBuffers(i + 1, 1, &buf); // i + 1 because first slot is always occupied
 	}
 
-	for (size_t i = 0; i < material->vertexShaderBuffers.size(); i++)
+	for (size_t i = 0; i < renderData.pixelBuffers.size(); i++)
 	{
-		ID3D11Buffer* buf = material->vertexShaderBuffers[i]->GetBuffer();
+		ID3D11Buffer* buf = renderData.pixelBuffers[i]->GetBuffer();
 		this->immediateContext->VSSetConstantBuffers(i + 2, 1, &buf); // i + 2 because the first two slots are always occupied
 	}
 }
@@ -362,22 +435,30 @@ void Renderer::BindLights()
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
-	const size_t lightCount = std::min<size_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
-		//Logger::Log("No light. Please add a light to the scene.");
 
 		// Inefficient, should be fixed
 		std::vector<SpotlightObject::SpotLightContainer> spotlights;
-		for (size_t i = 0; i < lightCount; i++)
+		for (uint32_t i = 0; i < lightCount; i++)
 		{
-			spotlights.push_back((*this->lightRenderQueue)[i]->data);
+			if ((*this->lightRenderQueue)[i].expired()) 
+			{
+				// This should remove deleted lights
+				Logger::Log("The renderer deleted a light");
+				this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
+				i--;
+				continue;
+			}
+
+			spotlights.push_back((*this->lightRenderQueue)[i].lock()->data);
 		}
 
 		// Updates and binds buffer
 		this->spotlightBuffer->UpdateBuffer(this->immediateContext.Get(), spotlights.data());
 		ID3D11ShaderResourceView* lightSrv = this->spotlightBuffer->GetSRV();
-		this->immediateContext->PSSetShaderResources(1, 1, &lightSrv);
+		this->immediateContext->PSSetShaderResources(0, 1, &lightSrv);
 	}
 
 	// Updates and binds light count constant buffer
@@ -434,44 +515,28 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 	this->worldMatrixBuffer->UpdateBuffer(this->immediateContext.Get(), &worldMatrixBufferContainer);
 	BindWorldMatrix(this->worldMatrixBuffer->GetBuffer());
 
+
+	// Draw submeshes
 	size_t index = 0;
 	for (auto& subMesh : mesh->GetSubMeshes())
 	{
 		std::weak_ptr<BaseMaterial> weak_material = data.GetMaterial(index);
-		if (weak_material.expired()) {
+
+		if (weak_material.expired())
+		{
 			Logger::Error("Trying to render expired material, trying to continue...");
-			continue;
 		}
-
-		std::shared_ptr<BaseMaterial> material = weak_material.lock();
-		RenderData renderData = material->GetRenderData();
-
-		if (renderData.pixelShader) {
-			if (/*current ps ! renderData.pixelShader*/ 0) {
-				//this->immediateContext->PSSetShader();
+		else
+		{
+			if (!this->renderAllWireframe)
+			{
+				BindMaterial(weak_material.lock().get());
 			}
-		}
-		else {
-			if (/*current ps != default ps*/ 0) {
-				//this->immediateContext->PSSetShader(default);
-			}
+
+			// Draw to screen
+			this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
 		}
 
-		if (renderData.vertexShader) {
-			if (/*current vs ! renderData.vertexShader*/ 0) {
-				//this->immediateContext->VSSetShader();
-			}
-		}
-		else {
-			if (/*current vs != default vs*/ 0) {
-				//this->immediateContext->VSSetShader(default);
-			}
-		}
-
-		this->immediateContext->PSSetShaderResources(0, 1/*renderData.textures.size()*/, renderData.textures.data());
-
-		// Draw to screen
-		this->immediateContext->DrawIndexed(subMesh.GetNrOfIndices(), subMesh.GetStartIndex(), 0);
 		index++;
 	}
 }

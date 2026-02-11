@@ -1,8 +1,6 @@
 #include "gameObjects/gameObject.h"
 
-GameObject::GameObject() : children(), parent(), factory(nullptr)
-{
-	
+GameObject::GameObject() : children(), parent(), factory(nullptr) {
 }
 
 const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const
@@ -66,8 +64,8 @@ void GameObject::Start()
 
 }
 
-void GameObject::Tick()
-{
+void GameObject::Tick() 
+{ 
 }
 
 void GameObject::LateTick()
@@ -94,9 +92,14 @@ DirectX::XMMATRIX GameObject::GetGlobalWorldMatrix(bool inverseTranspose) const
 	}
 }
 
-std::weak_ptr<GameObject> GameObject::GetPtr()
+std::shared_ptr<GameObject> GameObject::GetPtr() 
 {
-	return shared_from_this();
+	if (this->myPtr.expired()) {
+		Logger::Error("How did this happen?");
+	}
+
+	return this->myPtr.lock();
+	//return shared_from_this();
 }
 
 void GameObject::LoadFromJson(const nlohmann::json& data)

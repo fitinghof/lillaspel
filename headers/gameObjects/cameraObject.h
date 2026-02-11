@@ -1,11 +1,8 @@
 #pragma once
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-
 #include "gameObjects/gameObject3D.h"
-#include <DirectXMath.h>
 #include "utilities/logger.h"
+#include <DirectXMath.h>
 #include "utilities/time.h"
 
 #include "imgui.h"
@@ -24,7 +21,7 @@ public:
 		/// <summary>
 		/// Camera world position
 		/// </summary>
-		DirectX::XMVECTOR cameraPosition; 
+		DirectX::XMVECTOR cameraPosition;
 	};
 
 	CameraObject();

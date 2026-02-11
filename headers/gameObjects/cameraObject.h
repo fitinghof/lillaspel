@@ -32,6 +32,8 @@ public:
 	virtual void Tick() override;
 	virtual void LateTick() override;
 
+	virtual void Start() override;
+
 	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 	void SetMainCamera();
 	static CameraObject& GetMainCamera();

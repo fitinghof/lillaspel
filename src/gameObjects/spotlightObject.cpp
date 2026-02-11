@@ -1,4 +1,5 @@
 #include "gameObjects/spotlightObject.h"
+#include "gameObjects/cameraObject.h"
 
 SpotlightObject::SpotlightObject()
 {
@@ -12,7 +13,9 @@ SpotlightObject::SpotlightObject()
 	Logger::Log("Created a spotlight.");
 }
 
-void SpotlightObject::Start() { RenderQueue::AddLightObject(this->GetPtr()); }
+void SpotlightObject::Start() { 
+	RenderQueue::AddLightObject(this->GetPtr()); 
+}
 
 void SpotlightObject::Tick() {
 	DirectX::XMStoreFloat3(&this->data.position, GetGlobalPosition());

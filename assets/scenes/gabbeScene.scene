@@ -42,10 +42,6 @@
         ]
       },
       "type": "TestPlayer",
-      "tag" : 1,
-      "targetTag" : 0,
-      "solid" : true,
-      "dynamic" : true,
       "children": [
       {
       "transform": {
@@ -66,7 +62,11 @@
           1.0
         ]
       },
-      "type": "BoxCollider"
+      "type": "BoxCollider",
+      "tag": 1,
+      "targetTag": 0,
+      "solid": true,
+      "dynamic": true,
     },
       {
       "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",

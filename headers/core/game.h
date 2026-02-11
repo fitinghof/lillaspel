@@ -1,5 +1,6 @@
 #pragma once
 
+#include "UI/uiManager.h"
 #include "core/imguiManager.h"
 #include "core/window.h"
 #include "rendering/renderer.h"
@@ -18,4 +19,5 @@ private:
 	ImguiManager imguiManager;
 	Renderer renderer;
 	std::unique_ptr<SceneManager> sceneManager;
+	std::unique_ptr<UI::UIManager> uiManager;
 };

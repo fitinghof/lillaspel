@@ -33,6 +33,7 @@ private:
 	void ConsoleImGui();
 	void WindowOptionsImGui();
 	void MainMenuImGui();
+	void UIEditorImGui();
 	float GetAverageFrameRate();
 
 	// Options
@@ -47,6 +48,7 @@ private:
 	bool showWireframe = false;
 
 	// Edit
+	bool showUIEditorWindow = false;
 	bool showTransformWindow = false;
 	bool showSoundWindow = false;
 	bool showMusicWindow = false;

@@ -132,3 +132,10 @@ void BoxCollider::SetRotation(DirectX::XMFLOAT3 newRotation)
 	this->satData.normalData = this->axis;
 	this->BuildCornersArray(this->satData.positionData);
 }
+
+bool BoxCollider::IntersectWithRay(const Ray& ray, float& distance) { 
+	
+	
+	return false; 
+
+}

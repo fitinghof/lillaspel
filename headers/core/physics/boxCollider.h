@@ -24,6 +24,8 @@ public:
 	void SetExtents(DirectX::XMFLOAT3 newSize);
 	DirectX::XMFLOAT3 GetExtents();
 
+	bool IntersectWithRay(const Ray& ray, float& distance) override;
+
 private:
 	DirectX::XMFLOAT3 axis[3];
 	SATData satData = {};

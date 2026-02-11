@@ -76,3 +76,10 @@ bool SphereCollider::CollidesWithSphere(SphereCollider* sphere, DirectX::XMFLOAT
 
 	return true;
 }
+
+bool SphereCollider::IntersectWithRay(const Ray& ray, float& distance) {
+	
+	return false; 
+
+
+}

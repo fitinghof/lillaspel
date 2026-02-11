@@ -2,6 +2,7 @@
 #include <memory>
 #include "gameObjects/gameObject3D.h"
 #include "core/physics/physics.h"
+#include "core/physics/ray.h"
 
 static const DirectX::XMFLOAT3 localBoxCorners[8] =
 {
@@ -73,6 +74,14 @@ public:
 	bool solid = true;
 	bool dynamic = false;
 	bool hasInitializedPreviousPosition = false;
+
+	/// <summary>
+	/// returns true if ray intersects object with float 
+	/// </summary>
+	/// <param name="ray"></param>
+	/// <param name="distance"></param>
+	/// <returns></returns>
+	virtual bool IntersectWithRay(const Ray& ray, float& distance) = 0;
 
 private:
 	int id = -1;

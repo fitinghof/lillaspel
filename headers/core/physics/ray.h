@@ -1,6 +1,6 @@
 #pragma once
 
-#include "vector3D.h"
+#include "core/physics/vector3D.h"
 
 struct Ray {
 	Vector3D origin;

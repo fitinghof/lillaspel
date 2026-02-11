@@ -20,6 +20,8 @@ public:
 	void SetDiameter(float diameter);
 	float GetDiameter();
 
+	bool IntersectWithRay(const Ray& ray, float& distance) override;
+
 private:
 	bool CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) override;
 	bool CollidesWithSphere(SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) override;

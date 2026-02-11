@@ -3,7 +3,8 @@
 #include <DirectXMath.h>
 #include "core/physics/collider.h"
 
-//how will satData.center and BuildCornersArray be handled?
+//axis is never updated => normals never updated?
+
 
 class SphereCollider;
 

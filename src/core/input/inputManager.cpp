@@ -33,6 +33,7 @@ void InputManager::Reset() {
 
 bool InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	this->currentWindowHandle = hWnd;
 	const unsigned char key = static_cast<unsigned char>(wParam);
 	switch (message) {
 
@@ -89,12 +90,25 @@ bool InputManager::ReadMessage(HWND hWnd, UINT message, WPARAM wParam, LPARAM lP
 	}
 }
 
-std::array<int, 2> InputManager::GetMouseMovement() const { 
-	const int centerX = GetSystemMetrics(SM_CXSCREEN) / 2;
-	const int centerY = GetSystemMetrics(SM_CYSCREEN) / 2;
+std::array<int, 2> InputManager::GetMouseMovement() const {
+	
+	if (!this->currentWindowHandle) { return this->mouseMovement; }
+	
+	RECT windowRect;
+	GetClientRect(this->currentWindowHandle, &windowRect); // Get the window size
 
-	const_cast<InputManager*>(this)->SetMousePosition(centerX, centerY, true);
-	SetCursorPos(centerX, centerY);
+	POINT centerPoint = {
+		(windowRect.right - windowRect.left) / 2, 
+		(windowRect.bottom - windowRect.top) / 2
+	};
+
+	// Convert to screen coordinates for SetCursorPos
+	POINT screenCenter = centerPoint;
+	ClientToScreen(this->currentWindowHandle, &screenCenter);
+	SetCursorPos(screenCenter.x, screenCenter.y);
+
+	// Store CLIENT coordinates (not screen coordinates!)
+	const_cast<InputManager*>(this)->SetMousePosition(centerPoint.x, centerPoint.y, true);
 
 	return this->mouseMovement;
 }

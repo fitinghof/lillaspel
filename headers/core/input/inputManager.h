@@ -93,6 +93,8 @@ private:
 	unsigned char LM;
 	unsigned char RM;
 
+	HWND currentWindowHandle;
+
 	// Keyboard
 	void SetKeyState(const unsigned char key, const unsigned char state);
 

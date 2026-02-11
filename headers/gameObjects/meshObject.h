@@ -28,4 +28,6 @@ public:
 	virtual void SaveToJson(nlohmann::json& data) override;
 private:
 	MeshObjData mesh; 
+
+	int tempId;
 };

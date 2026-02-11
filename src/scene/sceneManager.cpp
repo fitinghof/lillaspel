@@ -53,7 +53,7 @@ void SceneManager::LoadScene(Scenes scene)
 		Logger::Warn("There is no end credits scene.");
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile("../../../../assets/scenes/testresult.json");
+		LoadSceneFromFile("../../../../assets/scenes/testresult.scene");
 		break;
 	default:
 		break;
@@ -178,6 +178,8 @@ void SceneManager::LoadSceneFromFile(const std::string &filePath)
 {
 	CreateNewScene(this->mainScene);
 
+	this->mainScene->finishedLoading = false;
+
 	std::ifstream file(filePath);
 	nlohmann::json data = nlohmann::json::parse(file);
 	file.close();
@@ -185,6 +187,9 @@ void SceneManager::LoadSceneFromFile(const std::string &filePath)
 
 	// Actual loading
 	CreateObjectsFromJsonRecursively(data["gameObjects"], std::shared_ptr<GameObject>(nullptr));
+
+	this->mainScene->finishedLoading = true;
+	this->mainScene->CallStartOnAll();
 
 	SetMainCameraInScene(this->mainScene);
 }
@@ -267,12 +272,10 @@ void SceneManager::SaveSceneToFile(const std::string &filePath)
 
 void SceneManager::SetMainCameraInScene(std::shared_ptr<Scene>& scene)
 {
-	for (auto gameObject : scene->gameObjects) {
-		if (CameraObject* newMainCamera = dynamic_cast<CameraObject*>(gameObject.get())) {
-			if (newMainCamera != nullptr) {
-				newMainCamera->SetMainCamera();
-			}
-		}
+	if (auto newMainCamera = this->mainScene->FindObjectOfType<CameraObject>(); !newMainCamera.expired()) {
+		newMainCamera.lock()->SetMainCamera();
+	} else {
+		Logger::Error("Couldn't find a camera in the scene.");
 	}
 }
 

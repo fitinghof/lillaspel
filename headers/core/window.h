@@ -24,8 +24,6 @@ public:
     bool IsFullscreen() const;
     void Show(int nCmdShow) const;
 
-    bool IsIMGuiShown() const;
-    void SetIMGuiShown(const bool show);
     void Show(int nCmdShow);
     void Resize(UINT width, UINT height);
     void ToggleFullscreen(bool fullscreen);
@@ -39,8 +37,6 @@ private:
     HINSTANCE instance;
     RECT windowedRect{};
     bool isFullscreen;
-    bool showIMGui;
-	bool cursorVisible;
 
     DEVMODE originalDisplayMode{};
     bool hasOriginalDisplayMode;

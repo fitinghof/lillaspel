@@ -3,10 +3,10 @@
 #include "gameObjects/spaceShipObj.h"
 
 static const std::array<std::array<int, 2>, 4> wallpositions = {
-	std::array<int, 2>({1, 0}),
 	std::array<int, 2>({0, 1}),
-	std::array<int, 2>({-1, 0}),
+	std::array<int, 2>({1, 0}),
 	std::array<int, 2>({0, -1}),
+	std::array<int, 2>({-1, 0}),
 };
 
 std::array<int, 2> Room::GetNeighborOffset(Room::WallIndex wallIndex) { return wallpositions[wallIndex]; }

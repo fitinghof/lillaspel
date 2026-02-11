@@ -6,8 +6,28 @@
 class SpaceShip : public GameObject3D {
 public:
 	SpaceShip();
+
+	/// <summary>
+	/// Creates a room and makes sure the room isn't beyond max size,
+	/// Note that this doesn't check if there is any way to get to the room.
+	/// It is recommended to call create room from a room to ensure it is valid
+	/// for the player to create said room
+	/// </summary>
+	/// <param name="x"></param>
+	/// <param name="y"></param>
 	void CreateRoom(size_t x, size_t y);
+
+	/// <summary>
+	/// returns a reference to a room
+	/// </summary>
+	/// <param name="x"></param>
+	/// <param name="y"></param>
+	/// <returns></returns>
 	std::weak_ptr<Room> GetRoom(size_t x, size_t y);
+
+	/// <summary>
+	/// Only overloaded for Imgui currently
+	/// </summary>
 	void Tick() override;
 
 private:

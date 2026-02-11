@@ -50,3 +50,7 @@ void PhysicsQueue::SolveCollisions()
         }
     }
 }
+
+bool PhysicsQueue::castRay(Ray& ray, RayCastData& rayCastData) { 
+    return this->rayCaster.castRay(ray, rayCastData, this->strayColliders);
+}

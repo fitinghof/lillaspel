@@ -1,5 +1,6 @@
 #pragma once
 #include "core/physics/rigidBody.h"
+#include "core/physics/rayCaster.h"
 
 class PhysicsQueue
 {
@@ -13,6 +14,8 @@ public:
     void AddStrayCollider(std::weak_ptr<Collider> collider);
     void SolveCollisions();
 
+    bool castRay(Ray& ray, RayCastData& rayCastData);
+
 private:
     PhysicsQueue();
     ~PhysicsQueue();
@@ -22,4 +25,6 @@ private:
 
     std::vector<std::weak_ptr<RigidBody>> rigidBodies;
     std::vector<std::weak_ptr<Collider>> strayColliders;
+
+    RayCaster rayCaster;
 };

@@ -5,6 +5,16 @@ Vector3D::Vector3D(float xValue, float yValue, float zValue) {
 	this->y = yValue;
 	this->z = zValue;
 }
+
+Vector3D::Vector3D(const DirectX::XMVECTOR& directXVector) {
+	DirectX::XMFLOAT3 components;
+	
+	DirectX::XMStoreFloat3(&components, directXVector);
+
+	this->x = components.x;
+	this->y = components.y;
+	this->z = components.z;
+}
 
 Vector3D Vector3D::operator+(const Vector3D& right) const {
 	return Vector3D(this->x + right.GetX(), this->y + right.GetY(), this->z + right.GetZ());

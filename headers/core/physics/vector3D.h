@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include "DirectXMath.h"
 class Vector3D {
 private:
 	float x;
@@ -11,6 +12,7 @@ public:
 
 	~Vector3D() = default;
 	Vector3D(const Vector3D& other) = default;
+	Vector3D(const DirectX::XMVECTOR& directXVector);
 	Vector3D& operator=(const Vector3D& other) = default;
 	Vector3D(Vector3D&& other) = default;
 	Vector3D& operator=(Vector3D&& other) = default;

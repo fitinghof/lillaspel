@@ -77,9 +77,34 @@ bool SphereCollider::CollidesWithSphere(SphereCollider* sphere, DirectX::XMFLOAT
 	return true;
 }
 
+//needs improved variable names
 bool SphereCollider::IntersectWithRay(const Ray& ray, float& distance) {
 	
-	return false; 
+	Vector3D originToCenter = Vector3D(this->transform.GetPosition()) - ray.origin;
+
+	float radius = this->GetDiameter();
+
+	float s = originToCenter * ray.direction;
+
+	float originToCenterSquared = originToCenter * originToCenter;
+
+	float radiusSquared = pow(radius, 2);
+
+	if (s < 0 && originToCenterSquared > radiusSquared) return false;
+
+	float Msquared = originToCenterSquared - pow(s, 2);
+	
+	float Qsquared = radiusSquared;
+	if (Msquared > Qsquared) return false;
+
+	float q = sqrt(Qsquared - Msquared);
+
+	if (originToCenterSquared > Qsquared)
+		distance = s - q;
+	else
+		distance = s + q;
+
+	return true;
 
 
 }

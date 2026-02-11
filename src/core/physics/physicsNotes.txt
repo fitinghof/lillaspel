@@ -1,0 +1,2 @@
+- perfect barely touch is a collision, should it be out of collision?
+- rigidbody will have linear velocity and can build corners array when velocity > 0, but what about teleporting the rigidbody to another location?

@@ -10,10 +10,15 @@
 #include "core/assetManager.h"
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
+#include "core/physics/rigidBody.h"
+#include "core/physics/collision.h"
 #include "scene/objectFromStringFactory.h"
 #include "gameObjects/debugCamera.h"
 #include "gameObjects/SpaceShipObj.h"
 #include "core/audio/soundEngine.h"
+#include "core/physics/rigidBody.h"
+
+#include "core/physics/testPlayer.h"
 #include "utilities/masterVolume.h"
 
 #include <fstream>

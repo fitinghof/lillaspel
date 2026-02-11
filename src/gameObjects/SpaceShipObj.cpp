@@ -21,6 +21,8 @@ void SpaceShip::CreateRoom(size_t x, size_t y) {
 
 		roomMesh->SetParent(this->GetPtr());
 
+		roomMesh->SetPosition(x, y);
+
 		this->rooms[x][y] = room;
 
 		for (size_t i = 0; i < 4; i++) {

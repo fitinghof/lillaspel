@@ -16,12 +16,19 @@ public:
 	};
 
 	static std::array<int, 2> GetNeighborOffset(WallIndex wallIndex);
-	void Start() override;
 	static void SetSize(float size);
+	void Start() override;
+	void Tick() override;
+
+	void CreateRoom(WallIndex wallIndex);
+	void SetPosition(size_t x, size_t y);
 	void SetWallState(Room::WallIndex wall, bool active);
+	void SetParent(std::weak_ptr<GameObject> parent) override;
 
 private:
 
+
+	std::array<size_t, 2> pos;
 	inline static float size;
 	std::weak_ptr<MeshObject> roof;
 	std::weak_ptr<MeshObject> floor;

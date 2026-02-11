@@ -1,5 +1,6 @@
 #include "gameObjects/room.h"
 #include "core/assetManager.h"
+#include "gameObjects/spaceShipObj.h"
 
 static const std::array<std::array<int, 2>, 4> wallpositions = {
 	std::array<int, 2>({1, 0}),
@@ -9,6 +10,23 @@ static const std::array<std::array<int, 2>, 4> wallpositions = {
 };
 
 std::array<int, 2> Room::GetNeighborOffset(Room::WallIndex wallIndex) { return wallpositions[wallIndex]; }
+
+void Room::CreateRoom(WallIndex wallIndex) {
+	Logger::Log("Creating room");
+	auto parentWeak = this->GetParent();
+	if (parentWeak.expired()) {
+		Logger::Error("Room parent is dead, how in the funk?");
+		return;
+	}
+
+	auto parent = std::static_pointer_cast<SpaceShip>(parentWeak.lock());
+
+	auto neighOffset = Room::GetNeighborOffset(wallIndex);
+	Logger::Log("Position: ", this->pos[0], " ", this->pos[1]);
+	parent->CreateRoom(this->pos[0] + neighOffset[0], this->pos[1] + neighOffset[1]);
+}
+
+void Room::SetPosition(size_t x, size_t y) { this->pos = {x, y}; }
 
 void Room::Start() {
 	Logger::Warn("room size ", this->size);
@@ -67,6 +85,10 @@ void Room::Start() {
 	}
 }
 
+void Room::Tick() {
+	this->GameObject3D::Tick();
+}
+
 void Room::SetSize(float size) { Room::size = size; }
 
 void Room::SetWallState(Room::WallIndex wallindex, bool active) {
@@ -98,5 +120,19 @@ void Room::SetWallState(Room::WallIndex wallindex, bool active) {
 		}
 
 		this->walls[wallindex] = meshobj;
+	}
+}
+
+void Room::SetParent(std::weak_ptr<GameObject> parentWeak) {
+	if (auto basePtr = parentWeak.lock()) {
+		if (auto shipPtr = std::dynamic_pointer_cast<SpaceShip>(basePtr)) {
+			this->GameObject3D::SetParent(parentWeak);
+		} else {
+			Logger::Error("Trying to set non SpaceShip obj as parent to Room");
+			return;
+		}
+	} else {
+		Logger::Error("Trying to set parent when parent doesn't exist???");
+		return;
 	}
 }

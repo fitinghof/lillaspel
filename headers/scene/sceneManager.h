@@ -14,7 +14,9 @@
 #include "core/physics/collision.h"
 #include "scene/objectFromStringFactory.h"
 #include "gameObjects/debugCamera.h"
+#include "gameObjects/SpaceShipObj.h"
 #include "core/audio/soundEngine.h"
+#include "utilities/masterVolume.h"
 #include "core/physics/rigidBody.h"
 
 #include "core/physics/testPlayer.h"
@@ -62,7 +64,6 @@ public:
 	void FadeOutStopMusicTrack(std::string id, float seconds);
 	void GetMusicTrackSourceState(std::string id, ALint& sourceState);
 	void SetMusicTrackGain(std::string id, float gain);
-	void SetMasterMusicGain(float gain);
 	MusicTrack* GetMusicTrack(std::string id);
 
 	void SaveSceneToCurrentFile();

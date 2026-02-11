@@ -6,7 +6,8 @@ Scene::Scene() : gameObjects()
 
 void Scene::SceneTick()
 {
-	for (auto& gameObject : this->gameObjects) {
+	for (size_t i = 0; i < this->gameObjects.size(); i++) {
+		std::shared_ptr<GameObject> gameObject = this->gameObjects[i];
 		gameObject->Tick();
 		gameObject->LateTick();
 	}
@@ -18,6 +19,7 @@ void Scene::RegisterGameObject(std::shared_ptr<GameObject> gameObject)
 {
 	this->gameObjects.push_back(gameObject);
 	gameObject->factory = this;
+	gameObject->myPtr = gameObject;
 	gameObject->Start();
 }
 

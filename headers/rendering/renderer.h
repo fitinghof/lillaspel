@@ -38,6 +38,12 @@ public:
 	void Init(const Window &window);
 
 	/// <summary>
+	/// Set all default material stuff,
+	/// and set some stuff that requires defaults
+	/// </summary>
+	void SetAllDefaults();
+
+	/// <summary>
 	/// Render a frame
 	/// </summary>
 	void Render();
@@ -47,8 +53,16 @@ public:
 	/// </summary>
 	void Present();
 
+	/// <summary>
+	/// Resizes swapchain to fit window
+	/// </summary>
+	/// <param name="window"></param>
 	void Resize(const Window &window);
 
+	/// <summary>
+	/// Toggles VSync
+	/// </summary>
+	/// <param name="enable"></param>
 	void ToggleVSync(bool enable);
 
 	ID3D11Device *GetDevice() const;
@@ -66,7 +80,7 @@ private:
 
 	struct LightCountBufferContainer
 	{
-		size_t spotlightCount;
+		uint32_t spotlightCount;
 		float padding[3];
 	};
 
@@ -83,21 +97,27 @@ private:
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
+	std::unique_ptr<RasterizerState> wireframeRasterizerState;
+	RasterizerState* currentRasterizerState;
 
-	// Temporary:
+	// Default stuff
+	// Avoids calling the assetmanager every frame
 
-	std::unique_ptr<Material> defaultMat;
-	std::unique_ptr<Material> defaultUnlitMat;
+	std::weak_ptr<BaseMaterial> defaultMat;
+	std::weak_ptr<BaseMaterial> defaultUnlitMat;
 
 	std::shared_ptr<Shader> vertexShader;
 	std::shared_ptr<Shader> pixelShaderLit;
 	std::shared_ptr<Shader> pixelShaderUnlit;
 
+	Shader* currentPixelShader;
+	Shader* currentVertexShader;
+
 	// Render Queue:
 
 	std::unique_ptr<RenderQueue> renderQueue;
-	std::shared_ptr<std::vector<MeshObject *>> meshRenderQueue;
-	std::shared_ptr<std::vector<SpotlightObject *>> lightRenderQueue;
+	std::shared_ptr<std::vector<std::weak_ptr<MeshObject>>> meshRenderQueue;
+	std::shared_ptr<std::vector<std::weak_ptr<SpotlightObject>>> lightRenderQueue;
 
 	// Constant buffers:
 	// The renderer keeps these constant buffers since only one is ever required
@@ -112,6 +132,8 @@ private:
 	// ImGui variables
 
 	bool isVSyncEnabled = false;
+	bool renderAllWireframe = false;
+	bool hasBoundStatic = false;
 
 	void SetViewport(const Window &window);
 	void CreateDeviceAndSwapChain(const Window &window);
@@ -119,7 +141,7 @@ private:
 	void CreateDepthBuffer(const Window &window);
 	void CreateInputLayout(const std::string &vShaderByteCode);
 	void CreateSampler();
-	void CreateStandardRasterizerState();
+	void CreateRasterizerStates();
 
 	/// <summary>
 	/// Creates required constant buffers. The renderer needs a cameraBuffer and worldMatrixBuffer.
@@ -128,7 +150,7 @@ private:
 
 	void CreateRenderQueue();
 
-	void LoadShaders(std::string &vShaderByteCode);
+	void LoadShaders();
 
 	/// <summary>
 	/// This is where the actual rendering logic is done
@@ -148,7 +170,7 @@ private:
 	void BindViewport();
 	void BindRasterizerState(RasterizerState *rastState);
 
-	void BindMaterial(Material *material);
+	void BindMaterial(BaseMaterial *material);
 	void BindLights();
 
 	void BindCameraMatrix();

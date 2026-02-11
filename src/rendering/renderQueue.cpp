@@ -3,30 +3,44 @@
 
 RenderQueue* RenderQueue::instance = nullptr;
 
-RenderQueue::RenderQueue(std::shared_ptr<std::vector<MeshObject*>> meshRenderQueue, std::shared_ptr<std::vector<SpotlightObject*>> lightRenderQueue)
+RenderQueue::RenderQueue(std::shared_ptr<std::vector<std::weak_ptr<MeshObject>>> meshRenderQueue,
+						 std::shared_ptr<std::vector<std::weak_ptr<SpotlightObject>>> lightRenderQueue)
 	: meshRenderQueue(meshRenderQueue), lightRenderQueue(lightRenderQueue)
 {
 	Logger::Log("Initializing RenderQueue.");
 
 	if (instance) {
-		throw std::runtime_error("Tried to create another RenderQueue, there can only be one.");
+		Logger::Error("Tried to create another RenderQueue, there can only be one.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
 	}
 
 	instance = this;
 }
 
-void RenderQueue::AddMeshObject(MeshObject* newMeshObject)
-{
-	if (!instance) {
-		throw std::runtime_error("Tried to add object to queue, but RenderQueue is not initialized.");
+void RenderQueue::AddMeshObject(std::weak_ptr<GameObject> newMeshObject) {
+	if (newMeshObject.expired()) {
+		Logger::Error("Tried to add expired object.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
+	}
+
+	if (auto derived = dynamic_cast<MeshObject*>(newMeshObject.lock().get()); derived == nullptr) {
+		Logger::Error("Tried adding something other than a mesh object.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
+	}
+
+	if (!instance) 
+	{
+		Logger::Error("Tried to add object to queue, but RenderQueue is not initialized.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
 	}
 
 	if (!instance->meshRenderQueue)
 	{
-		throw std::runtime_error("meshRenderQueue is null");
+		Logger::Error("meshRenderQueue is null.");
+		throw std::runtime_error("Fatal error in RenderQueue");
 	}
 
-	instance->meshRenderQueue->push_back(newMeshObject);
+	instance->meshRenderQueue->push_back(std::static_pointer_cast<MeshObject>(newMeshObject.lock()));
 }
 
 void RenderQueue::RemoveMeshObject()
@@ -36,18 +50,24 @@ void RenderQueue::RemoveMeshObject()
 	}
 }
 
-void RenderQueue::AddLightObject(SpotlightObject* newSpotlightObject)
-{
+void RenderQueue::AddLightObject(std::weak_ptr<GameObject> newSpotlightObject) {
+	if (newSpotlightObject.expired()) {
+		Logger::Error("Tried to add expired light.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
+	}
+
 	if (!instance) {
-		throw std::runtime_error("Tried to add light to queue, but RenderQueue is not initialized.");
+		Logger::Error("Tried to add light to queue, but RenderQueue is not initialized.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
 	}
 
 	if (!instance->lightRenderQueue)
 	{
-		throw std::runtime_error("lightRenderQueue is null");
+		Logger::Error("lightRenderQueue is null.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
 	}
 
-	instance->lightRenderQueue->push_back(newSpotlightObject);
+	instance->lightRenderQueue->push_back(std::static_pointer_cast<SpotlightObject>(newSpotlightObject.lock()));
 }
 
 void RenderQueue::ClearAllQueues()
@@ -55,7 +75,8 @@ void RenderQueue::ClearAllQueues()
 	Logger::Log("Clearing render queue...");
 
 	if (!instance) {
-		throw std::runtime_error("Tried to remove object from queue, but RenderQueue is not initialized.");
+		Logger::Error("Tried to remove object from queue, but RenderQueue is not initialized.");
+		throw std::runtime_error("Fatal error in RenderQueue.");
 	}
 
 	instance->meshRenderQueue->clear();

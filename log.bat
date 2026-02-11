@@ -1,5 +1,5 @@
 @echo off
-cd build
+cd out/build
 if /i "%1"=="clear" (
     type /dev/null > log.txt
     echo Log cleared

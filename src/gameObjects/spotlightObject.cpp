@@ -9,13 +9,12 @@ SpotlightObject::SpotlightObject()
 	this->data.intensity = 5;
 	this->data.spotAngleRadians = DirectX::XMConvertToRadians(360);
 
-	RenderQueue::AddLightObject(this);
-
 	Logger::Log("Created a spotlight.");
 }
 
-void SpotlightObject::Tick()
-{
+void SpotlightObject::Start() { RenderQueue::AddLightObject(this->GetPtr()); }
+
+void SpotlightObject::Tick() {
 	DirectX::XMStoreFloat3(&this->data.position, GetGlobalPosition());
 	DirectX::XMStoreFloat3(&this->data.direction, GetGlobalForward());
 }

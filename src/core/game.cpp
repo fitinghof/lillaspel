@@ -2,6 +2,7 @@
 #include "core/imguiManager.h"
 #include "scene/sceneManager.h"
 #include "utilities/time.h"
+#include "core/input/inputManager.h"
 #include <memory>
 
 // Game Loop
@@ -10,7 +11,9 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow)
     Window window(hInstance, nCmdShow, "Game Window");
 
     this->renderer.Init(window);
-    AssetManager::GetInstance().setDevicePointer(this->renderer.GetDevice());
+    AssetManager::GetInstance().SetDevicePointer(this->renderer.GetDevice());
+    AssetManager::GetInstance().CreateDefaultAssets();
+    this->renderer.SetAllDefaults();
     this->sceneManager = std::make_unique<SceneManager>(&renderer);
 
     this->imguiManager.InitalizeImgui(window.GetHWND(), this->renderer.GetDevice(), this->renderer.GetContext());
@@ -57,5 +60,7 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow)
         this->renderer.Render();
         this->imguiManager.ImguiAtFrameEnd();
         this->renderer.Present();
+        
+        InputManager::GetInstance().Reset();
     }
 }

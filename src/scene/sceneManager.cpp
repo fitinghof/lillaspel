@@ -11,6 +11,7 @@ SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<SpotlightObject>(NAMEOF(SpotlightObject));
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
 	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
+	this->objectFromString.RegisterType<SpaceShip>(NAMEOF(SpaceShip));
 	this->objectFromString.RegisterType<BoxCollider>(NAMEOF(BoxCollider));
 	this->objectFromString.RegisterType<SphereCollider>(NAMEOF(SphereCollider));
 	this->objectFromString.RegisterType<RigidBody>(NAMEOF(RigidBody));
@@ -52,7 +53,7 @@ void SceneManager::LoadScene(Scenes scene)
 		Logger::Warn("There is no end credits scene.");
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile("../../assets/scenes/testresult.json");
+		LoadSceneFromFile("../../../../assets/scenes/testresult.json");
 		break;
 	default:
 		break;
@@ -358,11 +359,6 @@ void SceneManager::GetMusicTrackSourceState(std::string id, ALint& sourceState)
 void SceneManager::SetMusicTrackGain(std::string id, float gain)
 {
 	this->audioManager.SetGain(id, gain);
-}
-
-void SceneManager::SetMasterMusicGain(float gain)
-{
-	this->audioManager.SetMusicGain(gain);
 }
 
 MusicTrack* SceneManager::GetMusicTrack(std::string id)

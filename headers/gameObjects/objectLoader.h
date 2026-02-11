@@ -26,7 +26,7 @@ struct MeshLoadData {
 class ObjectLoader
 {
 public:
-	ObjectLoader(std::filesystem::path basePath = "../../assets");
+	ObjectLoader(std::filesystem::path basePath = "../../../../assets");
 	~ObjectLoader();
 
 	/// <summary>

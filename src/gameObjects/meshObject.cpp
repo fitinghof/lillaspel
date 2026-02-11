@@ -2,6 +2,8 @@
 
 MeshObject::MeshObject() : mesh()
 {
+	static int id = 0;
+	this->tempId = id++;
 	Logger::Log("Created a MeshObject.");
 }
 
@@ -26,14 +28,14 @@ void MeshObject::Tick()
 	//static float rot = 0;
 	//this->transform.SetRotationRPY(0,0,rot += 0.0005f);
 
-	//ImGui::Begin("Object" + this->tempId);
-	//if (ImGui::Button("Add")) {
-	//	auto newCam = this->factory->CreateGameObjectOfType<GameObject>();
-	//}
-	//if (ImGui::Button("Delete")) {
-	//	this->factory->QueueDeleteGameObject(this->GetPtr());
-	//}
-	//ImGui::End();
+	ImGui::Begin("Object" + this->tempId);
+	if (ImGui::Button("Add")) {
+		auto newCam = this->factory->CreateGameObjectOfType<GameObject>();
+	}
+	if (ImGui::Button("Delete")) {
+		this->factory->QueueDeleteGameObject(this->GetPtr());
+	}
+	ImGui::End();
 }
 
 void MeshObject::LoadFromJson(const nlohmann::json& data)

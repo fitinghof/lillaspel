@@ -23,7 +23,7 @@ public:
 	const int GetChildCount() const;
 
 	const std::weak_ptr<GameObject> GetParent() const;
-	
+
 	/// <summary>
 	/// When using this function, the object's current localPosition isn't updated to match it's old worldPosition,
 	/// which could lead to unexpected behaviour.
@@ -50,6 +50,11 @@ public:
 
 	virtual void PhysicsTick();
 	virtual void LatePhysicsTick();
+
+	/// <summary>
+	/// Called right before the object is destroyed.
+	/// </summary>
+	virtual void OnDestroy();
 
 	// This should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D
 	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;

@@ -37,8 +37,7 @@ void TestPlayer::Tick()
 	DirectX::XMFLOAT3 newPos = FLOAT3ADD(oldPos, FLOAT3MULT1(moveVector, deltaTime));
 	this->transform.SetPosition(DirectX::XMLoadFloat3(&newPos));
 
-	// std::vector<std::weak_ptr<GameObject>> children = this->GetChildren();
-	// std::shared_ptr<BoxCollider> box = children[0].lock(); ?????????????????????
+	this->transform.Rotate(0, deltaTime, 0);
 
 	PhysicsQueue::GetInstance().SolveCollisions(); //this is extremely temporary
 }

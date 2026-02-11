@@ -78,7 +78,8 @@ public:
 private:
 	int id = -1;
 	std::weak_ptr<GameObject> meshObjectChild; //reference to the mesh visual representation of the collider (remove?)
-	std::weak_ptr<RigidBody> castedParent;
+	std::weak_ptr<RigidBody> rigidBodyParent;
+	std::weak_ptr<GameObject3D> gameObject3DParent;
 
 	bool CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance);
 };

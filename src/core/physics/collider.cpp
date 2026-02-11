@@ -31,22 +31,36 @@ void Collider::SetParent(std::weak_ptr<GameObject> newParent)
 		return;
 	}
 
-	this->GameObject3D::SetParent(newParent);
 	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent.lock());
+	std::shared_ptr<GameObject3D> gameObject3DParent = std::dynamic_pointer_cast<GameObject3D>(newParent.lock());
 	std::shared_ptr<Collider> thisCollider = std::static_pointer_cast<Collider>(this->GetPtr());
 
 	if (rigidBodyParent)
 	{
-		PhysicsQueue::GetInstance().AddRigidBody(rigidBodyParent);
-		this->castedParent = rigidBodyParent;
+		PhysicsQueue::GetInstance().AddRigidBody(rigidBodyParent); //this is a bit weird, shouldn't RigidBody::Start do this?
+		this->rigidBodyParent = rigidBodyParent;
 		rigidBodyParent->AddColliderChild(thisCollider);
-		Logger::Log("Added Rigidbody to physics queue");
+		Logger::Log("Added collider with Rigidbody to physics queue");
 	}
-	else
+	else if (gameObject3DParent)
 	{
+		this->gameObject3DParent = gameObject3DParent;
 		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
-		Logger::Log("Added stray Collider to physics queue");
+		Logger::Log("Added stray Collider with GameObject3D parent to physics queue");
+	} 
+	else if (!newParent.expired())
+	{
+		Logger::Error("Tried to set GameObject as parent on Collider (parent has to be derived from GameObject3D)");
+		return;
+	} 
+	else
+	{		
+		this->gameObject3DParent = gameObject3DParent;
+		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
+		Logger::Log("Added stray Collider without a parent to physics queue");
 	}
+
+	this->GameObject3D::SetParent(newParent);
 }
 
 bool Collider::Collision(Collider* otherCollider)
@@ -56,13 +70,13 @@ bool Collider::Collision(Collider* otherCollider)
 
 	return this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
 
-	Logger::Log(":::::::::::::::::After CollisionHandling::::::::::::::::");
+	//Logger::Log(":::::::::::::::::After CollisionHandling::::::::::::::::");
 
-	std::string o = "mtvAxis: " + std::to_string(mtvAxis.x) + ", " + std::to_string(mtvAxis.y) + ", " + std::to_string(mtvAxis.z);
-	Logger::Log(o);
+	//std::string o = "mtvAxis: " + std::to_string(mtvAxis.x) + ", " + std::to_string(mtvAxis.y) + ", " + std::to_string(mtvAxis.z);
+	//Logger::Log(o);
 
-	std::string b = "mtvDistance: " + std::to_string(mtvDistance);
-	Logger::Log(b);
+	//std::string b = "mtvDistance: " + std::to_string(mtvDistance);
+	//Logger::Log(b);
 }
 
 bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNormal)
@@ -94,12 +108,17 @@ int Collider::GetId()
 
 void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)
 {
-	std::shared_ptr<RigidBody> rigidBodyParent = this->castedParent.lock();
+	std::shared_ptr<RigidBody> rigidBodyParent = this->rigidBodyParent.lock();
+	std::shared_ptr<GameObject3D> gameObject3DParent = this->gameObject3DParent.lock();
 	GameObject3D* moveTarget = this;
 
 	if (rigidBodyParent)
 	{
 		moveTarget = rigidBodyParent.get();
+	} 
+	else if (gameObject3DParent)
+	{
+		moveTarget = gameObject3DParent.get();
 	}
 
 	DirectX::XMFLOAT3 resolveVector = FLOAT3MULT1(resolveAxis, resolveDistance);
@@ -247,7 +266,7 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 	//	}
 	//}
 
-	Logger::Log(":::::::::::::::::About to do DoubleDispatchCollision::::::::::::::::");
+	//Logger::Log(":::::::::::::::::About to do DoubleDispatchCollision::::::::::::::::");
 
 	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
 
@@ -256,14 +275,15 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 		mtvDistance = -mtvDistance;
 	}
 
-	Logger::Log(":::::::::::::::::after DoubleDispatchCollision::::::::::::::::");
+	//Logger::Log(":::::::::::::::::after DoubleDispatchCollision::::::::::::::::");
 
-	Logger::Log("collision: " + collision);
-
+	//Logger::Log("collision: " + collision);
 	if (!collision) return false;
 	if (!this->solid || !otherCollider->solid) return collision;
 
-	Logger::Log(":::::::::::::::::Made it past solid checks, resolve will be performed::::::::::::::::");
+	//Logger::Log("COLLISION!");
+
+	//Logger::Log(":::::::::::::::::Made it past solid checks, resolve will be performed::::::::::::::::");
 
 	// Determine who moves
 	if (this->dynamic && otherCollider->dynamic)

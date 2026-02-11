@@ -7,6 +7,7 @@ class SpaceShip : public GameObject3D {
 public:
 	SpaceShip();
 	void CreateRoom(size_t x, size_t y);
+	std::weak_ptr<Room> GetRoom(size_t x, size_t y);
 	void Tick() override;
 
 private:

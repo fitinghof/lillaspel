@@ -1,4 +1,5 @@
 #include "scene/sceneManager.h"
+#include "gameObjects/room.h"
 
 // Very good macro, please don't remove
 #define NAMEOF(x) #x
@@ -12,6 +13,7 @@ SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<CameraObject>(NAMEOF(CameraObject));
 	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
 	this->objectFromString.RegisterType<SpaceShip>(NAMEOF(SpaceShip));
+	this->objectFromString.RegisterType<Room>(NAMEOF(Room));
 	this->objectFromString.RegisterType<BoxCollider>(NAMEOF(BoxCollider));
 	this->objectFromString.RegisterType<SphereCollider>(NAMEOF(SphereCollider));
 	this->objectFromString.RegisterType<RigidBody>(NAMEOF(RigidBody));

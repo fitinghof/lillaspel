@@ -151,6 +151,16 @@ void AssetManager::CreateDefaultAssets()
 	pixelShaderUnlit->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "PSUnlit.cso");
 	AddShader("PSUnlit", pixelShaderUnlit);
 
+	auto skyboxVertexShader = std::shared_ptr<Shader>(new Shader());
+	skyboxVertexShader->Init(this->d3d11Device, ShaderType::VERTEX_SHADER, "vsSkybox.cso");
+	AddShader("VSSkybox", skyboxVertexShader);
+
+	auto skyboxPixelShader = std::shared_ptr<Shader>(new Shader());
+	skyboxPixelShader->Init(this->d3d11Device, ShaderType::PIXEL_SHADER, "psSkybox.cso");
+	AddShader("PSSkybox", skyboxPixelShader);
+
+
+
 
 	// Materials
 

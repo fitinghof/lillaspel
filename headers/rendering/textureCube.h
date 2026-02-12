@@ -16,7 +16,7 @@ public:
 	TextureCube() = default;
 	~TextureCube() = default;
 
-	void Init(ID3D11Device* device, UINT width, UINT height) {};
+	void Init(ID3D11Device* device, ID3D11DeviceContext* deviceContext, std::string ddsPath);
 
-	ID3D11ShaderResourceView* GetSRV() const { return nullptr; };
+	ID3D11ShaderResourceView* GetShaderResourceView() const;
 };

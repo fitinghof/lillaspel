@@ -1,8 +1,7 @@
 #pragma once
 
 template <typename T>
-class MinPriorityQueue 
-{
+class MinPriorityQueue {
 public:
 	MinPriorityQueue() : head(nullptr) {}
 	MinPriorityQueue(MinPriorityQueue& other) = delete;
@@ -14,15 +13,17 @@ public:
 	T Dequeue();
 	size_t Size() const;
 	bool IsEmpty() const;
+	void Clear();
 
 private:
 	struct Node {
 		unsigned int priority;
 		T data;
 		Node* next;
-		Node(unsigned int priority, const T data) : priority(priority), data(data), next(nullptr) {}
+		Node(const T data, const unsigned int priority) : data(data), priority(priority), next(nullptr) {}
 	};
 	Node* head;
+	void ReplaceNode(Node* newNode, Node* prevNode);
 };
 
 
@@ -50,6 +51,10 @@ inline void MinPriorityQueue<T>::Enqueue(const T data, const unsigned int priori
 
 	Node* walker = this->head;
 	while (walker->next && walker->next->priority < priority) {
+		/*if (walker == data) {
+			this->ReplaceNode(newNode, walker);
+			return;
+		}*/
 		walker = walker->next;
 	}
 
@@ -105,4 +110,36 @@ inline size_t MinPriorityQueue<T>::Size() const {
 /// Is the min priority queue empty?
 /// </summary>
 template <typename T>
-inline bool MinPriorityQueue<T>::IsEmpty() const { return this->head == nullptr; }
+inline bool MinPriorityQueue<T>::IsEmpty() const {
+	return this->head == nullptr;
+}
+
+/// <summary>
+/// Clear the min priority queue by deleting all nodes and resetting the head pointer to nullptr.
+/// </summary>
+template <typename T>
+inline void MinPriorityQueue<T>::Clear() {
+	while (this->head) {
+		Node* temp = this->head;
+		this->head = this->head->next;
+		delete temp;
+	}
+}
+
+template <typename T>
+inline void MinPriorityQueue<T>::ReplaceNode(Node* newNode, Node* prevNode) {
+	if (prevNode == this->head) {
+		newNode->next = prevNode->next;
+		delete prevNode;
+		this->head = newNode;
+	}
+	else {
+		Node* walker = this->head;
+		while (walker->next != prevNode) {
+			walker = walker->next;
+		}
+		newNode->next = prevNode->next;
+		delete prevNode;
+		walker->next = newNode;
+	}
+}

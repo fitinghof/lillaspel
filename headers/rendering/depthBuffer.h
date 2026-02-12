@@ -6,6 +6,12 @@
 #include <wrl/client.h>
 
 class DepthBuffer {
+private:
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
+	std::vector<Microsoft::WRL::ComPtr<ID3D11DepthStencilView>> depthStencilViews;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+
 public:
 	DepthBuffer() = default;
 	~DepthBuffer() = default;
@@ -14,9 +20,5 @@ public:
 
 	ID3D11DepthStencilView* GetDepthStencilView(UINT arrayIndex) const;
 	ID3D11ShaderResourceView* GetShaderResourceView() const;
-
-private:
-	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
-	std::vector<Microsoft::WRL::ComPtr<ID3D11DepthStencilView>> depthStencilViews;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
+	ID3D11DepthStencilState* GetDepthStencilState() const;
 };

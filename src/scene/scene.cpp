@@ -12,6 +12,25 @@ void Scene::SceneTick()
 	}
 
 	this->DeleteDeleteQueue();
+
+	ImGui::SetNextWindowSize(ImVec2(400.f, 500.f), ImGuiCond_FirstUseEver);
+	ImGui::Begin("Object Hierarchy");
+	if (ImGui::Button("Create")) ImGui::OpenPopup("select_gameobject");
+	if (ImGui::BeginPopup("select_gameobject")) {
+		if (ImGui::Selectable("GameObject")) 
+		{
+			this->CreateGameObjectOfType<GameObject>();
+		}
+			
+		ImGui::EndPopup();
+	}
+	for (size_t i = 0; i < this->gameObjects.size(); i++) {
+		std::weak_ptr<GameObject> gameObject = this->gameObjects[i];
+		if (gameObject.lock()->parent.expired()) {
+			ShowHierarchyRecursive("GameObject " + std::to_string(i), gameObject);
+		}
+	}
+	ImGui::End();
 }
 
 void Scene::RegisterGameObject(std::shared_ptr<GameObject> gameObject)
@@ -79,6 +98,22 @@ void Scene::CallStartOnAll() {
 		std::shared_ptr<GameObject> gameObject = this->gameObjects[i];
 		gameObject->Start();
 	}
+}
+
+void Scene::ShowHierarchyRecursive(std::string name, std::weak_ptr<GameObject> gameObject) 
+{
+	if (ImGui::TreeNode(name.c_str())) {
+		gameObject.lock()->ShowInHierarchy();
+		if (gameObject.lock()->children.size() > 0) {
+			if (ImGui::TreeNode("Children")) {
+				for (size_t i = 0; i < gameObject.lock()->children.size(); i++) {
+					ShowHierarchyRecursive("GameObject " + std::to_string(i), gameObject.lock()->children[i].lock());
+				}
+				ImGui::TreePop();
+			}
+		}
+		ImGui::TreePop();
+	};
 }
 
 const std::vector<std::shared_ptr<GameObject>>& Scene::GetGameObjects() const { return this->gameObjects; }

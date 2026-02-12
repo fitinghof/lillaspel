@@ -119,3 +119,9 @@ void GameObject::SaveToJson(nlohmann::json& data)
 	}
 }
 
+void GameObject::ShowInHierarchy() { 
+	ImGui::Text("Object details."); 
+	if (ImGui::Button("Delete")) {
+		this->factory->QueueDeleteGameObject(this->GetPtr());
+	}
+}

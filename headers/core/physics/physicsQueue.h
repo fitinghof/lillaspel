@@ -15,7 +15,14 @@ public:
     void AddRigidBody(std::weak_ptr<RigidBody> rigidBody);
     void AddStrayCollider(std::weak_ptr<Collider> collider);
     void SolveCollisions();
-
+    /// <summary>
+    /// casts ray with origin point and direction aswell as optional max distance,
+    /// populates rayCastData struct with hit object and distance to hit
+    /// </summary>
+    /// <param name="ray"></param>
+    /// <param name="rayCastData"></param>
+    /// <param name="maxDistance"></param>
+    /// <returns></returns>
     bool castRay(Ray& ray, RayCastData& rayCastData, float maxDistance = (std::numeric_limits<float>::max)());
 
 private:

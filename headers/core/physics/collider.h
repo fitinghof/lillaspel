@@ -77,7 +77,8 @@ public:
 	bool hasInitializedPreviousPosition = false;
 
 	/// <summary>
-	/// returns true if ray intersects object with float 
+	/// returns true if ray intersects object with distance 
+	/// to hit and max ray distance 
 	/// </summary>
 	/// <param name="ray"></param>
 	/// <param name="distance"></param>

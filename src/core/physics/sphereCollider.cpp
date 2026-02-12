@@ -87,25 +87,25 @@ bool SphereCollider::IntersectWithRay(const Ray& ray, float& distance, float max
 	if (originToCenter.Length() - radius > maxDistance) {
 		false;
 	}
-	float s = originToCenter * ray.direction;
+	float projectionDist = originToCenter * ray.direction;
 
 	float originToCenterSquared = originToCenter * originToCenter;
 
 	float radiusSquared = pow(radius, 2);
 
-	if (s < 0 && originToCenterSquared > radiusSquared) return false;
+	if (projectionDist < 0 && originToCenterSquared > radiusSquared) return false;
 
-	float Msquared = originToCenterSquared - pow(s, 2);
+	float Msquared = originToCenterSquared - pow(projectionDist, 2);
 	
 	float Qsquared = radiusSquared;
 	if (Msquared > Qsquared) return false;
 
-	float q = sqrt(Qsquared - Msquared);
+	float halfChordDist = sqrt(Qsquared - Msquared);
 
 	if (originToCenterSquared > Qsquared)
-		distance = s - q;
+		distance = projectionDist - halfChordDist;
 	else
-		distance = s + q;
+		distance = projectionDist + halfChordDist;
 
 	return true;
 

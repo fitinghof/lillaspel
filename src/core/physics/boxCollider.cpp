@@ -1,5 +1,8 @@
 #include "core/physics/boxCollider.h"
 #include "core/physics/sphereCollider.h"
+#include <limits>
+#include <cmath>
+
 
 BoxCollider::BoxCollider()
 {
@@ -162,7 +165,51 @@ void BoxCollider::SetRotation(DirectX::XMFLOAT3 newRotation)
 
 bool BoxCollider::IntersectWithRay(const Ray& ray, float& distance, float maxDistance) { 
 	
+	float EPSILON = 0.000001;
 	
-	return false; 
+	float tMAX = std::numeric_limits<float>::max();
+	float tMIN = std::numeric_limits<float>::min();
 
+	Vector3D originToCenter = Vector3D(this->GetGlobalPosition()) - ray.origin;
+
+	float dimensions[3] = {
+		this->GetExtents().x,
+		this->GetExtents().x,
+		this->GetExtents().x
+	};
+	
+	
+	for (int i = 0; i < 3; i++) {
+		float axisOffset = Vector3D(this->axis[i]) * originToCenter;
+		float rayProj = Vector3D(this->axis[i]) * ray.direction;
+		
+		if (std::abs(rayProj) > EPSILON) {
+			float t1 = (axisOffset + dimensions[i]) / rayProj;
+			float t2 = (axisOffset - dimensions[i]) / rayProj;
+
+			if (t1 > t2) std::swap(t1, t2);
+			if (t1 > tMIN) tMIN = t1;
+			if (t2 < tMAX) tMAX = t2;
+			if (tMIN > tMAX) return false;
+			if (tMAX < 0) return false;
+
+		} else if (-axisOffset - dimensions[i] > 0 || -axisOffset + dimensions[i] < 0)
+			return false;
+	}
+
+	if (tMIN > 0) {
+
+		if (maxDistance < tMIN) {
+			distance = tMIN;
+			return true;
+		}
+		distance = tMIN;
+		return false;
+	}
+	if (maxDistance < tMAX) {
+		distance = tMAX;
+		return true;
+	}
+	distance = tMAX;
+	return false;
 }

@@ -1,4 +1,4 @@
-﻿#include "core/physics/collider.h"
+#include "core/physics/collider.h"
 #include "core/physics/boxCollider.h"
 #include "core/physics/sphereCollider.h"
 #include "core/physics/rigidBody.h"
@@ -86,14 +86,6 @@ bool Collider::Collision(Collider* otherCollider)
 	float mtvDistance = 0;
 
 	return this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
-
-	//Logger::Log(":::::::::::::::::After CollisionHandling::::::::::::::::");
-
-	//std::string o = "mtvAxis: " + std::to_string(mtvAxis.x) + ", " + std::to_string(mtvAxis.y) + ", " + std::to_string(mtvAxis.z);
-	//Logger::Log(o);
-
-	//std::string b = "mtvDistance: " + std::to_string(mtvDistance);
-	//Logger::Log(b);
 }
 
 bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNormal)
@@ -151,6 +143,14 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 {
 	using namespace DirectX;
 
+	if (GetAsyncKeyState('B'))
+	{
+		if(sphere->targetTag == 3)
+		{
+			int a = 0;
+		}
+	}
+
 	//CHECK MATRIX TRANSPOSE's!
 
 	XMVECTOR boxCenter = box->GetGlobalPosition();
@@ -160,14 +160,16 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 
 	//inverse transpose?
 	//XMMATRIX boxWorldMatrix = XMMatrixTranspose(box->GetGlobalWorldMatrix(false)); //worldMatrix is pre-transposed, so needs to get un-transposed again here
-	XMMATRIX boxWorldMatrix = box->GetGlobalWorldMatrix(false);
+	//XMMATRIX boxWorldMatrix = box->GetGlobalWorldMatrix(false);
+	XMFLOAT4X4 matrix = box->transform.GetWorldMatrix(false);
+	XMMATRIX boxWorldMatrix = XMLoadFloat4x4(&matrix);
 
 	//we get the inverse of the rotation and translation matrices, scale should not be included
 	XMVECTOR scale, rotation, translation;
 	XMMatrixDecompose(&scale, &rotation, &translation, boxWorldMatrix);
 
-	//XMMATRIX rotationMatrix = DirectX::XMMatrixRotationX(rotation.m128_f32[0]) * DirectX::XMMatrixRotationY(rotation.m128_f32[1]) * DirectX::XMMatrixRotationZ(rotation.m128_f32[2]);
-	XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(rotation.m128_f32[0], rotation.m128_f32[1], rotation.m128_f32[2]);
+	XMMATRIX rotationMatrix = DirectX::XMMatrixRotationX(rotation.m128_f32[0]) * DirectX::XMMatrixRotationY(rotation.m128_f32[1]) * DirectX::XMMatrixRotationZ(rotation.m128_f32[2]);
+	//XMMATRIX rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(rotation.m128_f32[0], rotation.m128_f32[1], rotation.m128_f32[2]);
 	XMMATRIX invRotationMatrix = XMMatrixTranspose(rotationMatrix); //rotationMatrix here won't be pre-transposed, so a transpose is required to get the inverse
 	XMMATRIX invTranslationMatrix = XMMatrixTranslation(-boxCenter.m128_f32[0], -boxCenter.m128_f32[1], -boxCenter.m128_f32[2]);
 	XMMATRIX invScalingMatrix = XMMatrixScaling(1.0f / XMVectorGetX(scale), 1.0f / XMVectorGetY(scale), 1.0f / XMVectorGetZ(scale));
@@ -224,6 +226,8 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 		//PrintFloat3(resolveAxis, "resolveAxis: ");
 		//std::cout << "-------------------------------------------------" << std::endl;
 
+		Logger::Log("BOXSPHERE COLLISION!");
+
 		return true;
 	}
 
@@ -235,56 +239,6 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance)
 {
 	bool collision = false;
-
-	//if (!this->hasInitializedPreviousPosition) //little annoying, is there a way to not do this each check?
-	//{
-	//	this->previousPosition = this->transform.GetPosition();
-	//	this->hasInitializedPreviousPosition = true;
-	//}
-
-	//if (GetLengthOfFLOAT3(FLOAT3SUB(this->GetPosition(), this->previousPosition)) > this->shortestExtent * 3) //1.5 shortest side lengths result in coolision detection in 2 steps
-	//{
-	//	this happens when when move is bigger than 1.5 sideLengths
-	//	DirectX::XMVECTOR finalPosition = this->transform.GetPosition();
-	//	DirectX::XMVECTOR movementVector = FLOAT3SUB(finalPosition, this->previousPosition);
-	//	DirectX::XMVECTOR middlePosition = FLOAT3ADD(this->previousPosition, FLOAT3MULT1(movementVector, 0.5f));
-
-	//	this->SetPosition(middlePosition);
-	//	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
-
-	//	if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE)
-	//	{
-	//		mtvDistance = -mtvDistance;
-	//	}
-
-	//	if (collision)
-	//	{
-	//		if (!this->solid || !otherCollider->solid) return true;
-
-	//		if (this->dynamic && otherCollider->dynamic)
-	//		{
-	//			this->ResolveCollision(mtvAxis, mtvDistance / 2);
-	//			otherCollider->ResolveCollision(mtvAxis, -mtvDistance / 2);
-	//		}
-	//		else if (this->dynamic)
-	//		{
-	//			this->ResolveCollision(mtvAxis, mtvDistance);
-	//		}
-	//		else if (otherCollider->dynamic)
-	//		{
-	//			otherCollider->ResolveCollision(mtvAxis, -mtvDistance);
-	//		}
-
-	//		return true;
-	//	}
-	//	else
-	//	{
-	//		this->SetPosition(finalPosition);
-	//	}
-	//}
-
-	//Logger::Log(":::::::::::::::::About to do DoubleDispatchCollision::::::::::::::::");
-
 	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
 
 	if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE)
@@ -292,15 +246,8 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 		mtvDistance = -mtvDistance;
 	}
 
-	//Logger::Log(":::::::::::::::::after DoubleDispatchCollision::::::::::::::::");
-
-	//Logger::Log("collision: " + collision);
 	if (!collision) return false;
 	if (!this->solid || !otherCollider->solid) return collision;
-
-	Logger::Log("COLLISION!");
-
-	//Logger::Log(":::::::::::::::::Made it past solid checks, resolve will be performed::::::::::::::::");
 
 	// Determine who moves
 	if (this->dynamic && otherCollider->dynamic)

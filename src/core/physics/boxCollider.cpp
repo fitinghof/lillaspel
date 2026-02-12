@@ -87,23 +87,7 @@ void BoxCollider::SaveToJson(nlohmann::json& data)
 
 bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
 {
-	//Logger::Log(":::::::::::::::::Entered boxVSbox and sat-check::::::::::::::::");
-
 	bool collision = SAT(this->satData, box->satData, resolveAxis, resolveDistance);
-
-	//Logger::Log(":::::::::::::::::After sat-check::::::::::::::::");
-
-	//std::string o = "resolveAxis: " + std::to_string(resolveAxis.x) + ", " + std::to_string(resolveAxis.y) + ", " + std::to_string(resolveAxis.z);
-	//Logger::Log(o);
-
-	//std::string b = "resolveDistance: " + std::to_string(resolveDistance);
-	//Logger::Log(b);
-
-	//std::string a = "this->satData center: " + std::to_string(this->satData.center.x) + ", " + std::to_string(this->satData.center.y) + ", " + std::to_string(this->satData.center.z);
-	//Logger::Log(a);
-
-	//std::string k = "other->satData center: " + std::to_string(box->satData.center.x) + ", " + std::to_string(box->satData.center.y) + ", " + std::to_string(box->satData.center.z);
-	//Logger::Log(k);
 
 	return collision;
 }
@@ -143,20 +127,20 @@ void BoxCollider::SetExtents(DirectX::XMFLOAT3 extents)
 	if (extents.y < this->shortestExtent) this->shortestExtent = extents.y;
 	if (extents.z < this->shortestExtent) this->shortestExtent = extents.z;
 
-	Logger::Log("----------SAT-DATA---------");
+	// Logger::Log("----------SAT-DATA---------");
 
-	for (int i = 0; i < 8; i++)
-	{
-		Logger::Log("positions: " + std::to_string(this->satData.positionData[i].x), +", " + std::to_string(this->satData.positionData[i].y) + std::to_string(this->satData.positionData[i].z));
-	}
+	// for (int i = 0; i < 8; i++)
+	// {
+	// 	Logger::Log("positions: " + std::to_string(this->satData.positionData[i].x), +", " + std::to_string(this->satData.positionData[i].y) + std::to_string(this->satData.positionData[i].z));
+	// }
 
-	Logger::Log("----------||---------");
+	// Logger::Log("----------||---------");
 }
 
 DirectX::XMFLOAT3 BoxCollider::GetExtents()
 {
 	DirectX::XMFLOAT3 extents = {};
-	DirectX::XMStoreFloat3(&extents, this->transform.GetScale());
+	DirectX::XMStoreFloat3(&extents, this->GetGlobalScale());
 	
 	return extents;
 }

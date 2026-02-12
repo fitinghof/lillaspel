@@ -19,7 +19,7 @@ void SphereCollider::Tick()
 	float diameter = scale.m128_f32[0];
 	scale.m128_f32[1] = diameter;
 	scale.m128_f32[2] = diameter;
-	scale.m128_f32[3] = diameter;
+	//scale.m128_f32[3] = diameter;
 	this->transform.SetScale(scale);
 }
 

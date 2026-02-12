@@ -138,7 +138,7 @@
       "tag": 1,
       "targetTag": 0,
       "solid": true,
-      "dynamic": false
+      "dynamic": true
     },
       {
       "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",
@@ -209,7 +209,7 @@
       "tag": 1,
       "targetTag": 0,
       "solid": true,
-      "dynamic": true
+      "dynamic": false
     },
       {
       "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",
@@ -271,12 +271,12 @@
           1.0
         ],
         "scale": [
-          2.0,
-          2.0,
-          2.0
+          4.0,
+          4.0,
+          4.0
         ]
       },
-      "type": "BoxCollider",
+      "type": "SphereCollider",
       "tag": 1,
       "targetTag": 0,
       "solid": true,

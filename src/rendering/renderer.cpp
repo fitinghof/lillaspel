@@ -280,6 +280,51 @@ void Renderer::RenderPass()
 	}
 }
 
+std::vector<ID3D10DepthStencilView*> Renderer::ShadowPass() { 
+	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	std::vector<ID3D10DepthStencilView*> spotlights;
+	for (uint32_t i = 0; i < lightCount; i++) {
+		if ((*this->lightRenderQueue)[i].expired()) {
+			// This should remove deleted lights
+			Logger::Log("The renderer deleted a light");
+			this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
+			i--;
+			continue;
+		}
+
+		auto light = (*this->lightRenderQueue)[i].lock();
+		this->immediateContext->ClearDepthStencilView(light->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1, 0);
+		this->immediateContext->OMSetRenderTargets(0, nullptr, light->GetDepthStencilView());
+
+
+		if (light->camera.expired()) {
+			Logger::Error("Lights shadow camera was dead");
+			continue;
+		}
+		auto& matrixContainer = light->camera.lock()->GetCameraMatrix();
+
+		this->immediateContext->RSSetViewports(1, light->camera.lock()->);
+		this->cameraBuffer->UpdateBuffer(this->GetContext(), &matrixContainer);
+		this->BindCameraMatrix();
+
+
+		// Draw all objects to depthstencil
+		for (auto& mesh : *this->meshRenderQueue.get()) {
+			if (mesh.expired()) continue;
+			this->RenderMeshObject(mesh.lock().get(), false);
+		}
+	}
+
+	// Reset renderTarget and deapthStencil
+	this->BindRenderTarget();
+
+	// Reset ViewPort
+	this->BindViewport();
+
+	return std::vector<ID3D10DepthStencilView*>(); 
+
+}
+
 void Renderer::ClearRenderTargetViewAndDepthStencilView()
 {
 	// Clear previous frame
@@ -452,7 +497,7 @@ void Renderer::BindLights()
 				continue;
 			}
 
-			spotlights.push_back((*this->lightRenderQueue)[i].lock()->data);
+			spotlights.push_back((*this->lightRenderQueue)[i].lock()->GetSpotLightData());
 		}
 
 		// Updates and binds buffer
@@ -481,7 +526,7 @@ void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 	this->immediateContext->VSSetConstantBuffers(1, 1, &buffer);
 }
 
-void Renderer::RenderMeshObject(MeshObject* meshObject)
+void Renderer::RenderMeshObject(MeshObject* meshObject, bool renderMaterial)
 {
 	
 	// Bind mesh
@@ -528,7 +573,7 @@ void Renderer::RenderMeshObject(MeshObject* meshObject)
 		}
 		else
 		{
-			if (!this->renderAllWireframe)
+			if (!this->renderAllWireframe && renderMaterial)
 			{
 				BindMaterial(weak_material.lock().get());
 			}

@@ -2,6 +2,11 @@
 
 void DepthBuffer::Init(ID3D11Device* device, UINT width, UINT height)
 {
+
+	if (this->texture.Get()) this->texture.Reset();
+	if (this->shaderResourceView.Get()) this->shaderResourceView.Reset();
+	if (this->depthStencilViews[0].Get()) this->depthStencilViews[0].Reset();
+
 	D3D11_TEXTURE2D_DESC textureDesc;
 	textureDesc.Width = width;
 	textureDesc.Height = height;

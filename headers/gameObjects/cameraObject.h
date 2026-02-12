@@ -31,9 +31,12 @@ public:
 
 	virtual void Start() override;
 
-	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 	void SetMainCamera();
+
+
+	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 	static CameraObject& GetMainCamera();
+
 
 	virtual void LoadFromJson(const nlohmann::json& data) override;
 	virtual void SaveToJson(nlohmann::json& data) override;

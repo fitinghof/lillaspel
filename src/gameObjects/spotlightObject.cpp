@@ -7,14 +7,25 @@ SpotlightObject::SpotlightObject()
 	DirectX::XMStoreFloat3(&this->data.position, DirectX::XMVectorSet(0, 0, 0, 0));
 	DirectX::XMStoreFloat3(&this->data.direction, DirectX::XMVectorSet(0, 0, 0, 0));
 	DirectX::XMStoreFloat4(&this->data.color, DirectX::XMVectorSet(1, 1, 1, 1));
+	
 	this->data.intensity = 5;
 	this->data.spotAngleRadians = DirectX::XMConvertToRadians(360);
 
 	Logger::Log("Created a spotlight.");
 }
 
+SpotlightObject::SpotLightContainer SpotlightObject::GetSpotLightData() const { return this->data; }
+
+ID3D11DepthStencilView* SpotlightObject::GetDepthStencilView() const {
+	return this->shadowbuffer.GetDepthStencilView(0);
+}
+
 void SpotlightObject::Start() { 
 	RenderQueue::AddLightObject(this->GetPtr()); 
+
+	// Attach camera for shadowpass
+	this->camera = this->factory->CreateGameObjectOfType<CameraObject>();
+	this->camera.lock()->SetParent(this->GetPtr());
 }
 
 void SpotlightObject::Tick() {
@@ -52,4 +63,17 @@ void SpotlightObject::SaveToJson(nlohmann::json& data)
 	data["intensity"] = this->data.intensity;
 
 	data["angleRadians"] = this->data.spotAngleRadians;
+}
+
+void SpotlightObject::SetShadowResolution(ID3D11Device* device, size_t width, size_t height) {
+	this->shadowViewPort = {
+		.TopLeftX = 0,
+		.TopLeftY = 0,
+		.Width = static_cast<FLOAT>(width),
+		.Height = static_cast<FLOAT>(height),
+		.MinDepth = 0.0f,
+		.MaxDepth = 1.0f,
+	};
+
+	this->shadowbuffer.Init(device, width, height);
 }

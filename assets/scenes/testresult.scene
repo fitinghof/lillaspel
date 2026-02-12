@@ -22,6 +22,28 @@
       },
       "type": "DebugCamera"
     },
+      {
+        "meshIdentifier": "meshes/indicatorSphere.glb:Mesh_0",
+        "transform": {
+          "position": [
+            0.0,
+            2.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "type": "MeshObject"
+      },
     {
       "children": [
         {

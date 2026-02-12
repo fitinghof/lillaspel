@@ -12,7 +12,7 @@ void TestPlayer::Tick()
 	float deltaTime = Time::GetInstance().GetDeltaTime();
 
 	DirectX::XMFLOAT3 moveVector = DirectX::XMFLOAT3(0, 0, 0);
-	float speed = 5;
+	float speed = 18;
 
 	if (GetAsyncKeyState('I'))
 	{

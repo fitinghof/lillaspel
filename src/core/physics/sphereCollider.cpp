@@ -10,6 +10,19 @@ SphereCollider::~SphereCollider()
 {
 }
 
+void SphereCollider::Tick()
+{
+	this->Collider::Tick();
+
+	//force scale to the x-factor to ensure sphere shape
+	DirectX::XMVECTOR scale = this->transform.GetScale();
+	float diameter = scale.m128_f32[0];
+	scale.m128_f32[1] = diameter;
+	scale.m128_f32[2] = diameter;
+	scale.m128_f32[3] = diameter;
+	this->transform.SetScale(scale);
+}
+
 bool SphereCollider::DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance)
 {
 	return otherCollider->CollidesWithSphere(this, mtvAxis, mtvDistance);

@@ -57,9 +57,17 @@ void Collider::Start()
 {
 	GameObject3D::Start();
 
-	auto meshData = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0");
-	auto material = AssetManager::GetInstance().GetMaterialWeakPtr("wireframeWhite");
+	MeshObjData meshData = {};
+	if(this->type == ColliderType::SPHERE)
+	{
+		meshData = AssetManager::GetInstance().GetMeshObjData("meshes/indicatorSphere.glb:Mesh_0");
+	}
+	else
+	{
+		meshData = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0");
+	}
 
+	auto material = AssetManager::GetInstance().GetMaterialWeakPtr("wireframeWhite");
 	if(material.expired())
 	{
 		Logger::Error("Collider mesh material was expired");

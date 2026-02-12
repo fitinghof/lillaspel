@@ -3,7 +3,7 @@
 #include "gameObjects/meshObject.h"
 #include "core/physics/physicsQueue.h"
 
-class TestPlayer : public GameObject3D
+class TestPlayer : public RigidBody
 {
 public:
 	TestPlayer();

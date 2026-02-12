@@ -44,4 +44,5 @@ void TestPlayer::Tick()
 
 void TestPlayer::Start()
 {
+	this->RigidBody::Start();
 }

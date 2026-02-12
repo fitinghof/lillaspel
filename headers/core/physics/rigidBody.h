@@ -17,7 +17,6 @@ public:
 	/// </summary>
 	void SetParent(std::weak_ptr<GameObject> parent) override;
 	void AddColliderChild(std::weak_ptr<Collider> collider);
-	void RemoveExpiredColliderChild();
 	void SetId(int id);
 
 	int GetId();
@@ -25,6 +24,7 @@ public:
 	std::vector<std::weak_ptr<Collider>>* GetColliderChildrenVector();
 
 	bool Collision(std::weak_ptr<RigidBody> rigidbody);
+	bool Collision(std::weak_ptr<Collider> collider);
 
 
 private:

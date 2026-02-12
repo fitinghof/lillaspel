@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include "gameObjects/gameObject3D.h"
+#include "gameObjects/meshObject.h"
 #include "core/physics/physics.h"
 
 static const DirectX::XMFLOAT3 localBoxCorners[8] =
@@ -55,7 +56,8 @@ public:
 	bool Collision(Collider* other);
 	bool Collision(Collider* other, DirectX::XMVECTOR& contactNormal);
 
-	void SetParent(std::weak_ptr<GameObject> newParent) override;
+	void SetParent(std::weak_ptr<GameObject> parent) override;
+	void Start() override;
 
 	virtual bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) = 0;
 	virtual bool CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance) = 0;

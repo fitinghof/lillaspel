@@ -37,11 +37,6 @@ void RigidBody::AddColliderChild(std::weak_ptr<Collider> collider)
 	this->colliderChildren.push_back(collider);
 }
 
-void RigidBody::RemoveExpiredColliderChild()
-{
-	//japp
-}
-
 void RigidBody::SetId(int id)
 {
 	this->id = id;
@@ -80,6 +75,36 @@ bool RigidBody::Collision(std::weak_ptr<RigidBody> rigidbody)
 
 			if (tempCollision) collision = true;
 		}
+	}
+
+	return collision;
+}
+
+bool RigidBody::Collision(std::weak_ptr<Collider> collider)
+{
+	bool collision = false;
+	bool tempCollision = false;
+	Collider* otherCollider = collider.lock().get(); //make sure this ptr isn't stored in collider
+
+	if(collider.expired())
+	{
+		Logger::Log("RigidBody tried colliding with null-collider");
+		return false;
+	}
+
+	for (int i = this->colliderChildren.size() - 1; i >= 0; i--)
+	{
+		if(this->colliderChildren[i].expired())
+		{
+			Logger::Log("RigidBody had null-collider child, removing from RigidBody");
+			this->colliderChildren.erase(this->colliderChildren.begin() + i);
+			continue;
+		}
+
+		Collider* thisCollider = this->colliderChildren[i].lock().get(); //make sure this ptr isn't stored in collider
+
+		tempCollision = thisCollider->Collision(otherCollider);
+		if (tempCollision) collision = true;
 	}
 
 	return collision;

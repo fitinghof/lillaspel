@@ -12,7 +12,7 @@ void TestPlayer::Tick()
 	float deltaTime = Time::GetInstance().GetDeltaTime();
 
 	DirectX::XMFLOAT3 moveVector = DirectX::XMFLOAT3(0, 0, 0);
-	float speed = 5;
+	float speed = 18;
 
 	if (GetAsyncKeyState('I'))
 	{
@@ -37,12 +37,12 @@ void TestPlayer::Tick()
 	DirectX::XMFLOAT3 newPos = FLOAT3ADD(oldPos, FLOAT3MULT1(moveVector, deltaTime));
 	this->transform.SetPosition(DirectX::XMLoadFloat3(&newPos));
 
-	// std::vector<std::weak_ptr<GameObject>> children = this->GetChildren();
-	// std::shared_ptr<BoxCollider> box = children[0].lock(); ?????????????????????
+	this->transform.Rotate(0, deltaTime, 0);
 
 	PhysicsQueue::GetInstance().SolveCollisions(); //this is extremely temporary
 }
 
 void TestPlayer::Start()
 {
+	this->RigidBody::Start();
 }

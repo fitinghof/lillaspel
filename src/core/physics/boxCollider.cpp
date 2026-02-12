@@ -11,6 +11,10 @@ BoxCollider::BoxCollider()
 
 	this->satData.center = DirectX::XMFLOAT3(0, 0, 0);
 	this->satData.nrOfPositions = 8;
+
+	DirectX::XMStoreFloat3(&this->axis[0], this->GetGlobalRight());
+	DirectX::XMStoreFloat3(&this->axis[1], this->GetGlobalUp());
+	DirectX::XMStoreFloat3(&this->axis[2], this->GetGlobalForward());
 	this->satData.nrOfNormals = 3;
 	this->satData.normalData = this->axis;
 
@@ -25,6 +29,12 @@ BoxCollider::~BoxCollider()
 void BoxCollider::Tick()
 {
 	this->Collider::Tick();
+
+	//update normals
+	DirectX::XMStoreFloat3(&this->axis[0], this->GetGlobalRight());
+	DirectX::XMStoreFloat3(&this->axis[1], this->GetGlobalUp());
+	DirectX::XMStoreFloat3(&this->axis[2], this->GetGlobalForward());
+	this->satData.normalData = this->axis;
 
 	this->BuildCornersArray(this->satData.positionData);
 	DirectX::XMStoreFloat3(&this->satData.center, this->GetGlobalPosition());

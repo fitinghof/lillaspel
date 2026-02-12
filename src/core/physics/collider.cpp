@@ -6,47 +6,78 @@
 
 Collider::Collider()
 {
-	//in start:
-	//add mesh
-	//set parent
-	//change material to wireframe
 }
 
 Collider::~Collider()
 {
 }
 
-void Collider::SetParent(std::weak_ptr<GameObject> newParent)
+void Collider::SetParent(std::weak_ptr<GameObject> parent)
 {
-	if (newParent.expired())
+	std::shared_ptr<GameObject> newParent = parent.lock();
+
+	if (!newParent)
 	{
 		Logger::Error("Tried to set expired gameobject as parent");
 		return;
 	}
 
-	std::shared_ptr<Collider> colliderParent = std::dynamic_pointer_cast<Collider>(newParent.lock());
+	std::shared_ptr<Collider> colliderParent = std::dynamic_pointer_cast<Collider>(newParent);
 	if(colliderParent != nullptr)
 	{
 		Logger::Error("Tried to set Collider as parent to a Collider");
 		return;
 	}
 
-	this->GameObject3D::SetParent(newParent);
-	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent.lock());
+	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent);
+	std::shared_ptr<GameObject3D> gameObject3DParent = std::dynamic_pointer_cast<GameObject3D>(newParent);
 	std::shared_ptr<Collider> thisCollider = std::static_pointer_cast<Collider>(this->GetPtr());
 
 	if (rigidBodyParent)
 	{
-		PhysicsQueue::GetInstance().AddRigidBody(rigidBodyParent);
-		this->castedParent = rigidBodyParent;
+		this->rigidBodyParent = rigidBodyParent;
 		rigidBodyParent->AddColliderChild(thisCollider);
-		Logger::Log("Added Rigidbody to physics queue");
+	}
+	else if (gameObject3DParent)
+	{
+		this->gameObject3DParent = gameObject3DParent;
+		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
+		Logger::Log("Added stray Collider with GameObject3D parent to physics queue");
 	}
 	else
 	{
-		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
-		Logger::Log("Added stray Collider to physics queue");
+		Logger::Error("Tried to set GameObject as parent on Collider (parent has to be derived from GameObject3D)");
+		return;
+	} 
+
+	this->GameObject3D::SetParent(newParent);
+}
+
+void Collider::Start()
+{
+	GameObject3D::Start();
+
+	MeshObjData meshData = {};
+	if(this->type == ColliderType::SPHERE)
+	{
+		meshData = AssetManager::GetInstance().GetMeshObjData("meshes/indicatorSphere.glb:Mesh_0");
 	}
+	else
+	{
+		meshData = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0");
+	}
+
+	auto material = AssetManager::GetInstance().GetMaterialWeakPtr("wireframeWhite");
+	if(material.expired())
+	{
+		Logger::Error("Collider mesh material was expired");
+		return;
+	}
+
+	meshData.SetMaterial(0, material.lock());
+	auto visualMeshObject = this->factory->CreateGameObjectOfType<MeshObject>().lock();
+	visualMeshObject->SetMesh(meshData);
+	visualMeshObject->SetParent(std::static_pointer_cast<Collider>(this->GetPtr()));
 }
 
 bool Collider::Collision(Collider* otherCollider)
@@ -87,12 +118,17 @@ int Collider::GetId()
 
 void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)
 {
-	std::shared_ptr<RigidBody> rigidBodyParent = this->castedParent.lock();
+	std::shared_ptr<RigidBody> rigidBodyParent = this->rigidBodyParent.lock();
+	std::shared_ptr<GameObject3D> gameObject3DParent = this->gameObject3DParent.lock();
 	GameObject3D* moveTarget = this;
 
 	if (rigidBodyParent)
 	{
 		moveTarget = rigidBodyParent.get();
+	} 
+	else if (gameObject3DParent)
+	{
+		moveTarget = gameObject3DParent.get();
 	}
 
 	DirectX::XMFLOAT3 resolveVector = FLOAT3MULT1(resolveAxis, resolveDistance);
@@ -250,6 +286,7 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 	}
 
 
+	//Logger::Log("collision: " + collision);
 	if (!collision) return false;
 	if (!this->solid || !otherCollider->solid) return collision;
 

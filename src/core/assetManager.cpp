@@ -157,7 +157,6 @@ void AssetManager::CreateDefaultAssets()
 	auto defaultMat = std::make_shared<GenericMaterial>(this->d3d11Device);
 	AddMaterial("defaultLitMaterial", defaultMat);
 
-
 	auto defaultUnlitMat = std::make_shared<UnlitMaterial>(this->d3d11Device);
 	defaultUnlitMat->unlitShader = pixelShaderUnlit;
 	AddMaterial("defaultUnlitMaterial", defaultUnlitMat);

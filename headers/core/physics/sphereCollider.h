@@ -13,6 +13,8 @@ public:
 	SphereCollider();
 	~SphereCollider();
 
+	void Tick() override;
+
 	bool DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) override;
 
 	void SetPosition(DirectX::XMFLOAT3 newCenter) override;

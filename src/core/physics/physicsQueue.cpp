@@ -32,8 +32,7 @@ void PhysicsQueue::AddStrayCollider(std::weak_ptr<Collider> collider)
 
 void PhysicsQueue::SolveCollisions()
 {
-    //what about filtering?
-
+    //RigidBody vs RigidBody collisions
     for(int i = rigidBodies.size() - 1; i >= 0; i--)
     {
         std::shared_ptr<RigidBody> thisRigidBody = this->rigidBodies[i].lock();
@@ -57,6 +56,7 @@ void PhysicsQueue::SolveCollisions()
         }
     }
 
+    //StrayCollider vs StrayCollider collisions
     for(int i = strayColliders.size() - 1; i >= 0; i--)
     {
         std::shared_ptr<Collider> thisCollider = this->strayColliders[i].lock();
@@ -79,8 +79,28 @@ void PhysicsQueue::SolveCollisions()
             thisCollider->Collision(otherCollider.get());
         }
     }
-}
 
-bool PhysicsQueue::castRay(Ray& ray, RayCastData& rayCastData, float maxDistance) { 
-    return this->rayCaster.castRay(ray, rayCastData, this->strayColliders);
+    //RigidBody vs StrayCollider collisions
+    for(int i = rigidBodies.size() - 1; i >= 0; i--)
+    {
+        std::shared_ptr<RigidBody> rigidBody = this->rigidBodies[i].lock();
+        if(!rigidBody)
+        {
+            this->rigidBodies.erase(this->rigidBodies.begin() + i);
+            continue;
+        }
+
+        for (int j = strayColliders.size() - 1; j >= 0; j--)
+        {
+            std::shared_ptr<Collider> collider = this->strayColliders[j].lock();
+            if(!collider)
+            {
+                this->strayColliders.erase(this->strayColliders.begin() + j);
+                i--;
+                continue;
+            }
+
+            rigidBody->Collision(collider);
+        }
+    }
 }

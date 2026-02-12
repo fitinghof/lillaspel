@@ -83,6 +83,12 @@ void Room::Start() {
 
 		this->walls[i] = meshobj;
 	}
+
+	// place first pathfinding point in the middle of the room, then place the rest around it in a grid pattern
+	DirectX::XMVECTOR center = this->transform.GetPosition();
+	DirectX::XMFLOAT4 centerFloat4;
+	DirectX::XMStoreFloat4(&centerFloat4, center);
+	this->pathfindingPoints[0] = AStarPoint(static_cast<int>(centerFloat4.x), static_cast<int>(centerFloat4.z));
 }
 
 void Room::Tick() {

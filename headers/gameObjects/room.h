@@ -1,6 +1,7 @@
 #pragma once
 #include "gameObjects/gameObject3D.h"
 #include "gameObjects/meshObject.h"
+#include "utilities/aStar.h"
 
 class WallIndex {
 
@@ -65,11 +66,11 @@ public:
 	void SetParent(std::weak_ptr<GameObject> parent) override;
 
 private:
-
-
 	std::array<size_t, 2> pos;
 	inline static float size;
 	std::weak_ptr<MeshObject> roof;
 	std::weak_ptr<MeshObject> floor;
 	std::array<std::weak_ptr<MeshObject>, 4> walls;
+
+	std::array<AStarPoint, 9> pathfindingPoints;
 };

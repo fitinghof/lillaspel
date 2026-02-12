@@ -92,6 +92,7 @@ private:
 	std::unique_ptr<DepthBuffer> depthBuffer;
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
+	std::unique_ptr<Sampler> shadowSampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 	std::unique_ptr<RasterizerState> wireframeRasterizerState;
 	std::unique_ptr<RasterizerState> skyboxRasterizerState;

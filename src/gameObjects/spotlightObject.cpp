@@ -7,8 +7,7 @@ SpotlightObject::SpotlightObject() {
 	DirectX::XMStoreFloat3(&this->data.direction, DirectX::XMVectorSet(0, 0, 0, 0));
 	DirectX::XMStoreFloat4(&this->data.color, DirectX::XMVectorSet(1, 1, 1, 1));
 
-	this->data.intensity = 5;
-	this->data.spotCosAngleRadians = cos(DirectX::XMConvertToRadians(120) / 2);
+	this->data.spotCosAngleRadians = cos(DirectX::XMConvertToRadians(120));
 
 	this->shadowViewPort = {
 		.TopLeftX = 0,
@@ -20,9 +19,16 @@ SpotlightObject::SpotlightObject() {
 	};
 
 	Logger::Log("Created a spotlight.");
+	this->resolutionChanged = true;
 }
 
-SpotlightObject::SpotLightContainer SpotlightObject::GetSpotLightData() const { return this->data; }
+SpotlightObject::SpotLightContainer SpotlightObject::GetSpotLightData() const { 
+
+	// Temporary workaround to avoid messing with json load
+	auto dataCopy = this->data;
+	dataCopy.spotCosAngleRadians = cos(this->data.spotCosAngleRadians / 2);
+	return dataCopy;
+}
 
 ID3D11DepthStencilView* SpotlightObject::GetDepthStencilView() const {
 	return this->shadowbuffer.GetDepthStencilView(0);
@@ -41,11 +47,27 @@ void SpotlightObject::Tick() {
 	DirectX::XMStoreFloat3(&this->data.position, GetGlobalPosition());
 	DirectX::XMStoreFloat3(&this->data.direction, GetGlobalForward());
 
-	auto projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(this->data.spotCosAngleRadians, 1, 1, 100);
-	auto viewMatrix = this->GetGlobalViewMatrix();
+	this->camera.lock()->GetCameraMatrix().cameraPosition = GetGlobalPosition();
 
-	DirectX::XMStoreFloat4x4(&this->data.viewProjectionMatrix,
-							 DirectX::XMMatrixMultiplyTranspose(viewMatrix, projectionMatrix));
+	// View Projection Matrix
+
+	DirectX::XMVECTOR globalRotation = GetGlobalRotation();
+
+	DirectX::XMVECTOR focusPos = DirectX::XMVectorAdd(this->camera.lock()->GetCameraMatrix().cameraPosition,
+							 DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 0, 1, 0), globalRotation));
+	DirectX::XMVECTOR upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), globalRotation);
+	DirectX::XMMATRIX viewMatrix =
+		DirectX::XMMatrixLookAtLH(this->camera.lock()->GetCameraMatrix().cameraPosition, focusPos, upDir);
+
+	float tempAspectRatio = 16.0f / 9.0f;
+
+	/// WHY DOESN*T CAMERA HAVE GETTER FOR FOV?????????????
+	DirectX::XMMATRIX projMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(80),
+																	 tempAspectRatio, 0.1f, 100.0f);
+
+	DirectX::XMMATRIX viewProjMatrix = DirectX::XMMatrixMultiplyTranspose(viewMatrix, projMatrix);
+
+	DirectX::XMStoreFloat4x4(&this->data.viewProjectionMatrix, viewProjMatrix);
 }
 
 void SpotlightObject::LoadFromJson(const nlohmann::json& data) {

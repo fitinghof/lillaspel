@@ -48,6 +48,7 @@ SamplerState shadowSampler : register(s1);
 
 float4 main(PixelShaderInput input) : SV_TARGET
 {
+    
     float3 normal = normalize(input.normal);
     
     float4 ambientColor = ambient;  
@@ -58,7 +59,8 @@ float4 main(PixelShaderInput input) : SV_TARGET
     uint numLights, stride;
     spotlightBuffer.GetDimensions(numLights, stride);
         
-    for (int i = 0; i < numLights; i++)
+    // Seems structured buffer might be made larger than the number of lights, as such we do need to use ugly constant buffer
+    for (int i = 0; i < spotlightCount; i++)
     {
         
         Spotlight lightdata = spotlightBuffer[i];
@@ -77,7 +79,9 @@ float4 main(PixelShaderInput input) : SV_TARGET
         
         float3 LightToHit = input.worldPosition.xyz - lightdata.position;
         float3 lightDir = normalize(LightToHit);
-        if (dot(lightDir.xyz, normalize(lightdata.direction)) > lightdata.spotCosAngle && islit)
+        float lightCosAngle = dot(lightDir.xyz, normalize(lightdata.direction));
+        
+        if (lightCosAngle > lightdata.spotCosAngle && islit)
         {
             float intensity = (1 / dot(LightToHit, LightToHit)) * max(0.0f, dot(-lightDir, normal));
     
@@ -89,7 +93,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
             specularColor += lighting.z * lightdata.color;
         }
     }
-    
     
     // Read textures
     // It's done in a way to avoid if-statements

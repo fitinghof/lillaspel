@@ -29,13 +29,14 @@ void DepthBuffer::Init(ID3D11Device* device, UINT width, UINT height)
 	textureDesc.Height = height;
 	textureDesc.MipLevels = 1;
 	textureDesc.ArraySize = 1;
-	textureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	textureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
 	textureDesc.SampleDesc.Count = 1;
 	textureDesc.SampleDesc.Quality = 0;
 	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	textureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	textureDesc.CPUAccessFlags = 0;
 	textureDesc.MiscFlags = 0;
+
 
 
 	HRESULT hr1 = device->CreateTexture2D(&textureDesc, nullptr, this->texture.GetAddressOf());
@@ -44,10 +45,26 @@ void DepthBuffer::Init(ID3D11Device* device, UINT width, UINT height)
 		throw std::exception(std::format("Failed to create Depth Stencil Texture, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr1)).c_str());
 	}
 
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc{};
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
 	HRESULT hr =
-		device->CreateDepthStencilView(this->texture.Get(), 0, this->depthStencilViews.GetAddressOf());
+		device->CreateDepthStencilView(this->texture.Get(), &depthStencilViewDesc, this->depthStencilViews.GetAddressOf());
 	if (FAILED(hr)) {
 		throw std::exception(std::format("Error creating Depth Stencil, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
+	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc{};
+	srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+	srvDesc.Texture2D.MostDetailedMip = 0;
+	srvDesc.Texture2D.MipLevels = 1;
+
+	hr = device->CreateShaderResourceView(this->texture.Get(), &srvDesc, this->shaderResourceView.GetAddressOf());
+	if (FAILED(hr)) {
+		throw std::exception(
+			std::format("Error creating srv, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 }
 
@@ -62,7 +79,8 @@ ID3D11DepthStencilView* DepthBuffer::GetDepthStencilView() const {
 
 ID3D11ShaderResourceView* DepthBuffer::GetShaderResourceView() const
 {
-	return this->shaderResourceView.Get(); }
+	return this->shaderResourceView.Get(); 
+}
 
 ID3D11DepthStencilState* DepthBuffer::GetDepthStencilState() const
 { 

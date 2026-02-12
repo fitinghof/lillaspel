@@ -74,7 +74,7 @@ void CameraObject::UpdateCameraMatrix() {
 
 	float tempAspectRatio = 16.0f / 9.0f;
 	DirectX::XMMATRIX projMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(this->fieldOfView),
-																	 tempAspectRatio, 0.1f, 1000.0f);
+																	 tempAspectRatio, 0.1f, 100.0f);
 
 	DirectX::XMMATRIX viewProjMatrix = viewMatrix * projMatrix;
 

@@ -141,6 +141,10 @@ void Renderer::CreateSampler()
 {
 	this->sampler = std::unique_ptr<Sampler>(new Sampler());
 	this->sampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_WRAP);
+
+	this->shadowSampler = std::unique_ptr<Sampler>(new Sampler());
+	this->shadowSampler->Init(this->device.Get(), D3D11_TEXTURE_ADDRESS_BORDER, D3D11_FILTER_ANISOTROPIC,
+							  D3D11_COMPARISON_LESS_EQUAL, {1, 1, 1, 1});
 }
 
 void Renderer::CreateRasterizerStates()
@@ -213,7 +217,6 @@ void Renderer::LoadShaders()
 void Renderer::Render()
 {
 	auto shadowmaps = this->ShadowPass();
-	Logger::Log("Shadowmaps: ", shadowmaps.size());
 	this->GetContext()->PSSetShaderResources(5, shadowmaps.size(), shadowmaps.data());
 
 	RenderPass();
@@ -349,7 +352,9 @@ std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() {
 		const auto& viewPort = light->GetViewPort();
 		this->immediateContext->RSSetViewports(1, &viewPort);
 		this->cameraBuffer->UpdateBuffer(this->GetContext(), &matrixContainer);
-		this->BindCameraMatrix();
+
+		ID3D11Buffer* buffer = this->cameraBuffer->GetBuffer();
+		this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);
 
 		// Draw all objects to depthstencil
 		for (auto& mesh : *this->meshRenderQueue.get()) {
@@ -411,12 +416,12 @@ void Renderer::ResizeSwapChain(const Window& window)
 void Renderer::BindSampler()
 {
 	// Sampler
-	ID3D11SamplerState* s = this->sampler->GetSamplerState();
-	immediateContext->PSSetSamplers(0, 1, &s);
+	ID3D11SamplerState* sampler = this->sampler->GetSamplerState();
+	immediateContext->PSSetSamplers(0, 1, &sampler);
 
-	// Replace with dedicated shadow sampler
-	// Logger::Warn("This is not a dedicated shadow sampler");
-	immediateContext->PSSetSamplers(1, 1, &s);
+	// Shadow samplerF
+	ID3D11SamplerState* shadowSampler = this->shadowSampler->GetSamplerState();
+	immediateContext->PSSetSamplers(1, 1, &shadowSampler);
 }
 
 void Renderer::BindInputLayout()

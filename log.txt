@@ -1213,3 +1213,150 @@ miss at distance: 340282346638528859811704183484516925440.000000
 shooting ray
 miss at distance: 340282346638528859811704183484516925440.000000
 Exiting game...5000002DCE0DB25F0
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene: ../../../../assets/scenes/testresult.scene
+Successfully created a camera.
+------------------BEFORE TAGS-----------------
+tag was found in json: 1
+targetTag was found in json: 0
+solid was found in json: 1
+dynamic was found in json: 0
+Added stray Collider with GameObject3D parent to physics queue
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+shooting ray
+hit against object nr: 0distance: 3.25674
+hit at distance: 3.256739
+shooting ray
+hit against object nr: 0distance: 3.31885
+hit at distance: 3.318847
+Exiting game...50000024397FAAB80
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene: ../../../../assets/scenes/testresult.scene
+Successfully created a camera.
+------------------BEFORE TAGS-----------------
+tag was found in json: 1
+targetTag was found in json: 0
+solid was found in json: 1
+dynamic was found in json: 0
+Added stray Collider with GameObject3D parent to physics queue
+Set Parent.
+Created a MeshObject.
+Set Parent.
+------------------BEFORE TAGS-----------------
+tag was found in json: 1
+targetTag was found in json: 0
+solid was found in json: 1
+dynamic was found in json: 0
+Added stray Collider with GameObject3D parent to physics queue
+Set Parent.
+Created a MeshObject.
+Set Parent.
+------------------BEFORE TAGS-----------------
+tag was found in json: 1
+targetTag was found in json: 0
+solid was found in json: 1
+dynamic was found in json: 1
+Added stray Collider with GameObject3D parent to physics queue
+Set Parent.
+Created a MeshObject.
+Set Parent.
+------------------BEFORE TAGS-----------------
+tag was found in json: 1
+targetTag was found in json: 0
+solid was found in json: 1
+dynamic was found in json: 1
+Set Parent.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Created a MeshObject.
+Set Parent.
+Successfully created a camera.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a spotlight.
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Added Rigidbody to physics queue
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+hit against object nr: 0distance: 5.45146
+hit at distance: 5.451463
+shooting ray
+hit against object nr: 0distance: 6.793
+hit at distance: 6.793002
+shooting ray
+hit against object nr: 0distance: 7.13518
+hit at distance: 7.135179
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+hit against object nr: 0distance: 4.98218
+hit at distance: 4.982181
+shooting ray
+hit against object nr: 0distance: 3.93225
+hit at distance: 3.932251
+Exiting game...50000021AA7B68E30
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene: ../../../../assets/scenes/testresult.scene
+Successfully created a camera.
+Added stray Collider with GameObject3D parent to physics queue
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Exiting game...500000149CB47CF20
+Clearing render queue...
+Clearing render queue successful.
+Deleted scene: ../../../../assets/scenes/testresult.scene
+Successfully created a camera.
+Added stray Collider with GameObject3D parent to physics queue
+Set Parent.
+Created a MeshObject.
+Set Parent.
+Created a MeshObject.
+Set Parent.
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+hit against object nr: 0distance: 5.99396
+hit at distance: 5.993962
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+hit against object nr: 0distance: 8.46228
+hit at distance: 8.462284
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+shooting ray
+miss at distance: 340282346638528859811704183484516925440.000000
+Exiting game...500000252F1E37CE0

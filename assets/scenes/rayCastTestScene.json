@@ -37,9 +37,9 @@
           1.0
         ],
         "scale": [
-          1.0,
-          1.0,
-          1.0
+          3.0,
+          3.0,
+          3.0
         ]
       },
       "type": "GameObject3D",
@@ -63,7 +63,7 @@
           1.0
         ]
       },
-      "type": "BoxCollider",
+      "type": "SphereCollider",
       "tag": 1,
       "targetTag": 0,
       "solid": true,

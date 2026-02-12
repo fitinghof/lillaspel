@@ -45,7 +45,7 @@ void SphereCollider::SetDiameter(float diameter)
 
 float SphereCollider::GetDiameter()
 {
-	return this->transform.GetScale().m128_f32[0];
+	return this->GetGlobalScale().m128_f32[0];
 }
 
 bool SphereCollider::CollidesWithBox(BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)

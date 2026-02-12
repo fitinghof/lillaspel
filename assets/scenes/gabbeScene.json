@@ -134,7 +134,7 @@
           1.0
         ]
       },
-      "type": "SphereCollider",
+      "type": "BoxCollider",
       "tag": 1,
       "targetTag": 0,
       "solid": true,
@@ -303,7 +303,7 @@
       },
       "type": "SphereCollider",
       "tag": 1,
-      "targetTag": 0,
+      "targetTag": 3,
       "solid": true,
       "dynamic": true
     },

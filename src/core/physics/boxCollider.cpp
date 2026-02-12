@@ -90,10 +90,7 @@ void BoxCollider::SaveToJson(nlohmann::json& data)
 
 bool BoxCollider::CollidesWithBox(class BoxCollider* box, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
 {
-
 	bool collision = SAT(this->satData, box->satData, resolveAxis, resolveDistance);
-
-
 
 	return collision;
 }
@@ -133,20 +130,20 @@ void BoxCollider::SetExtents(DirectX::XMFLOAT3 extents)
 	if (extents.y < this->shortestExtent) this->shortestExtent = extents.y;
 	if (extents.z < this->shortestExtent) this->shortestExtent = extents.z;
 
-	Logger::Log("----------SAT-DATA---------");
+	// Logger::Log("----------SAT-DATA---------");
 
-	for (int i = 0; i < 8; i++)
-	{
-		Logger::Log("positions: " + std::to_string(this->satData.positionData[i].x), +", " + std::to_string(this->satData.positionData[i].y) + std::to_string(this->satData.positionData[i].z));
-	}
+	// for (int i = 0; i < 8; i++)
+	// {
+	// 	Logger::Log("positions: " + std::to_string(this->satData.positionData[i].x), +", " + std::to_string(this->satData.positionData[i].y) + std::to_string(this->satData.positionData[i].z));
+	// }
 
-	Logger::Log("----------||---------");
+	// Logger::Log("----------||---------");
 }
 
 DirectX::XMFLOAT3 BoxCollider::GetExtents()
 {
 	DirectX::XMFLOAT3 extents = {};
-	DirectX::XMStoreFloat3(&extents, this->transform.GetScale());
+	DirectX::XMStoreFloat3(&extents, this->GetGlobalScale());
 	
 	return extents;
 }

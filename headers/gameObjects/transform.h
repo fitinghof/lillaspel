@@ -101,6 +101,12 @@ public:
 	DirectX::XMFLOAT4X4 GetWorldMatrix(bool inverseTranspose) const;
 
 	/// <summary>
+	/// Makes the view matrix for transform
+	/// </summary>
+	/// <returns>ViewMatrix</returns>
+	DirectX::XMFLOAT4X4 GetViewMatrix() const;
+
+	/// <summary>
 	/// Returns a rotation quaternion based on yaw and pitch, making sure up is up
 	/// </summary>
 	/// <param name="yawDegrees">Yaw in degrees</param>

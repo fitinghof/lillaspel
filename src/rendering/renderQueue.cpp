@@ -64,7 +64,9 @@ void RenderQueue::AddLightObject(std::weak_ptr<GameObject> newSpotlightObject) {
 		throw std::runtime_error("Fatal error in RenderQueue.");
 	}
 
-	instance->lightRenderQueue->push_back(std::static_pointer_cast<SpotlightObject>(newSpotlightObject.lock()));
+	auto light = std::static_pointer_cast<SpotlightObject>(newSpotlightObject.lock());
+
+	instance->lightRenderQueue->push_back(light);
 }
 
 void RenderQueue::ClearAllQueues() {

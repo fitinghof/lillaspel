@@ -156,7 +156,7 @@ private:
 	/// </summary>
 	void RenderPass();
 
-	std::vector<ID3D10DepthStencilView*> ShadowPass();
+	std::vector<ID3D11ShaderResourceView*> ShadowPass();
 
 	/// <summary>
 	/// Clears last frame with a clear color

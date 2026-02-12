@@ -5,7 +5,8 @@ void DepthBuffer::Init(ID3D11Device* device, UINT width, UINT height)
 
 	if (this->texture.Get()) this->texture.Reset();
 	if (this->shaderResourceView.Get()) this->shaderResourceView.Reset();
-	if (this->depthStencilViews[0].Get()) this->depthStencilViews[0].Reset();
+	if (this->depthStencilViews.Get()) this->depthStencilViews.Reset();
+	if (this->depthStencilState.Get()) this->depthStencilState.Reset();
 
 	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
 	depthStencilDesc.DepthEnable = true;
@@ -14,7 +15,6 @@ void DepthBuffer::Init(ID3D11Device* device, UINT width, UINT height)
 	depthStencilDesc.StencilEnable = false;
 	depthStencilDesc.StencilReadMask = 0;
 	depthStencilDesc.StencilWriteMask = 0;
-
 
 	HRESULT hr0 = device->CreateDepthStencilState(&depthStencilDesc, this->depthStencilState.GetAddressOf());
 	if (FAILED(hr0)) {
@@ -44,18 +44,20 @@ void DepthBuffer::Init(ID3D11Device* device, UINT width, UINT height)
 		throw std::exception(std::format("Failed to create Depth Stencil Texture, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr1)).c_str());
 	}
 
-	this->depthStencilViews.push_back(nullptr);
-	int arrayIndex = this->depthStencilViews.size() - 1;
 	HRESULT hr =
-		device->CreateDepthStencilView(this->texture.Get(), 0, &this->depthStencilViews[arrayIndex]);
+		device->CreateDepthStencilView(this->texture.Get(), 0, this->depthStencilViews.GetAddressOf());
 	if (FAILED(hr)) {
 		throw std::exception(std::format("Error creating Depth Stencil, HRESULT: 0x{:08X}", static_cast<unsigned long>(hr)).c_str());
 	}
 }
 
-ID3D11DepthStencilView* DepthBuffer::GetDepthStencilView(UINT arrayIndex) const
-{
-	return this->depthStencilViews[arrayIndex].Get();
+
+[[deprecated]] ID3D11DepthStencilView* DepthBuffer::GetDepthStencilView(UINT arrayIndex) const {
+	return this->depthStencilViews.Get();
+}
+
+ID3D11DepthStencilView* DepthBuffer::GetDepthStencilView() const {
+	return this->depthStencilViews.Get();
 }
 
 ID3D11ShaderResourceView* DepthBuffer::GetShaderResourceView() const

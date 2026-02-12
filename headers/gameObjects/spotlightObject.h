@@ -15,7 +15,9 @@ public:
 		DirectX::XMFLOAT4 color; // 16 b
 		float intensity;		 // 4 b
 
-		float spotAngleRadians; // 4 b
+		float spotCosAngleRadians; // 4 b
+
+		DirectX::XMFLOAT4X4 viewProjectionMatrix;
 	};
 
 
@@ -26,6 +28,9 @@ public:
 
 	SpotLightContainer GetSpotLightData() const;
 	ID3D11DepthStencilView* GetDepthStencilView() const;
+	const D3D11_VIEWPORT& GetViewPort() const;
+	bool GetResolutionChanged() const;
+	ID3D11ShaderResourceView* GetSRV() const;
 
 	virtual void Start() override;
 	virtual void Tick() override;
@@ -33,12 +38,16 @@ public:
 	virtual void LoadFromJson(const nlohmann::json& data) override;
 	virtual void SaveToJson(nlohmann::json& data) override;
 
+
 	std::weak_ptr<CameraObject> camera;
-	void SetShadowResolution(ID3D11Device* device, size_t width, size_t height);
+	void SetShadowResolution(size_t width, size_t height);
+
+	void SetDepthBuffer(ID3D11Device* device);
+
 
 private:
 
-
+	bool resolutionChanged = true;
 
 	D3D11_VIEWPORT shadowViewPort;
 	SpotLightContainer data;

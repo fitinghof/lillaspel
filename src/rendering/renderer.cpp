@@ -212,6 +212,10 @@ void Renderer::LoadShaders()
 
 void Renderer::Render()
 {
+	auto shadowmaps = this->ShadowPass();
+	Logger::Log("Shadowmaps: ", shadowmaps.size());
+	this->GetContext()->PSSetShaderResources(5, shadowmaps.size(), shadowmaps.data());
+
 	RenderPass();
 
 	ImGui::Begin("Change Skybox");
@@ -256,6 +260,7 @@ IDXGISwapChain* Renderer::GetSwapChain() const
 
 void Renderer::RenderPass()
 {
+
 	// Bind basic stuff (it probably doesn't need to be set every frame)
 	if (!this->hasBoundStatic) {
 		BindSampler();
@@ -302,9 +307,21 @@ void Renderer::RenderPass()
 	}
 }
 
-std::vector<ID3D10DepthStencilView*> Renderer::ShadowPass() { 
+std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() { 
+
+	this->hasBoundStatic = false;
+	if (this->currentVertexShader != this->vertexShader.get()) {
+		this->vertexShader->BindShader(this->immediateContext.Get());
+		this->currentVertexShader = this->vertexShader.get();
+	}
+	this->GetContext()->PSSetShader(nullptr, nullptr, 0);
+
 	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
-	std::vector<ID3D10DepthStencilView*> spotlights;
+
+	std::vector<ID3D11ShaderResourceView*> depthStencilViews;
+	depthStencilViews.reserve(lightCount);
+
+
 	for (uint32_t i = 0; i < lightCount; i++) {
 		if ((*this->lightRenderQueue)[i].expired()) {
 			// This should remove deleted lights
@@ -315,6 +332,10 @@ std::vector<ID3D10DepthStencilView*> Renderer::ShadowPass() {
 		}
 
 		auto light = (*this->lightRenderQueue)[i].lock();
+		if (light->GetResolutionChanged()) {
+			light->SetDepthBuffer(this->GetDevice());
+		}
+
 		this->immediateContext->ClearDepthStencilView(light->GetDepthStencilView(), D3D11_CLEAR_DEPTH, 1, 0);
 		this->immediateContext->OMSetRenderTargets(0, nullptr, light->GetDepthStencilView());
 
@@ -325,16 +346,18 @@ std::vector<ID3D10DepthStencilView*> Renderer::ShadowPass() {
 		}
 		auto& matrixContainer = light->camera.lock()->GetCameraMatrix();
 
-		this->immediateContext->RSSetViewports(1, light->camera.lock()->);
+		const auto& viewPort = light->GetViewPort();
+		this->immediateContext->RSSetViewports(1, &viewPort);
 		this->cameraBuffer->UpdateBuffer(this->GetContext(), &matrixContainer);
 		this->BindCameraMatrix();
-
 
 		// Draw all objects to depthstencil
 		for (auto& mesh : *this->meshRenderQueue.get()) {
 			if (mesh.expired()) continue;
 			this->RenderMeshObject(mesh.lock().get(), false);
+			
 		}
+		depthStencilViews.push_back(light->GetSRV());
 	}
 
 	// Reset renderTarget and deapthStencil
@@ -343,7 +366,7 @@ std::vector<ID3D10DepthStencilView*> Renderer::ShadowPass() {
 	// Reset ViewPort
 	this->BindViewport();
 
-	return std::vector<ID3D10DepthStencilView*>(); 
+	return depthStencilViews; 
 
 }
 
@@ -390,6 +413,10 @@ void Renderer::BindSampler()
 	// Sampler
 	ID3D11SamplerState* s = this->sampler->GetSamplerState();
 	immediateContext->PSSetSamplers(0, 1, &s);
+
+	// Replace with dedicated shadow sampler
+	// Logger::Warn("This is not a dedicated shadow sampler");
+	immediateContext->PSSetSamplers(1, 1, &s);
 }
 
 void Renderer::BindInputLayout()
@@ -561,7 +588,6 @@ void Renderer::DrawSkybox() {
 
 void Renderer::RenderMeshObject(MeshObject* meshObject, bool renderMaterial)
 {
-	
 	// Bind mesh
 	MeshObjData data = meshObject->GetMesh();
 	std::weak_ptr<Mesh> weak_mesh = data.GetMesh();
@@ -608,6 +634,7 @@ void Renderer::RenderMeshObject(MeshObject* meshObject, bool renderMaterial)
 		{
 			if (!this->renderAllWireframe && renderMaterial)
 			{
+
 				BindMaterial(weak_material.lock().get());
 			}
 

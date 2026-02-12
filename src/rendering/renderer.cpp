@@ -234,9 +234,11 @@ void Renderer::Resize(const Window& window)
 	BindViewport();
 }
 
-void Renderer::ToggleVSync(bool enable)
-{
-	this->isVSyncEnabled = enable;
+void Renderer::ToggleVSync(bool enable) { this->isVSyncEnabled = enable; }
+
+void Renderer::ToggleWireframe(bool enable) {
+	Logger::Log("test");
+	this->renderAllWireframe = enable;
 }
 
 ID3D11Device* Renderer::GetDevice() const
@@ -281,9 +283,9 @@ void Renderer::RenderPass()
 	// Bind rasterizerState
 	if (!this->renderAllWireframe) {
 		BindRasterizerState(this->standardRasterizerState.get());
-	}	else {
-		BindRasterizerState(this->wireframeRasterizerState.get());
+	} else {
 		BindMaterial(this->defaultUnlitMat.lock().get());
+		BindRasterizerState(this->wireframeRasterizerState.get());
 	}
 
 	// Bind meshes

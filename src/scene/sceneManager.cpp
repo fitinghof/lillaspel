@@ -4,8 +4,7 @@
 // Very good macro, please don't remove
 #define NAMEOF(x) #x
 
-SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend), objectFromString()
-{
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString(), isPaused(false) {
 	this->objectFromString.RegisterType<GameObject>(NAMEOF(GameObject));
 	this->objectFromString.RegisterType<GameObject3D>(NAMEOF(GameObject3D));
 	this->objectFromString.RegisterType<MeshObject>(NAMEOF(MeshObject));
@@ -25,7 +24,9 @@ void SceneManager::SceneTick()
 		this->mainScene = this->emptyScene;
 	}
 
-	this->mainScene->SceneTick();
+	if (!this->isPaused) {
+		this->mainScene->SceneTick();
+	}
 
 	ImGui::Begin("SceneTest");
 	if (ImGui::Button("Delete Scene")) {
@@ -147,6 +148,9 @@ void SceneManager::SetMainCameraInScene(std::shared_ptr<Scene>& scene)
 		Logger::Error("Couldn't find a camera in the scene.");
 	}
 }
+
+void SceneManager::TogglePause(bool enable) 
+{ this->isPaused = enable; }
 
 void SceneManager::SaveSceneToCurrentFile()
 {

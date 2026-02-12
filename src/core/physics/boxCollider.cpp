@@ -160,7 +160,7 @@ void BoxCollider::SetRotation(DirectX::XMFLOAT3 newRotation)
 	this->BuildCornersArray(this->satData.positionData);
 }
 
-bool BoxCollider::IntersectWithRay(const Ray& ray, float& distance) { 
+bool BoxCollider::IntersectWithRay(const Ray& ray, float& distance, float maxDistance) { 
 	
 	
 	return false; 

@@ -25,7 +25,7 @@ public:
 	void SetExtents(DirectX::XMFLOAT3 newSize);
 	DirectX::XMFLOAT3 GetExtents();
 
-	bool IntersectWithRay(const Ray& ray, float& distance) override;
+	bool IntersectWithRay(const Ray& ray, float& distance, float maxDistance) override;
 
 private:
 	DirectX::XMFLOAT3 axis[3];

@@ -5,7 +5,8 @@ RayCaster::RayCaster() {}
 
 RayCaster::~RayCaster() {}
 
-bool RayCaster::castRay(Ray& ray, RayCastData& rayCastData, std::vector<std::weak_ptr<Collider>>& colliders) {
+bool RayCaster::castRay(Ray& ray, RayCastData& rayCastData,
+						std::vector<std::weak_ptr<Collider>>& colliders, float maxDistance = -1) {
 	int currentClosest = -1;
 	float closestDistance = std::numeric_limits<float>::max();
 	for (size_t i = 0; i < colliders.size(); i++) {

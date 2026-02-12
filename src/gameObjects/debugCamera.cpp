@@ -71,18 +71,19 @@ void DebugCamera::shootRay() {
 		
 		Ray ray{Vector3D{posVec}, Vector3D{lookVec}};
 		RayCastData rayCastData;
-		Logger::Log("shooting ray from pos: ", ray.origin.GetX(), " ", ray.origin.GetY(), " ", ray.origin.GetZ());
-		Logger::Log("with direction: ", ray.direction.GetX(), " ", ray.direction.GetY(), " ", ray.direction.GetZ());
+		Logger::Log("shooting ray");
+		//Logger::Log("shooting ray from pos: ", ray.origin.GetX(), " ", ray.origin.GetY(), " ", ray.origin.GetZ());
+		//Logger::Log("with direction: ", ray.direction.GetX(), " ", ray.direction.GetY(), " ", ray.direction.GetZ());
 
 		bool didHit = PhysicsQueue::GetInstance().castRay(ray, rayCastData);
 		std::string hitString;
 		if (didHit) {
 			hitString = "hit";
 		} else {
-			hitString = "false";
+			hitString = "miss";
 		}
 
-		Logger::Log("did hit: ", hitString, " at distance: ", std::to_string(rayCastData.distance));
+		Logger::Log(hitString, " at distance: ", std::to_string(rayCastData.distance));
 	}
 
 }

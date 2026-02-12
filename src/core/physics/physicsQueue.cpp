@@ -81,6 +81,6 @@ void PhysicsQueue::SolveCollisions()
     }
 }
 
-bool PhysicsQueue::castRay(Ray& ray, RayCastData& rayCastData) { 
+bool PhysicsQueue::castRay(Ray& ray, RayCastData& rayCastData, float maxDistance) { 
     return this->rayCaster.castRay(ray, rayCastData, this->strayColliders);
 }

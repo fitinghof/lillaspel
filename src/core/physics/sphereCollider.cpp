@@ -78,15 +78,15 @@ bool SphereCollider::CollidesWithSphere(SphereCollider* sphere, DirectX::XMFLOAT
 }
 
 //needs improved variable names
-bool SphereCollider::IntersectWithRay(const Ray& ray, float& distance) {
+bool SphereCollider::IntersectWithRay(const Ray& ray, float& distance, float maxDistance) {
 	
-	//Logger::Log("At collider: shooting ray from pos: ", ray.origin.GetX(), " ", ray.origin.GetY(), " ", ray.origin.GetZ());
-	//Logger::Log("with direction: ", ray.direction.GetX(), " ", ray.direction.GetY(), " ", ray.direction.GetZ());
 
 	Vector3D originToCenter = Vector3D(this->GetGlobalPosition()) - ray.origin;
-	Logger::Log("sphere pos: ", Vector3D(this->GetGlobalPosition()).GetString());
+	
 	float radius = this->GetDiameter() / 2;
-	Logger::Log("sphere radius: ", radius);
+	if (originToCenter.Length() - radius > maxDistance) {
+		false;
+	}
 	float s = originToCenter * ray.direction;
 
 	float originToCenterSquared = originToCenter * originToCenter;

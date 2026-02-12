@@ -1,6 +1,8 @@
 #pragma once
 #include "core/physics/rigidBody.h"
 #include "core/physics/rayCaster.h"
+#include <limits>
+
 
 class PhysicsQueue
 {
@@ -14,7 +16,7 @@ public:
     void AddStrayCollider(std::weak_ptr<Collider> collider);
     void SolveCollisions();
 
-    bool castRay(Ray& ray, RayCastData& rayCastData);
+    bool castRay(Ray& ray, RayCastData& rayCastData, float maxDistance = (std::numeric_limits<float>::max)());
 
 private:
     PhysicsQueue();

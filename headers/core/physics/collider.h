@@ -82,7 +82,7 @@ public:
 	/// <param name="ray"></param>
 	/// <param name="distance"></param>
 	/// <returns></returns>
-	virtual bool IntersectWithRay(const Ray& ray, float& distance) = 0;
+	virtual bool IntersectWithRay(const Ray& ray, float& distance, float maxDistance) = 0;
 
 private:
 	int id = -1;

@@ -21,6 +21,8 @@
 #include "rendering/vertexBuffer.h"
 #include "wrl/client.h"
 #include <algorithm>
+#include "core/assetManager.h"
+#include "rendering/skybox.h"
 
 class Renderer {
 public:
@@ -92,6 +94,7 @@ private:
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 	std::unique_ptr<RasterizerState> wireframeRasterizerState;
+	std::unique_ptr<RasterizerState> skyboxRasterizerState;
 	RasterizerState* currentRasterizerState;
 
 	// Default stuff
@@ -106,6 +109,8 @@ private:
 
 	Shader* currentPixelShader;
 	Shader* currentVertexShader;
+
+	std::unique_ptr<Skybox> skybox;
 
 	// Render Queue:
 
@@ -169,6 +174,8 @@ private:
 
 	void BindCameraMatrix();
 	void BindWorldMatrix(ID3D11Buffer* buffer);
+
+	void DrawSkybox();
 
 	/// <summary>
 	/// Renders a single MeshObject

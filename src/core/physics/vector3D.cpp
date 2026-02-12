@@ -51,3 +51,7 @@ void Vector3D::Normalize() {
 	this->y = this->y / len;
 	this->z = this->z / len;
 }
+
+std::string Vector3D::GetString() { 
+	return "(" + std::to_string(this->x) + ", " + std::to_string(this->y) + ", " + std::to_string(this->z) + ")";
+}

@@ -3,6 +3,7 @@
 #include "core/input/inputManager.h"
 #include "utilities/logger.h"
 #include "utilities/time.h"
+#include "core/physics/physicsQueue.h"
 
 #include "imgui.h"
 
@@ -24,6 +25,8 @@ void DebugCamera::Tick() {
 		showCursor = !showCursor;
 		ShowCursor(showCursor);
 	}
+
+	this->shootRay();
 
 	float speed = Time::GetInstance().GetDeltaTime() * 15;
 	this->transform.Move(this->transform.GetDirectionVector(), keyboardInput.GetMovementVector()[1] * speed);
@@ -58,4 +61,28 @@ void DebugCamera::Tick() {
 	if (this->controllerInput.Quit()) {
 		PostQuitMessage(0);
 	}
+}
+
+void DebugCamera::shootRay() {
+	const DirectX::XMVECTOR lookVec = this->transform.GetDirectionVector();
+	const DirectX::XMVECTOR posVec = this->transform.GetPosition(); 
+		
+	if (keyboardInput.LeftClick()) {
+		
+		Ray ray{Vector3D{posVec}, Vector3D{lookVec}};
+		RayCastData rayCastData;
+		Logger::Log("shooting ray from pos: ", ray.origin.GetX(), " ", ray.origin.GetY(), " ", ray.origin.GetZ());
+		Logger::Log("with direction: ", ray.direction.GetX(), " ", ray.direction.GetY(), " ", ray.direction.GetZ());
+
+		bool didHit = PhysicsQueue::GetInstance().castRay(ray, rayCastData);
+		std::string hitString;
+		if (didHit) {
+			hitString = "hit";
+		} else {
+			hitString = "false";
+		}
+
+		Logger::Log("did hit: ", hitString, " at distance: ", std::to_string(rayCastData.distance));
+	}
+
 }

@@ -95,7 +95,7 @@
           "type": "MeshObject"
         }
       ],
-      "meshIdentifier": "CS/cs2.glb:Mesh_0",
+      "meshIdentifier": "Box/indicatorSphereWithMaterial.glb:Mesh_0",
       "transform": {
         "position": [
           0.0,

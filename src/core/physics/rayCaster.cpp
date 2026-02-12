@@ -9,6 +9,7 @@ bool RayCaster::castRay(Ray& ray, RayCastData& rayCastData, std::vector<std::wea
 	int currentClosest = -1;
 	float closestDistance = std::numeric_limits<float>::max();
 	for (size_t i = 0; i < colliders.size(); i++) {
+		Logger::Log("testing against object nr: ", i);
 		bool didHit = false;
 		float distance;
 		didHit = colliders[i].lock().get()->IntersectWithRay(ray, distance);
@@ -25,6 +26,7 @@ bool RayCaster::castRay(Ray& ray, RayCastData& rayCastData, std::vector<std::wea
 	
 	} 
 	else {
+		rayCastData.distance = closestDistance;
 		return false;
 	}
 }

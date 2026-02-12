@@ -36,4 +36,6 @@ public:
 	/// normalizes the vector to a lenght of 1
 	/// </summary>
 	void Normalize();	  
+
+	std::string GetString();
 };

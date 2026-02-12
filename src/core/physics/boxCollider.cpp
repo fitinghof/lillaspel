@@ -178,16 +178,15 @@ bool BoxCollider::IntersectWithRay(const Ray& ray, float& distance, float maxDis
 	float EPSILON = 0.000001;
 	
 	float tMAX = std::numeric_limits<float>::max();
-	float tMIN = std::numeric_limits<float>::min();
+	float tMIN = 0.0f;
 
 	Vector3D originToCenter = Vector3D(this->GetGlobalPosition()) - ray.origin;
 
 	float dimensions[3] = {
 		this->GetExtents().x,
-		this->GetExtents().x,
-		this->GetExtents().x
+		this->GetExtents().y,
+		this->GetExtents().z
 	};
-	
 	
 	for (int i = 0; i < 3; i++) {
 		float axisOffset = Vector3D(this->axis[i]) * originToCenter;
@@ -209,14 +208,14 @@ bool BoxCollider::IntersectWithRay(const Ray& ray, float& distance, float maxDis
 
 	if (tMIN > 0) {
 
-		if (maxDistance < tMIN) {
+		if (maxDistance > tMIN) {
 			distance = tMIN;
 			return true;
 		}
 		distance = tMIN;
 		return false;
 	}
-	if (maxDistance < tMAX) {
+	if (maxDistance > tMAX) {
 		distance = tMAX;
 		return true;
 	}

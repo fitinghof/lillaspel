@@ -14,6 +14,7 @@ public:
 
     void AddRigidBody(std::weak_ptr<RigidBody> rigidBody);
     void AddStrayCollider(std::weak_ptr<Collider> collider);
+    void AddToAllColliders(std::weak_ptr<Collider> collider);
     void SolveCollisions();
     /// <summary>
     /// casts ray with origin point and direction aswell as optional max distance,
@@ -33,7 +34,9 @@ private:
     int colliderIdCounter = 0;
 
     std::vector<std::weak_ptr<RigidBody>> rigidBodies;
-    std::vector<std::weak_ptr<Collider>> strayColliders;
+    std::vector<std::weak_ptr<Collider>> allColiders;
+	std::vector<std::weak_ptr<Collider>> strayColliders;
+
 
     RayCaster rayCaster;
 };

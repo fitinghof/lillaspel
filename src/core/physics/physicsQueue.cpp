@@ -29,6 +29,12 @@ void PhysicsQueue::AddStrayCollider(std::weak_ptr<Collider> collider)
 
     this->colliderIdCounter++;
 }
+void PhysicsQueue::AddToAllColliders(std::weak_ptr<Collider> collider) {
+	collider.lock()->SetId(this->colliderIdCounter);
+	this->allColiders.push_back(collider);
+
+	this->colliderIdCounter++;
+}
 
 void PhysicsQueue::SolveCollisions()
 {
@@ -103,4 +109,10 @@ void PhysicsQueue::SolveCollisions()
             rigidBody->Collision(collider);
         }
     }
+}
+
+bool PhysicsQueue::castRay(Ray& ray, RayCastData& rayCastData, float maxDistance) {
+    
+   return this->rayCaster.castRay(ray, rayCastData, this->allColiders, maxDistance);
+
 }

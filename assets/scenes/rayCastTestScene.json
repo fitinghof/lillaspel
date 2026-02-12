@@ -63,7 +63,7 @@
           1.0
         ]
       },
-      "type": "SphereCollider",
+      "type": "BoxCollider",
       "tag": 1,
       "targetTag": 0,
       "solid": true,

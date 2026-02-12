@@ -37,11 +37,13 @@ void Collider::SetParent(std::weak_ptr<GameObject> parent)
 	{
 		this->rigidBodyParent = rigidBodyParent;
 		rigidBodyParent->AddColliderChild(thisCollider);
+		PhysicsQueue::GetInstance().AddToAllColliders(thisCollider);
 	}
 	else if (gameObject3DParent)
 	{
 		this->gameObject3DParent = gameObject3DParent;
 		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
+		PhysicsQueue::GetInstance().AddToAllColliders(thisCollider);
 		Logger::Log("Added stray Collider with GameObject3D parent to physics queue");
 	}
 	else

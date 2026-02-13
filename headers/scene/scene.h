@@ -26,6 +26,8 @@ public:
 
 	size_t GetNumberOfGameObjects();
 
+	virtual int GetNextID() override;
+
 private:
 	/// <summary>
 	/// Deletes all GameObjects in the deleteQueue (that is, all objects added using QueueDeleteGameObject())
@@ -48,4 +50,6 @@ private:
 	virtual const std::vector<std::shared_ptr<GameObject>>& GetGameObjects() const override;
 
 	bool finishedLoading;
+
+	int currentGameObjectId;
 };

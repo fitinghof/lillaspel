@@ -228,7 +228,7 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 		//PrintFloat3(resolveAxis, "resolveAxis: ");
 		//std::cout << "-------------------------------------------------" << std::endl;
 
-		Logger::Log("BOXSPHERE COLLISION!");
+		//Logger::Log("BOXSPHERE COLLISION!");
 
 		return true;
 	}

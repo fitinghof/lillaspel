@@ -96,7 +96,7 @@ bool SphereCollider::IntersectWithRay(const Ray& ray, float& distance, float max
 
 	Vector3D originToCenter = Vector3D(this->GetGlobalPosition()) - ray.origin;
 	
-	float radius = this->GetDiameter();
+	float radius = this->GetDiameter() / 2.0f;
 	if (originToCenter.Length() - radius > maxDistance) {
 		false;
 	}

@@ -105,6 +105,8 @@ void Scene::ShowHierarchy()
 
 	ImGui::SetNextWindowSize(ImVec2(400.f, 500.f), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Object Hierarchy", &ImguiManager::showObjectHierarchy, ImGuiWindowFlags_MenuBar);
+	
+	// Create GameObjects button
 	if (ImGui::Button("Create")) ImGui::OpenPopup("select_gameobject");
 	if (ImGui::BeginPopup("select_gameobject")) {
 		if (ImGui::Selectable("GameObject")) {
@@ -119,7 +121,6 @@ void Scene::ShowHierarchy()
 		if (ImGui::Selectable("CameraObject")) {
 			this->CreateGameObjectOfType<CameraObject>();
 		}
-		 //Debug Camera apparently breaks
 		if (ImGui::Selectable("DebugCamera")) {
 			this->CreateGameObjectOfType<DebugCamera>();
 		}
@@ -129,23 +130,35 @@ void Scene::ShowHierarchy()
 
 		ImGui::EndPopup();
 	}
+
+	if (!this->GetSelected().expired()) {
+		ImGui::SameLine();
+		if (ImGui::Button("Reparent selected to root")) {
+			std::weak_ptr<GameObject> emptyObj = std::make_shared<GameObject>();
+			this->GetSelected().lock()->SetParent(emptyObj);
+			this->SetSelected(emptyObj);
+		}
+	}
+
+	// Create the object hierarchy
 	for (size_t i = 0; i < this->gameObjects.size(); i++) {
 		std::weak_ptr<GameObject> gameObject = this->gameObjects[i];
 		if (gameObject.lock()->parent.expired()) {
-			ShowHierarchyRecursive(gameObject.lock()->name, gameObject);
+			ShowHierarchyRecursive(gameObject);
 		}
 	}
+
 	ImGui::End();
 }
 
-void Scene::ShowHierarchyRecursive(std::string name, std::weak_ptr<GameObject> gameObject) {
-	if (ImGui::TreeNode(name.c_str())) {
+void Scene::ShowHierarchyRecursive(std::weak_ptr<GameObject> gameObject) {
+	if (ImGui::TreeNode(gameObject.lock()->GetName().c_str())) {
 		gameObject.lock()->ShowInHierarchy();
 		ImGui::Separator();
 		if (gameObject.lock()->children.size() > 0) {
 			if (ImGui::TreeNode("Children")) {
 				for (size_t i = 0; i < gameObject.lock()->children.size(); i++) {
-					ShowHierarchyRecursive("GameObject " + std::to_string(i), gameObject.lock()->children[i].lock());
+					ShowHierarchyRecursive(gameObject.lock()->children[i]);
 				}
 				ImGui::TreePop();
 			}

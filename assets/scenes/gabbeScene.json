@@ -58,9 +58,9 @@
           1.0
         ],
         "scale": [
-          1.0,
-          1.0,
-          1.0
+          2.0,
+          2.0,
+          2.0
         ]
       },
       "type": "BoxCollider",
@@ -108,9 +108,9 @@
           1.0
         ],
         "scale": [
-          2.0,
           1.0,
-          2.0
+          1.0,
+          1.0
         ]
       },
       "type": "GameObject3D",
@@ -130,15 +130,15 @@
         ],
         "scale": [
           2.0,
-          1.0,
-          1.0
+          2.0,
+          2.0
         ]
       },
-      "type": "BoxCollider",
+      "type": "SphereCollider",
       "tag": 1,
       "targetTag": 0,
       "solid": true,
-      "dynamic": true
+      "dynamic": false
     },
       {
       "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",
@@ -200,9 +200,9 @@
           1.0
         ],
         "scale": [
-          1.0,
-          1.0,
-          1.0
+          2.0,
+          2.0,
+          2.0
         ]
       },
       "type": "BoxCollider",
@@ -271,9 +271,9 @@
           1.0
         ],
         "scale": [
-          4.0,
-          4.0,
-          4.0
+          2.0,
+          2.0,
+          2.0
         ]
       },
       "type": "SphereCollider",

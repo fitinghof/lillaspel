@@ -1,7 +1,8 @@
 #include "gameObjects/gameObject.h"
 
-GameObject::GameObject() : children(), parent(), factory(nullptr), imguiName() {
-}
+GameObject::GameObject()
+	: children(), parent(), factory(nullptr), imguiName(), isActive(true), isActiveOverride(false),
+	  imguiIsActive(isActive) {}
 
 const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const { return this->children; }
 
@@ -113,6 +114,10 @@ void GameObject::ShowInHierarchy() {
 	ImGui::Separator();
 	ImGui::Text("Object details.");
 
+	if (ImGui::Checkbox("Is Active", &this->imguiIsActive)) {
+		SetActive(this->imguiIsActive);
+	}
+
 	if (ImGui::Button("Delete")) {
 		this->factory->QueueDeleteGameObject(this->GetPtr());
 	}
@@ -141,3 +146,23 @@ void GameObject::SetName(std::string newName)
 }
 
 const std::string& GameObject::GetName() { return this->name; }
+
+bool GameObject::IsActive() { return this->isActive && !this->isActiveOverride; }
+
+void GameObject::SetActive(bool isActive) { 
+	if (this->isActiveOverride) {
+		Logger::Warn("Tried to set active when not possible");
+		return;
+	}
+
+	this->isActive = isActive;
+	SetActiveOverride(!this->isActive);
+	this->isActiveOverride = false;
+}
+
+void GameObject::SetActiveOverride(bool isActive) { 
+	this->isActiveOverride = isActive;
+	for (auto& child : this->children) {
+		child.lock()->SetActiveOverride(isActive);
+	}
+}

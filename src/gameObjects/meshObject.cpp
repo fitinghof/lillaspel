@@ -1,6 +1,6 @@
 #include "gameObjects/meshObject.h"
 
-MeshObject::MeshObject() : mesh(), imguiNewMeshIdent("\0") {
+MeshObject::MeshObject() : mesh(), imguiNewMeshIdent("\0"), imguiNewMatIdent("\0"), hide(false) {
 	static int id = 0;
 	this->tempId = id++;
 	Logger::Log("Created a MeshObject.");
@@ -15,7 +15,7 @@ void MeshObject::SetMesh(MeshObjData newMesh)
 	RenderQueue::AddMeshObject(this->GetPtr());
 }
 
-MeshObjData MeshObject::GetMesh()
+MeshObjData& MeshObject::GetMesh()
 {
 	return this->mesh;
 }
@@ -62,9 +62,40 @@ void MeshObject::ShowInHierarchy()
 
 	ImGui::Text("MeshObject"); 
 
+	ImGui::Checkbox("Hide", &this->hide);
+
 	if (!this->GetMesh().GetMesh().expired()) {
 		std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdent());
 		ImGui::Text(meshText.c_str()); 
+
+		ImGui::Text("Materials");
+		for (int i = 0; i < this->GetMesh().GetMesh().lock()->GetSubMeshes().size(); i++) {
+			std::string materialName = this->GetMesh().GetMaterial(i).lock()->identifier;
+			if (materialName.size() > 32) {
+				materialName = "..." + materialName.substr(materialName.size() - 32, std::string::npos);
+			}
+
+			materialName = std::to_string(i) + materialName;
+
+			if (ImGui::TreeNode(materialName.c_str())) {
+				ImGui::Text(materialName.c_str());
+
+				if (ImGui::Button("Change material")) ImGui::OpenPopup("change_mat");
+				if (ImGui::BeginPopup("change_mat")) {
+					ImGui::InputText("New Material", this->imguiNewMatIdent, sizeof(this->imguiNewMatIdent));
+					if (ImGui::Button("Apply")) {
+						Logger::Log("Tried to change material.");
+						this->GetMesh().SetMaterial(i, AssetManager::GetInstance().GetMaterialWeakPtr(this->imguiNewMatIdent).lock());
+						std::strncpy(this->imguiNewMatIdent, "", sizeof(this->imguiNewMatIdent));
+						ImGui::CloseCurrentPopup();
+					}
+
+					ImGui::EndPopup();
+				}
+
+				ImGui::TreePop();
+			};
+		}
 	}
 
 	if (ImGui::Button("Change mesh")) ImGui::OpenPopup("change_mesh");
@@ -75,9 +106,12 @@ void MeshObject::ShowInHierarchy()
 		if (ImGui::Button("Apply")) {
 			Logger::Log("Tried to change mesh.");
 			this->SetMesh(AssetManager::GetInstance().GetMeshObjData(this->imguiNewMeshIdent));
+			std::strncpy(this->imguiNewMeshIdent, "", sizeof(this->imguiNewMeshIdent));
 			ImGui::CloseCurrentPopup();
 		}
 
 		ImGui::EndPopup();
 	}
 }
+
+bool MeshObject::IsHidden() { return this->hide; }

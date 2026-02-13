@@ -9,6 +9,8 @@ void Scene::SceneTick(bool isPaused)
 	for (size_t i = 0; i < this->gameObjects.size(); i++) {
 		std::shared_ptr<GameObject> gameObject = this->gameObjects[i];
 
+		if (!gameObject->IsActive()) continue;
+
 		// If paused, only debug camera should run
 		if (isPaused) {
 			if (DebugCamera* cam = dynamic_cast<DebugCamera*>(gameObject.get()); cam == nullptr) {

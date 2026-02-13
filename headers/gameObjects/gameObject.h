@@ -74,6 +74,22 @@ public:
 
 	virtual const std::string& GetName();
 
+	/// <summary>
+	/// Get if the gameObject is active
+	/// </summary>
+	/// <returns></returns>
+	bool IsActive();
+
+	/// <summary>
+	/// Sets active on the object and for all children
+	/// </summary>
+	void SetActive(bool isActive);
+
+	/// <summary>
+	/// Engine only. Set active for children.
+	/// </summary>
+	void SetActiveOverride(bool isActive);
+
 private:
 	/// <summary>
 	/// WARNING: Engine only. Do not use for any in-game logic.
@@ -100,4 +116,8 @@ private:
 protected:
 	GameObjectFactory* factory;
 	std::string name;
+	bool isActive;
+	bool isActiveOverride; // If true, then a parent is inactive
+
+	bool imguiIsActive;
 };

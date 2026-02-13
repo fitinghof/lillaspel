@@ -98,6 +98,7 @@ private:
 	std::unique_ptr<DepthBuffer> depthBuffer;
 	std::unique_ptr<InputLayout> inputLayout;
 	std::unique_ptr<Sampler> sampler;
+	std::unique_ptr<Sampler> shadowSampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 	std::unique_ptr<RasterizerState> wireframeRasterizerState;
 	std::unique_ptr<RasterizerState> skyboxRasterizerState;
@@ -162,6 +163,8 @@ private:
 	/// </summary>
 	void RenderPass();
 
+	std::vector<ID3D11ShaderResourceView*> ShadowPass();
+
 	/// <summary>
 	/// Clears last frame with a clear color
 	/// </summary>
@@ -178,6 +181,7 @@ private:
 	void BindMaterial(BaseMaterial* material);
 	void BindLights();
 
+
 	void BindCameraMatrix();
 	void BindWorldMatrix(ID3D11Buffer* buffer);
 
@@ -187,5 +191,5 @@ private:
 	/// Renders a single MeshObject
 	/// </summary>
 	/// <param name="meshObject"></param>
-	void RenderMeshObject(MeshObject* meshObject);
+	void RenderMeshObject(MeshObject* meshObject, bool renderMaterial = true);
 };

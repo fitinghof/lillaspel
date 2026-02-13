@@ -13,7 +13,7 @@ public:
 	/// <summary>
 	/// For inputting into a constant buffer
 	/// </summary>
-	struct CameraMatrixContainer {
+	struct alignas(16) CameraMatrixContainer {
 		/// <summary>
 		/// View Projection Matrix of the camera
 		/// </summary>
@@ -32,9 +32,60 @@ public:
 
 	virtual void Start() override;
 
-	CameraObject::CameraMatrixContainer& GetCameraMatrix();
 	void SetMainCamera();
+
+	/// <summary>
+	/// Set the fov using degrees
+	/// </summary>
+	/// <param name="fov"></param>
+	void SetFov(float fov);
+
+	/// <summary>
+	/// Set distance to far plane
+	/// </summary>
+	/// <param name="farPlane"></param>
+	void SetFarPlane(float farPlane);
+
+	/// <summary>
+	/// Set distance to near plane
+	/// </summary>
+	/// <param name="farPlane"></param>
+	void SetNearPlane(float nearPlane);
+
+	/// <summary>
+	/// Sets the aspect ration for the camera, for example 16 / 9 or 1 / 1
+	/// </summary>
+	/// <param name="aspectRatio"></param>
+	void SetAspectRatio(float aspectRatio);
+
+
+	CameraObject::CameraMatrixContainer GetCameraMatrix(bool transposeViewProjMult = false);
 	static CameraObject& GetMainCamera();
+
+	/// <summary>
+	/// Returns FOV in degrees
+	/// </summary>
+	/// <returns></returns>
+	float GetFov() const;
+
+	/// <summary>
+	/// Returns Distance to far plane
+	/// </summary>
+	/// <returns></returns>
+	float GetFarPlane() const;
+
+	/// <summary>
+	/// Returns Distance to near plane
+	/// </summary>
+	/// <returns></returns>
+	float GetNearPlane() const;
+
+	/// <summary>
+	/// returns the aspectratio, typically either 16/9 or 1/1
+	/// </summary>
+	/// <returns></returns>
+	float GetAspectRatio() const;
+
 
 	virtual void LoadFromJson(const nlohmann::json& data) override;
 	virtual void SaveToJson(nlohmann::json& data) override;
@@ -46,12 +97,17 @@ private:
 	static size_t cameraId;
 	size_t thisCameraId;
 
-	CameraMatrixContainer cameraMatrix;
+	// CameraMatrixContainer cameraMatrix;
 
 	/// <summary>
 	/// Field of view (FOV) in degrees
 	/// </summary>
 	float fieldOfView;
 
-	void UpdateCameraMatrix();
+	float aspectRatio;
+
+	float nearPlane;
+	float farPlane;
+
+	//void UpdateCameraMatrix();
 };

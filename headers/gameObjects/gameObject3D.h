@@ -37,11 +37,25 @@ public:
 	/// <returns></returns>
 	DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const override;
 
+	DirectX::XMMATRIX GetGlobalViewMatrix() const override;
+
 	/// <summary>
 	/// Maybe misleading name, but returns the forward vector of the object in global space
 	/// </summary>
 	/// <returns></returns>
 	virtual DirectX::XMVECTOR GetGlobalForward() const;
+
+	/// <summary>
+	/// Maybe misleading name, but returns the right vector of the object in global space
+	/// </summary>
+	/// <returns></returns>
+	virtual DirectX::XMVECTOR GetGlobalRight() const;
+
+	/// <summary>
+	/// Maybe misleading name, but returns the up vector of the object in global space
+	/// </summary>
+	/// <returns></returns>
+	virtual DirectX::XMVECTOR GetGlobalUp() const;
 
 	virtual void LoadFromJson(const nlohmann::json& data) override;
 	virtual void SaveToJson(nlohmann::json& data) override;

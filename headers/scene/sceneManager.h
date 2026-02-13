@@ -7,11 +7,16 @@
 #include "gameObjects/debugCamera.h"
 #include "gameObjects/meshObject.h"
 #include "rendering/renderer.h"
+#include "core/physics/rigidBody.h"
+#include "core/physics/collision.h"
 #include "scene/objectFromStringFactory.h"
 #include "utilities/masterVolume.h"
 #include <memory>
 #include <scene/scene.h>
 #include <utilities/logger.h>
+#include "core/physics/rigidBody.h"
+
+#include "core/physics/testPlayer.h"
 
 #include <fstream>
 #include <nlohmann/json.hpp>

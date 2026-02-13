@@ -18,7 +18,6 @@ ObjectLoader::~ObjectLoader() {
 bool ObjectLoader::LoadGltf(std::filesystem::path localpath, MeshLoadData& meshLoadData, ID3D11Device* device) {
 	std::filesystem::path path = basePath / localpath;
 	fastgltf::Parser parser;
-	
 
 	auto gltfFile = fastgltf::GltfDataBuffer::FromPath(path);
 	if (gltfFile.error() != fastgltf::Error::None) {

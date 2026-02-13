@@ -1,11 +1,11 @@
 #include "scene/sceneManager.h"
 #include "gameObjects/room.h"
+#include "core/filepathHolder.h"
 
 // Very good macro, please don't remove
 #define NAMEOF(x) #x
 
-SceneManager::SceneManager(Renderer *rend) : mainScene(nullptr), renderer(rend), objectFromString()
-{
+SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend), objectFromString(), isPaused(false) {
 	this->objectFromString.RegisterType<GameObject>(NAMEOF(GameObject));
 	this->objectFromString.RegisterType<GameObject3D>(NAMEOF(GameObject3D));
 	this->objectFromString.RegisterType<MeshObject>(NAMEOF(MeshObject));
@@ -25,13 +25,13 @@ void SceneManager::SceneTick()
 		this->mainScene = this->emptyScene;
 	}
 
-	this->mainScene->SceneTick();
+	this->mainScene->SceneTick(this->isPaused);
 
-	ImGui::Begin("SceneTest");
-	if (ImGui::Button("Delete Scene")) {
-		DeleteScene(this->mainScene);
-	}
-	ImGui::End();
+	//ImGui::Begin("SceneTest");
+	//if (ImGui::Button("Delete Scene")) {
+	//	DeleteScene(this->mainScene);
+	//}
+	//ImGui::End();
 }
 
 void SceneManager::LoadScene(Scenes scene)
@@ -49,7 +49,7 @@ void SceneManager::LoadScene(Scenes scene)
 		Logger::Warn("There is no end credits scene.");
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile("../../../../assets/scenes/testresult.scene");
+		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "testresult.json").string());
 		break;
 	default:
 		break;
@@ -147,6 +147,9 @@ void SceneManager::SetMainCameraInScene(std::shared_ptr<Scene>& scene)
 		Logger::Error("Couldn't find a camera in the scene.");
 	}
 }
+
+void SceneManager::TogglePause(bool enable) 
+{ this->isPaused = enable; }
 
 void SceneManager::SaveSceneToCurrentFile()
 {

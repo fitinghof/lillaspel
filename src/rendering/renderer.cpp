@@ -1,5 +1,6 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
+#include "core/filepathHolder.h"
 
 Renderer::Renderer()
 	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),
@@ -30,7 +31,7 @@ void Renderer::SetAllDefaults()
 	LoadShaders();
 
 	this->skybox = std::make_unique<Skybox>();
-	this->skybox->Init(this->device.Get(), this->immediateContext.Get(), "../../../../assets/skybox/cubeMap.dds");
+	this->skybox->Init(this->device.Get(), this->immediateContext.Get(), (FilepathHolder::GetAssetsDirectory() / "skybox" / "space.dds").string());
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -214,11 +215,11 @@ void Renderer::Render()
 {
 	RenderPass();
 
-	ImGui::Begin("Change Skybox");
-	if (ImGui::Button("Change")) {
-		this->skybox->SwapCubemap(this->device.Get(), this->immediateContext.Get(), "../../../../assets/skybox/space.dds");
-	}
-	ImGui::End();
+	//ImGui::Begin("Change Skybox");
+	//if (ImGui::Button("Change")) {
+	//	this->skybox->SwapCubemap(this->device.Get(), this->immediateContext.Get(), "../../../../assets/skybox/space.dds");
+	//}
+	//ImGui::End();
 }
 
 void Renderer::Present()
@@ -234,9 +235,11 @@ void Renderer::Resize(const Window& window)
 	BindViewport();
 }
 
-void Renderer::ToggleVSync(bool enable)
-{
-	this->isVSyncEnabled = enable;
+void Renderer::ToggleVSync(bool enable) { this->isVSyncEnabled = enable; }
+
+void Renderer::ToggleWireframe(bool enable) {
+	Logger::Log("test");
+	this->renderAllWireframe = enable;
 }
 
 ID3D11Device* Renderer::GetDevice() const
@@ -281,9 +284,9 @@ void Renderer::RenderPass()
 	// Bind rasterizerState
 	if (!this->renderAllWireframe) {
 		BindRasterizerState(this->standardRasterizerState.get());
-	}	else {
-		BindRasterizerState(this->wireframeRasterizerState.get());
+	} else {
 		BindMaterial(this->defaultUnlitMat.lock().get());
+		BindRasterizerState(this->wireframeRasterizerState.get());
 	}
 
 	// Bind meshes
@@ -458,7 +461,7 @@ void Renderer::BindLights()
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
-	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
 
@@ -472,7 +475,9 @@ void Renderer::BindLights()
 				Logger::Log("The renderer deleted a light");
 				this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
 				i--;
-				continue;
+				// Lazy solution
+				BindLights();
+				return;
 			}
 
 			spotlights.push_back((*this->lightRenderQueue)[i].lock()->data);

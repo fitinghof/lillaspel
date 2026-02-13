@@ -58,10 +58,16 @@ public:
 	void Resize(const Window& window);
 
 	/// <summary>
-	/// Toggles VSync
+	/// Toggle VSync
 	/// </summary>
 	/// <param name="enable"></param>
 	void ToggleVSync(bool enable);
+
+	/// <summary>
+	/// Toggle wireframe for all objects
+	/// </summary>
+	/// <param name="enable"></param>
+	void ToggleWireframe(bool enable);
 
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;

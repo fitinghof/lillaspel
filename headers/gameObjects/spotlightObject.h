@@ -27,5 +27,7 @@ public:
 	virtual void LoadFromJson(const nlohmann::json& data) override;
 	virtual void SaveToJson(nlohmann::json& data) override;
 
+	virtual void ShowInHierarchy() override;
+
 private:
 };

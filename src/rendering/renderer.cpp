@@ -201,8 +201,8 @@ void Renderer::CreateRendererConstantBuffers()
 void Renderer::CreateRenderQueue()
 {
 	this->meshRenderQueue = std::make_shared<std::vector<std::weak_ptr<MeshObject>>>();
-	this->lightRenderQueue = std::make_shared<std::vector<std::weak_ptr<SpotlightObject>>>();
-	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->lightRenderQueue));
+	this->SpotLightRenderQueue = std::make_shared<std::vector<std::weak_ptr<SpotlightObject>>>();
+	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->SpotLightRenderQueue));
 }
 
 void Renderer::LoadShaders()
@@ -330,22 +330,22 @@ std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() {
 	}
 	this->GetContext()->PSSetShader(nullptr, nullptr, 0);
 
-	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	const uint32_t lightCount = std::min<uint32_t>(this->SpotLightRenderQueue->size(), this->maximumSpotlights);
 
 	std::vector<ID3D11ShaderResourceView*> depthStencilViews;
 	depthStencilViews.reserve(lightCount);
 
 
 	for (uint32_t i = 0; i < lightCount; i++) {
-		if ((*this->lightRenderQueue)[i].expired()) {
+		if ((*this->SpotLightRenderQueue)[i].expired()) {
 			// This should remove deleted lights
 			Logger::Log("The renderer deleted a light");
-			this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
+			this->SpotLightRenderQueue->erase(this->SpotLightRenderQueue->begin() + i);
 			i--;
 			continue;
 		}
 
-		auto light = (*this->lightRenderQueue)[i].lock();
+		auto light = (*this->SpotLightRenderQueue)[i].lock();
 		if (light->GetResolutionChanged()) {
 			light->SetDepthBuffer(this->GetDevice());
 		}
@@ -541,12 +541,12 @@ void Renderer::BindMaterial(BaseMaterial* material)
 
 void Renderer::BindLights()
 {
-	if (this->lightRenderQueue->size() > this->maximumSpotlights)
+	if (this->SpotLightRenderQueue->size() > this->maximumSpotlights)
 	{
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
-	uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	uint32_t lightCount = std::min<uint32_t>(this->SpotLightRenderQueue->size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
 
@@ -554,18 +554,18 @@ void Renderer::BindLights()
 		std::vector<SpotlightObject::SpotLightContainer> spotlights;
 		for (uint32_t i = 0; i < lightCount; i++)
 		{
-			if ((*this->lightRenderQueue)[i].expired()) 
+			if ((*this->SpotLightRenderQueue)[i].expired()) 
 			{
 				// This should remove deleted lights
 				Logger::Log("The renderer deleted a light");
-				this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
+				this->SpotLightRenderQueue->erase(this->SpotLightRenderQueue->begin() + i);
 				i--;
 				// Lazy solution
 				BindLights();
 				return;
 			}
 
-			spotlights.push_back((*this->lightRenderQueue)[i].lock()->GetSpotLightData());
+			spotlights.push_back((*this->SpotLightRenderQueue)[i].lock()->GetSpotLightData());
 		}
 
 		// Updates and binds buffer

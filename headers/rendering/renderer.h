@@ -123,7 +123,7 @@ private:
 
 	std::unique_ptr<RenderQueue> renderQueue;
 	std::shared_ptr<std::vector<std::weak_ptr<MeshObject>>> meshRenderQueue;
-	std::shared_ptr<std::vector<std::weak_ptr<SpotlightObject>>> lightRenderQueue;
+	std::shared_ptr<std::vector<std::weak_ptr<SpotlightObject>>> SpotLightRenderQueue;
 
 	// Constant buffers:
 	// The renderer keeps these constant buffers since only one is ever required

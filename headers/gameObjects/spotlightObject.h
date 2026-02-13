@@ -32,6 +32,12 @@ public:
 	bool GetResolutionChanged() const;
 	ID3D11ShaderResourceView* GetSRV() const;
 
+	/// <summary>
+	/// Return the spotlight angle in degrees
+	/// </summary>
+	/// <returns></returns>
+	float GetAngle() const;
+
 	virtual void Start() override;
 	virtual void Tick() override;
 
@@ -41,8 +47,13 @@ public:
 
 	std::weak_ptr<CameraObject> camera;
 	void SetShadowResolution(size_t width, size_t height);
-
 	void SetDepthBuffer(ID3D11Device* device);
+
+	/// <summary>
+	/// Sets the light angle in degrees
+	/// </summary>
+	/// <param name="angle"></param>
+	void SetAngle(float angle);
 
 
 private:

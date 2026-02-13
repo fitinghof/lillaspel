@@ -216,10 +216,18 @@ void Renderer::LoadShaders()
 
 void Renderer::Render()
 {
+	BindInputLayout();
 	auto shadowmaps = this->ShadowPass();
 	this->GetContext()->PSSetShaderResources(5, shadowmaps.size(), shadowmaps.data());
-
 	RenderPass();
+
+	// Unbinding shadowmaps to allow input on them again
+	for (auto& shadowMap : shadowmaps) {
+		// Since shadowmaps vector is just a non owning clone of all views, it is safe to just set them to nullptr
+		// for unbinding the shadowmaps
+		shadowMap = nullptr;
+	}
+	this->GetContext()->PSSetShaderResources(5, shadowmaps.size(), shadowmaps.data());
 
 	ImGui::Begin("Change Skybox");
 	if (ImGui::Button("Change")) {
@@ -347,7 +355,7 @@ std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() {
 			Logger::Error("Lights shadow camera was dead");
 			continue;
 		}
-		auto& matrixContainer = light->camera.lock()->GetCameraMatrix();
+		auto matrixContainer = light->camera.lock()->GetCameraMatrix();
 
 		const auto& viewPort = light->GetViewPort();
 		this->immediateContext->RSSetViewports(1, &viewPort);
@@ -570,7 +578,9 @@ void Renderer::BindLights()
 
 void Renderer::BindCameraMatrix()
 {
-	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &CameraObject::GetMainCamera().GetCameraMatrix());
+	auto cameraMatrix = CameraObject::GetMainCamera().GetCameraMatrix();
+
+	this->cameraBuffer->UpdateBuffer(this->immediateContext.Get(), &cameraMatrix);
 
 	ID3D11Buffer* buffer = this->cameraBuffer->GetBuffer();
 	this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);

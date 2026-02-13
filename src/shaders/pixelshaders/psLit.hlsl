@@ -47,8 +47,7 @@ SamplerState mainSampler : register(s0);
 SamplerState shadowSampler : register(s1);
 
 float4 main(PixelShaderInput input) : SV_TARGET
-{
-    
+{    
     float3 normal = normalize(input.normal);
     
     float4 ambientColor = ambient;  

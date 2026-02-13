@@ -7,7 +7,7 @@ SpotlightObject::SpotlightObject() {
 	DirectX::XMStoreFloat3(&this->data.direction, DirectX::XMVectorSet(0, 0, 0, 0));
 	DirectX::XMStoreFloat4(&this->data.color, DirectX::XMVectorSet(1, 1, 1, 1));
 
-	this->data.spotCosAngleRadians = cos(DirectX::XMConvertToRadians(120));
+	this->data.spotCosAngleRadians = DirectX::XMConvertToRadians(120);
 
 	this->shadowViewPort = {
 		.TopLeftX = 0,
@@ -23,23 +23,33 @@ SpotlightObject::SpotlightObject() {
 }
 
 SpotlightObject::SpotLightContainer SpotlightObject::GetSpotLightData() const { 
-
-	// Temporary workaround to avoid messing with json load
-	auto dataCopy = this->data;
-	dataCopy.spotCosAngleRadians = cos(this->data.spotCosAngleRadians / 2);
-	return dataCopy;
+	return this->data;
 }
 
 ID3D11DepthStencilView* SpotlightObject::GetDepthStencilView() const {
 	return this->shadowbuffer.GetDepthStencilView(0);
 }
 
+float SpotlightObject::GetAngle() const { 
+	if (this->camera.expired()) {
+		std::string error = "Lights shadow camera has been killed unexpectedly";
+		Logger::Error(error);
+		throw std::runtime_error(error);
+	}
+	return this->camera.lock()->GetFov();
+}
+
 void SpotlightObject::Start() {
 	RenderQueue::AddLightObject(this->GetPtr());
 
 	// Attach camera for shadowpass
-	this->camera = this->factory->CreateGameObjectOfType<CameraObject>();
-	this->camera.lock()->SetParent(this->GetPtr());
+	if (this->camera.expired()) {
+		this->camera = this->factory->CreateGameObjectOfType<CameraObject>();
+		this->camera.lock()->SetParent(this->GetPtr());
+		this->camera.lock()->SetFov(90);
+	}
+	this->camera.lock()->SetAspectRatio(1 / 1);
+	this->camera.lock()->SetFarPlane(20.);
 }
 
 void SpotlightObject::Tick() {
@@ -47,27 +57,21 @@ void SpotlightObject::Tick() {
 	DirectX::XMStoreFloat3(&this->data.position, GetGlobalPosition());
 	DirectX::XMStoreFloat3(&this->data.direction, GetGlobalForward());
 
-	this->camera.lock()->GetCameraMatrix().cameraPosition = GetGlobalPosition();
+	if (this->camera.expired()) {
+		std::string error = "Spotlight shadowcamera has been killed";
+		Logger::Error(error);
+		throw std::runtime_error(error);
+	}
 
-	// View Projection Matrix
+	auto cameraLocked = this->camera.lock();
 
-	DirectX::XMVECTOR globalRotation = GetGlobalRotation();
+	this->data.spotCosAngleRadians = cos(DirectX::XMConvertToRadians(cameraLocked->GetFov()) / 2);
 
-	DirectX::XMVECTOR focusPos = DirectX::XMVectorAdd(this->camera.lock()->GetCameraMatrix().cameraPosition,
-							 DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 0, 1, 0), globalRotation));
-	DirectX::XMVECTOR upDir = DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), globalRotation);
-	DirectX::XMMATRIX viewMatrix =
-		DirectX::XMMatrixLookAtLH(this->camera.lock()->GetCameraMatrix().cameraPosition, focusPos, upDir);
+	cameraLocked->GetCameraMatrix().cameraPosition = GetGlobalPosition();
 
-	float tempAspectRatio = 16.0f / 9.0f;
+	auto viewProj = cameraLocked->GetCameraMatrix(true).viewProjectionMatrix;
 
-	/// WHY DOESN*T CAMERA HAVE GETTER FOR FOV?????????????
-	DirectX::XMMATRIX projMatrix = DirectX::XMMatrixPerspectiveFovLH(DirectX::XMConvertToRadians(80),
-																	 tempAspectRatio, 0.1f, 100.0f);
-
-	DirectX::XMMATRIX viewProjMatrix = DirectX::XMMatrixMultiplyTranspose(viewMatrix, projMatrix);
-
-	DirectX::XMStoreFloat4x4(&this->data.viewProjectionMatrix, viewProjMatrix);
+	this->data.viewProjectionMatrix = viewProj;
 }
 
 void SpotlightObject::LoadFromJson(const nlohmann::json& data) {
@@ -83,8 +87,8 @@ void SpotlightObject::LoadFromJson(const nlohmann::json& data) {
 		this->data.intensity = data["intensity"].get<float>();
 	}
 
-	if (data.contains("angleRadians")) {
-		this->data.spotCosAngleRadians = data["angleRadians"].get<float>();
+	if (data.contains("angleDegrees")) {
+		this->camera.lock()->SetFov(data["angleDegrees"].get<float>());
 	}
 }
 
@@ -99,7 +103,7 @@ void SpotlightObject::SaveToJson(nlohmann::json& data) {
 
 	data["intensity"] = this->data.intensity;
 
-	data["angleRadians"] = this->data.spotCosAngleRadians;
+	data["angleDegrees"] = DirectX::XMConvertToDegrees(this->data.spotCosAngleRadians);
 }
 
 const D3D11_VIEWPORT& SpotlightObject::GetViewPort() const {
@@ -130,4 +134,14 @@ void SpotlightObject::SetShadowResolution(size_t width, size_t height) {
 void SpotlightObject::SetDepthBuffer(ID3D11Device* device) {
 	this->shadowbuffer.Init(device, this->shadowViewPort.Width, this->shadowViewPort.Height);
 	this->resolutionChanged = false;
+}
+
+void SpotlightObject::SetAngle(float angle) {
+	if (this->camera.expired()) {
+		std::string error = "Lights shadow camera has been killed unexpectedly";
+		Logger::Error(error);
+		throw std::runtime_error(error);
+	}
+
+	this->camera.lock()->SetFov(angle);
 }

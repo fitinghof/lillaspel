@@ -85,8 +85,6 @@ void DebugCamera::shootRay() {
 
 		Logger::Log(hitString, " at distance: ", std::to_string(rayCastData.distance));
 	}
-
-}
 }
 
 void DebugCamera::SaveToJson(nlohmann::json& data) 

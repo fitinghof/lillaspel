@@ -136,6 +136,8 @@ private:
 
 	std::unique_ptr<ConstantBuffer> spotlightCountBuffer;
 	std::unique_ptr<StructuredBuffer> spotlightBuffer;
+	std::unique_ptr<StructuredBuffer> pointlightBuffer;
+	std::unique_ptr<ConstantBuffer> pointlightCountBuffer;
 
 	// ImGui variables
 

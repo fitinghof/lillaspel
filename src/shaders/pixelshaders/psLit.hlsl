@@ -14,6 +14,11 @@ cbuffer SpotlightCountBuffer : register(b0)
     int spotlightCount;
 };
 
+cbuffer PointlightCountBuffer : register(b2)
+{
+    int pointLightCount;
+};
+
 cbuffer MaterialBuffer : register(b1)
 {
     float4 ambient;
@@ -34,6 +39,14 @@ struct Spotlight
     float spotCosAngle;
     float4x4 vpMatrix;
 };
+struct PointLight
+{
+    float3 position;
+    float4 color;
+    float intensity;
+
+    float4x4 vpMatrix[6];
+};
 
 Texture2D diffuseTexture : register(t1);
 Texture2D ambientTexture : register(t2);
@@ -42,6 +55,9 @@ Texture2D normalTexture : register(t4);
 
 StructuredBuffer<Spotlight> spotlightBuffer : register(t0);
 Texture2DArray<unorm float> shadowMaps : register(t5);
+
+StructuredBuffer<PointLight> pointLightBuffer : register(t6);
+Texture2DArray<unorm float> pointLightShadowMaps : register(t7);
 
 SamplerState mainSampler : register(s0);
 SamplerState shadowSampler : register(s1);
@@ -81,6 +97,44 @@ float4 main(PixelShaderInput input) : SV_TARGET
         float lightCosAngle = dot(lightDir.xyz, normalize(lightdata.direction));
         
         if (lightCosAngle > lightdata.spotCosAngle && islit)
+        {
+            float intensity = (1 / dot(LightToHit, LightToHit)) * max(0.0f, dot(-lightDir, normal));
+    
+            float3 halfWayVector = normalize(lightDir + normalize(camToPixel));
+            float specularDot = max(dot(normal, -halfWayVector), 0);
+            float4 lighting = lit(intensity, specularDot, shininess);
+            
+            diffuseColor += lighting.y * lightdata.color;
+            specularColor += lighting.z * lightdata.color;
+        }
+    }
+    for (int i = 0; i < pointLightCount; i++)
+    {
+        PointLight lightdata = pointLightBuffer[i];
+        float3 LightToHit = input.worldPosition.xyz - lightdata.position;
+        float3 lightDir = normalize(LightToHit);
+        
+        bool islit;
+        
+        for (int j = 0; j < 6; j++)
+        {
+            
+            float4 lightClip = mul(float4(input.worldPosition.xyz, 1), lightdata.vpMatrix[j]);
+            float3 ndc = lightClip.xyz / lightClip.w;
+        
+            float2 uv = float2(ndc.x * 0.5f + 0.5f, ndc.y * -0.5f + 0.5f);
+            const float bias = 0.01f;
+        
+            float sceneDepth = ndc.z;
+            float mapDepth = pointLightShadowMaps.SampleLevel(shadowSampler, float3(uv, i * 6 + j), 0.f).r;
+        
+            islit = (mapDepth + bias) >= sceneDepth;
+            if (!islit)
+                break;
+        
+        }
+        
+        if (islit)
         {
             float intensity = (1 / dot(LightToHit, LightToHit)) * max(0.0f, dot(-lightDir, normal));
     

@@ -59,22 +59,24 @@ std::array<ID3D11ShaderResourceView*, 6> PointLightObject::GetSRVs() const {
 }
 
 void PointLightObject::Start() {
-	RenderQueue::AddLightObject(this->GetPtr());
+	RenderQueue::AddPointLight(this->GetPtr());
 
 	// Attach camera for shadowpass
 	for (size_t i = 0; i < 6; i++) {
 		this->cameras[i] = this->factory->CreateGameObjectOfType<CameraObject>();
 		this->cameras[i].lock()->SetAspectRatio(1 / 1);
 		this->cameras[i].lock()->SetFarPlane(20.);
+		this->cameras[i].lock()->SetFov(90);
+		this->cameras[i].lock()->SetParent(this->GetPtr());
 	}
 
 	// Pray the directions are correct
-	this->cameras[0].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2, 0);
-	this->cameras[1].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2 * 2, 0);
-	this->cameras[2].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2 * 3, 0);
-	this->cameras[3].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2 * 4, 0);
-	this->cameras[4].lock()->transform.SetRotationRPY(DirectX::XM_PIDIV2, 0, 0);
-	this->cameras[5].lock()->transform.SetRotationRPY(-DirectX::XM_PIDIV2, 0, 0);
+	this->cameras[0].lock()->transform.SetRotationRPY(0, 0, 0);
+	this->cameras[1].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2, 0);
+	this->cameras[2].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2 * 2, 0);
+	this->cameras[3].lock()->transform.SetRotationRPY(0, DirectX::XM_PIDIV2 * 3, 0);
+	this->cameras[4].lock()->transform.SetRotationRPY(0, 0, DirectX::XM_PIDIV2);
+	this->cameras[5].lock()->transform.SetRotationRPY(0, 0, -DirectX::XM_PIDIV2);
 }
 
 void PointLightObject::Tick() {

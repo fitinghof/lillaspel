@@ -3,6 +3,7 @@
 #include "gameObjects/gameObject3D.h"
 #include "utilities/logger.h"
 #include <DirectXMath.h>
+#include "utilities/time.h"
 
 #include "imgui.h"
 #include <string>

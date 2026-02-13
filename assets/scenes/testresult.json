@@ -20,7 +20,8 @@
           1.0
         ]
       },
-      "type": "DebugCamera"
+      "type": "DebugCamera",
+      "name": "Best Camera"
     },
       {
         "meshIdentifier": "meshes/indicatorSphere05.glb:Mesh_0",
@@ -165,7 +166,8 @@
           1.0
         ]
       },
-      "type": "SpotlightObject"
+      "type": "SpotlightObject",
+      "name": "Sptolight Main"
     },
     {
       "angleRadians": 6.2831854820251465,
@@ -216,7 +218,8 @@
               1.0
             ]
           },
-          "type": "MeshObject"
+          "type": "MeshObject",
+          "name": "Spaceship"
         }
       ]
     }

@@ -57,6 +57,8 @@ public:
 	// This should be in Transform but that doesn't work because GameObjects doesn't have transforms, only GameObject3D
 	virtual DirectX::XMMATRIX GetGlobalWorldMatrix(bool inverseTranspose) const;
 
+	virtual DirectX::XMMATRIX GetGlobalViewMatrix() const;
+
 	std::shared_ptr<GameObject> GetPtr();
 
 	virtual void LoadFromJson(const nlohmann::json& data);

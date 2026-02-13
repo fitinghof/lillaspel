@@ -31,7 +31,8 @@ struct Spotlight
     float4 color;
     float intensity;
 
-    float spotAngle;
+    float spotCosAngle;
+    float4x4 vpMatrix;
 };
 
 Texture2D diffuseTexture : register(t1);
@@ -40,29 +41,57 @@ Texture2D specularTexture : register(t3);
 Texture2D normalTexture : register(t4);
 
 StructuredBuffer<Spotlight> spotlightBuffer : register(t0);
+Texture2DArray<unorm float> shadowMaps : register(t5);
 
 SamplerState mainSampler : register(s0);
+SamplerState shadowSampler : register(s1);
 
 float4 main(PixelShaderInput input) : SV_TARGET
-{
+{    
     float3 normal = normalize(input.normal);
     
     float4 ambientColor = ambient;  
     float4 diffuseColor = 0;
     float4 specularColor = 0;
+    float3 camToPixel = input.worldPosition.xyz - input.cameraPosition;
     
+    uint numLights, stride;
+    spotlightBuffer.GetDimensions(numLights, stride);
+        
+    // Seems structured buffer might be made larger than the number of lights, as such we do need to use ugly constant buffer
     for (int i = 0; i < spotlightCount; i++)
     {
-        // Light falloff on distance
-        float surfaceLightIntensity = CalculateLightFalloff(input.worldPosition.xyz, spotlightBuffer[i].position, spotlightBuffer[i].intensity); // light at surface
-    
-        // Diffuse component
-        diffuseColor += DiffuseComponent(input.worldPosition.xyz, spotlightBuffer[i].position, normal, diffuse, surfaceLightIntensity, spotlightBuffer[i].color);
         
-        // Specular component
-        specularColor += BlinnPhongSpecularComponent(input.worldPosition.xyz, spotlightBuffer[i].position, input.cameraPosition, normal, specular, shininess, surfaceLightIntensity, spotlightBuffer[i].color);
-    }
+        Spotlight lightdata = spotlightBuffer[i];
+                
+        float4 lightClip = mul(float4(input.worldPosition.xyz, 1), lightdata.vpMatrix);
+        float3 ndc = lightClip.xyz / lightClip.w;
+        
+        float2 uv = float2(ndc.x * 0.5f + 0.5f, ndc.y * -0.5f + 0.5f);
+        
+        float sceneDepth = ndc.z;
+        float mapDepth = shadowMaps.SampleLevel(shadowSampler, float3(uv, i), 0.f).r;
+        
+        const float bias = 0.000001f;
+        bool islit = (mapDepth + bias) >= sceneDepth;
+        
+        
+        float3 LightToHit = input.worldPosition.xyz - lightdata.position;
+        float3 lightDir = normalize(LightToHit);
+        float lightCosAngle = dot(lightDir.xyz, normalize(lightdata.direction));
+        
+        if (lightCosAngle > lightdata.spotCosAngle && islit)
+        {
+            float intensity = (1 / dot(LightToHit, LightToHit)) * max(0.0f, dot(-lightDir, normal));
     
+            float3 halfWayVector = normalize(lightDir + normalize(camToPixel));
+            float specularDot = max(dot(normal, -halfWayVector), 0);
+            float4 lighting = lit(intensity, specularDot, shininess);
+            
+            diffuseColor += lighting.y * lightdata.color;
+            specularColor += lighting.z * lightdata.color;
+        }
+    }
     
     // Read textures
     // It's done in a way to avoid if-statements

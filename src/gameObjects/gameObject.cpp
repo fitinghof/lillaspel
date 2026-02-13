@@ -16,13 +16,15 @@ void GameObject::SetParent(std::weak_ptr<GameObject> newParent) {
 		this->parent.lock()->DeleteChild(this->GetPtr());
 	}
 
-	if (newParent.expired()) {
-		Logger::Error("Tried to set expired parent.");
-		return;
+	this->parent = newParent;
+
+	// If setting to root the parent is expired
+	if (this->parent.expired()) {
+		//Logger::Error("Tried to set expired parent.");
+	} else {
+		this->parent.lock()->AddChild(this->GetPtr());
 	}
 
-	this->parent = newParent;
-	this->parent.lock()->AddChild(this->GetPtr());
 
 	Logger::Log("Set Parent.");
 }

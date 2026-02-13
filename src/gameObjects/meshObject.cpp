@@ -76,7 +76,7 @@ void MeshObject::ShowInHierarchy()
 				shortMaterialName = "..." + shortMaterialName.substr(shortMaterialName.size() - 32, std::string::npos);
 			}
 
-			shortMaterialName = std::to_string(i) + shortMaterialName;
+			shortMaterialName = std::to_string(i) + ". " + shortMaterialName;
 
 			if (ImGui::TreeNode(shortMaterialName.c_str())) {
 				ImGui::Text(("Identifier: " +  materialName).c_str());

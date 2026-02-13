@@ -54,7 +54,7 @@ private:
 	/// </summary>
 	/// <param name="name"></param>
 	/// <param name="gameObject"></param>
-	void ShowHierarchyRecursive(std::string name, std::weak_ptr<GameObject> gameObject);
+	void ShowHierarchyRecursive(std::weak_ptr<GameObject> gameObject);
 
 	std::vector<std::shared_ptr<GameObject>> gameObjects;
 	std::vector<std::weak_ptr<GameObject>> deleteQueue;

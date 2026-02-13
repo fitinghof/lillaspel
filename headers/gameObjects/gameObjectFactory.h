@@ -42,6 +42,9 @@ public:
 
 	virtual int GetNextID() = 0;
 
+	virtual std::weak_ptr<GameObject> GetSelected() { return this->selectedObject; }
+	virtual void SetSelected(std::weak_ptr<GameObject>& newSelected) { this->selectedObject = newSelected; }
+
 private:
 	/// <summary>
 	/// Add GameObject to game engine logic
@@ -51,6 +54,7 @@ private:
 
 protected:
 	virtual const std::vector<std::shared_ptr<GameObject>>& GetGameObjects() const = 0;
+	std::weak_ptr<GameObject> selectedObject;
 };
 
 template <typename T>

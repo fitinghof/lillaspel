@@ -59,3 +59,9 @@ void DebugCamera::Tick() {
 		PostQuitMessage(0);
 	}
 }
+
+void DebugCamera::SaveToJson(nlohmann::json& data) 
+{
+	this->CameraObject::SaveToJson(data);
+	data["type"] = "DebugCamera";
+}

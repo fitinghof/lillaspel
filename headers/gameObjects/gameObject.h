@@ -64,6 +64,12 @@ public:
 
 	virtual void ShowInHierarchy();
 
+	/// <summary>
+	/// If this is the same as a different object, it will lead to undefined behaviour
+	/// </summary>
+	/// <param name="newName"></param>
+	virtual void SetName(std::string newName);
+
 	virtual const std::string& GetName();
 
 private:
@@ -86,6 +92,8 @@ private:
 	friend Scene;
 
 	std::weak_ptr<GameObject> myPtr;
+
+	char imguiName[64];
 
 protected:
 	GameObjectFactory* factory;

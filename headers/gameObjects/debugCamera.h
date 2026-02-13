@@ -13,4 +13,6 @@ public:
 	ControllerInput controllerInput;
 
 	virtual void Tick() override;
+
+	virtual void SaveToJson(nlohmann::json& data) override;
 };

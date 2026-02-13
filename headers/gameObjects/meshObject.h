@@ -29,5 +29,7 @@ public:
 private:
 	MeshObjData mesh;
 
+	char imguiNewMeshIdent[128]; 
+
 	int tempId;
 };

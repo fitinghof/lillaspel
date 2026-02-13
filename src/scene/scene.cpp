@@ -30,7 +30,7 @@ void Scene::RegisterGameObject(std::shared_ptr<GameObject> gameObject)
 	this->gameObjects.push_back(gameObject);
 	gameObject->factory = this;
 	gameObject->myPtr = gameObject;
-	gameObject->name = "GameObject " + std::to_string(this->GetNextID());
+	gameObject->SetName("GameObject " + std::to_string(this->GetNextID()));
 	if (this->finishedLoading) {
 		gameObject->Start();
 	}
@@ -117,10 +117,10 @@ void Scene::ShowHierarchy()
 		if (ImGui::Selectable("CameraObject")) {
 			this->CreateGameObjectOfType<CameraObject>();
 		}
-		// Debug Camera apparently breaks
-		// if (ImGui::Selectable("DebugCamera")) {
-		//	this->CreateGameObjectOfType<DebugCamera>();
-		//}
+		 //Debug Camera apparently breaks
+		if (ImGui::Selectable("DebugCamera")) {
+			this->CreateGameObjectOfType<DebugCamera>();
+		}
 		if (ImGui::Selectable("SpotlightObject")) {
 			this->CreateGameObjectOfType<SpotlightObject>();
 		}
@@ -139,6 +139,7 @@ void Scene::ShowHierarchy()
 void Scene::ShowHierarchyRecursive(std::string name, std::weak_ptr<GameObject> gameObject) {
 	if (ImGui::TreeNode(name.c_str())) {
 		gameObject.lock()->ShowInHierarchy();
+		ImGui::Separator();
 		if (gameObject.lock()->children.size() > 0) {
 			if (ImGui::TreeNode("Children")) {
 				for (size_t i = 0; i < gameObject.lock()->children.size(); i++) {

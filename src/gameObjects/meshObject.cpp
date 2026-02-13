@@ -1,7 +1,6 @@
 #include "gameObjects/meshObject.h"
 
-MeshObject::MeshObject() : mesh()
-{
+MeshObject::MeshObject() : mesh(), imguiNewMeshIdent("\0") {
 	static int id = 0;
 	this->tempId = id++;
 	Logger::Log("Created a MeshObject.");
@@ -66,5 +65,19 @@ void MeshObject::ShowInHierarchy()
 	if (!this->GetMesh().GetMesh().expired()) {
 		std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdent());
 		ImGui::Text(meshText.c_str()); 
+	}
+
+	if (ImGui::Button("Change mesh")) ImGui::OpenPopup("change_mesh");
+	if (ImGui::BeginPopup("change_mesh")) {
+		ImGui::InputText("New Mesh", this->imguiNewMeshIdent, sizeof(this->imguiNewMeshIdent));
+		/*if (!std::filesystem::exists(FilepathHolder::GetAssetsDirectory() / this->imguiNewMeshIdent))
+			ImGui::Text("Invalid file.");*/
+		if (ImGui::Button("Apply")) {
+			Logger::Log("Tried to change mesh.");
+			this->SetMesh(AssetManager::GetInstance().GetMeshObjData(this->imguiNewMeshIdent));
+			ImGui::CloseCurrentPopup();
+		}
+
+		ImGui::EndPopup();
 	}
 }

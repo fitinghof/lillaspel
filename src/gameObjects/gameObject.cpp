@@ -1,6 +1,6 @@
 #include "gameObjects/gameObject.h"
 
-GameObject::GameObject() : children(), parent(), factory(nullptr) {
+GameObject::GameObject() : children(), parent(), factory(nullptr), imguiName() {
 }
 
 const std::vector<std::weak_ptr<GameObject>>& GameObject::GetChildren() const
@@ -60,8 +60,7 @@ void GameObject::DeleteChild(std::weak_ptr<GameObject> oldChild)
 }
 
 void GameObject::Start()
-{
-
+{ 
 }
 
 void GameObject::Tick() 
@@ -108,7 +107,7 @@ void GameObject::LoadFromJson(const nlohmann::json& data) {
 	// Children are loaded by the sceneManager
 
 	if (data.contains("name")) {
-		this->name = data.at("name").get<std::string>();
+		this->SetName(data.at("name").get<std::string>());
 	}
 }
 
@@ -124,10 +123,42 @@ void GameObject::SaveToJson(nlohmann::json& data)
 }
 
 void GameObject::ShowInHierarchy() { 
-	ImGui::Text("Object details."); 
+	ImGui::InputText("Name", this->imguiName, sizeof(this->imguiName));
+
+	ImGui::SameLine();
+
+	if (ImGui::Button("Apply")) {
+		this->name = this->imguiName; 
+	}
+
+	ImGui::Separator();
+	ImGui::Text("Object details.");
+
 	if (ImGui::Button("Delete")) {
 		this->factory->QueueDeleteGameObject(this->GetPtr());
 	}
+
+	ImGui::SameLine();
+	if (this->factory->GetSelected().expired()) {
+		if (ImGui::Button("Select")) {
+			std::weak_ptr<GameObject> me = this->GetPtr();
+			this->factory->SetSelected(me);
+		}
+	} else if (this->factory->GetSelected().lock().get() != this->GetPtr().get()) {
+		if (ImGui::Button("Reparent selected")) {
+			this->factory->GetSelected().lock()->SetParent(this->GetPtr());
+			std::weak_ptr<GameObject> emptyObj = std::make_shared<GameObject>();
+			this->factory->SetSelected(emptyObj);
+		}
+	} else {
+		ImGui::Text("Selected");
+	}
+}
+
+void GameObject::SetName(std::string newName) 
+{ 
+	this->name = newName;
+	std::strncpy(this->imguiName, this->name.c_str(), sizeof(this->imguiName));
 }
 
 const std::string& GameObject::GetName() { return this->name; }

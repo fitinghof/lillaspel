@@ -15,16 +15,60 @@ void SphereCollider::Tick()
 	this->Collider::Tick();
 
 	//force scale to the x-factor to ensure sphere shape
-	DirectX::XMVECTOR scale = this->transform.GetScale();
-	float diameter = scale.m128_f32[0];
-	scale.m128_f32[1] = diameter;
-	scale.m128_f32[2] = diameter;
-	scale.m128_f32[3] = diameter;
-	this->transform.SetScale(scale);
+	// DirectX::XMVECTOR scale = this->transform.GetScale();
+	// float diameter = scale.m128_f32[0];
+	// scale.m128_f32[1] = diameter;
+	// scale.m128_f32[2] = diameter;
+	// //scale.m128_f32[3] = diameter;
+	// this->transform.SetScale(scale);
 }
 
-bool SphereCollider::DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance)
+void SphereCollider::LoadFromJson(const nlohmann::json& data) 
 {
+	this->GameObject3D::LoadFromJson(data);
+
+	Logger::Log("------------------BEFORE TAGS-----------------");
+
+	 if(data.contains("tag"))
+	 {
+	 	this->tag = static_cast<Tag>(data.at("tag").get<int>()); //write enum as integer in json
+	 	Logger::Log("tag was found in json: " + std::to_string(this->tag));
+	 }
+	 else
+	 {
+	 	Logger::Log("didn't find tag!!!");
+	 }
+
+	 if(data.contains("targetTag"))
+	 {
+	 	this->targetTag = (Tag)data.at("targetTag").get<int>(); //write enum as integer in json
+	 	Logger::Log("targetTag was found in json: " + std::to_string(this->targetTag));
+	 }
+
+	 if(data.contains("solid"))
+	 {
+	 	this->solid = data.at("solid").get<bool>(); //write enum as integer in json
+	 	Logger::Log("solid was found in json: " + std::to_string(this->solid));
+	 }
+
+	 if(data.contains("dynamic"))
+	 {
+	 	this->dynamic = data.at("dynamic").get<bool>(); //write enum as integer in json
+	 	Logger::Log("dynamic was found in json: " + std::to_string(this->dynamic));
+	 }
+}
+
+void SphereCollider::SaveToJson(nlohmann::json& data) 
+{
+	this->GameObject3D::SaveToJson(data);
+
+	data["tag"] = this->tag;
+	data["targetTag"] = this->targetTag;
+	data["solid"] = this->solid;
+	data["dynamic"] = this->dynamic;
+}
+
+bool SphereCollider::DoubleDispatchCollision(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) {
 	return otherCollider->CollidesWithSphere(this, mtvAxis, mtvDistance);
 }
 

@@ -60,9 +60,15 @@ void Collider::Start()
 	GameObject3D::Start();
 
 	MeshObjData meshData = {};
+	DirectX::XMVECTOR scale;
+	scale.m128_f32[0] = 1;
+	scale.m128_f32[1] = 1;
+	scale.m128_f32[2] = 1;
+
 	if(this->type == ColliderType::SPHERE)
 	{
-		meshData = AssetManager::GetInstance().GetMeshObjData("meshes/indicatorSphere.glb:Mesh_0");
+		scale = DirectX::XMVectorScale(scale, 0.5f);
+		meshData = AssetManager::GetInstance().GetMeshObjData("meshes/indicatorSphere05.glb:Mesh_0");
 	}
 	else
 	{
@@ -79,6 +85,7 @@ void Collider::Start()
 	meshData.SetMaterial(0, material.lock());
 	auto visualMeshObject = this->factory->CreateGameObjectOfType<MeshObject>().lock();
 	visualMeshObject->SetMesh(meshData);
+	visualMeshObject->transform.SetScale(scale);
 	visualMeshObject->SetParent(std::static_pointer_cast<Collider>(this->GetPtr()));
 }
 

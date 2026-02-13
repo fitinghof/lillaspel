@@ -23,7 +23,7 @@
       "type": "DebugCamera"
     },
       {
-        "meshIdentifier": "meshes/indicatorSphere.glb:Mesh_0",
+        "meshIdentifier": "meshes/indicatorSphere05.glb:Mesh_0",
         "transform": {
           "position": [
             0.0,

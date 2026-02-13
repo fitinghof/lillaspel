@@ -64,6 +64,8 @@ public:
 	virtual void LoadFromJson(const nlohmann::json& data);
 	virtual void SaveToJson(nlohmann::json& data);
 
+	virtual void ShowInHierarchy();
+
 private:
 	/// <summary>
 	/// WARNING: Engine only. Do not use for any in-game logic.

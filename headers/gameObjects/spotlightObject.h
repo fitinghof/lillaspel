@@ -56,6 +56,8 @@ public:
 	void SetAngle(float angle);
 
 
+	virtual void ShowInHierarchy() override;
+
 private:
 
 	bool resolutionChanged = true;

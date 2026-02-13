@@ -94,3 +94,10 @@ void GameObject::SaveToJson(nlohmann::json& data) {
 		this->children[i].lock()->SaveToJson(data["children"][i]);
 	}
 }
+
+void GameObject::ShowInHierarchy() { 
+	ImGui::Text("Object details."); 
+	if (ImGui::Button("Delete")) {
+		this->factory->QueueDeleteGameObject(this->GetPtr());
+	}
+}

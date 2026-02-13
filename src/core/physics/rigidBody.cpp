@@ -23,7 +23,7 @@ void RigidBody::Tick()
 {
 	this->GameObject3D::Tick();
 
-	this->linearVelocity.y -= 6.0f * Time::GetInstance().GetDeltaTime(); //not working?
+	if(this->gravity) this->linearVelocity.y -= 6.0f * Time::GetInstance().GetDeltaTime();
 }
 
 void RigidBody::LateTick()

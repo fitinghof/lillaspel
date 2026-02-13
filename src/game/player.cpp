@@ -57,19 +57,15 @@ void Player::UpdateCamera()
 		return;
 	}
 
-	// static bool showCursor = true;
-
-	// if (this->keyBoardInput.Interact()) { // 'F'
-	// 	showCursor = !showCursor;
-	// 	ShowCursor(showCursor);
-	// }
+	if (this->keyBoardInput.Interact()) // 'F'
+	{
+		this->showCursor = !this->showCursor;
+		ShowCursor(this->showCursor);
+	}
 
 	float speed = Time::GetInstance().GetDeltaTime() * 15;
-	// this->transform.Move(this->transform.GetDirectionVector(), this->keyBoardInput.GetMovementVector()[1] * speed);
-	// this->transform.Move(DirectX::XMVector3Rotate(DirectX::XMVectorSet(1, 0, 0, 0), this->transform.GetRotationQuaternion()),
-	// this->keyBoardInput.GetMovementVector()[0] * speed);
 
-	if (true) {
+	if (this->showCursor) {
 		std::array<float, 2> lookVector = this->keyBoardInput.GetLookVector();
 
 		static float rot[3] = {0, 0, 0};

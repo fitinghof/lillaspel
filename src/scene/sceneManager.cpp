@@ -18,7 +18,9 @@ SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<SphereCollider>(NAMEOF(SphereCollider));
 	this->objectFromString.RegisterType<RigidBody>(NAMEOF(RigidBody));
 	this->objectFromString.RegisterType<SoundSourceObject>(NAMEOF(SoundSourceObject));
-	this->objectFromString.RegisterType<Player>(NAMEOF(Player));
+	this->objectFromString.RegisterType<TestPlayer>(NAMEOF(TestPlayer));
+
+	this->objectFromString.RegisterType<Player>(NAMEOF(Player));//Game specific
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();

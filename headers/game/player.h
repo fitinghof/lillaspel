@@ -12,6 +12,7 @@ public:
 	~Player() = default;
 
 	float speed = 12;
+	bool showCursor = false;
 
 	KeyboardInput keyBoardInput;
 	std::weak_ptr<CameraObject> camera;

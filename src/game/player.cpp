@@ -2,46 +2,78 @@
 
 void Player::Tick()
 {
-	
+	this->UpdateCamera();
 
-	this->GameObject3D::Tick();
-
-	DirectX::XMFLOAT3 oldPos;
-	DirectX::XMStoreFloat3(&oldPos, this->transform.GetPosition());
+	float* input = this->keyBoardInput.GetMovementVector().data(); //float2
 	float deltaTime = Time::GetInstance().GetDeltaTime();
-
-	DirectX::XMFLOAT3 moveVector = DirectX::XMFLOAT3(0, 0, 0);
-	float speed = 18;
-
-	if (GetAsyncKeyState('I'))
-	{
-		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(0, 0, speed));
-	}
-
-	if (GetAsyncKeyState('J'))
-	{
-		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(-speed, 0, 0));
-	}
-
-	if (GetAsyncKeyState('K'))
-	{
-		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(0, 0, -speed));
-	}
-
-	if (GetAsyncKeyState('L'))
-	{
-		moveVector = FLOAT3ADD(moveVector, DirectX::XMFLOAT3(speed, 0, 0));
-	}
-
-	DirectX::XMFLOAT3 newPos = FLOAT3ADD(oldPos, FLOAT3MULT1(moveVector, deltaTime));
-	this->transform.SetPosition(DirectX::XMLoadFloat3(&newPos));
-
-	this->transform.Rotate(0, deltaTime, 0);
+	this->linearVelocity = DirectX::XMFLOAT3(input[0] * this->speed * deltaTime, 0, input[1] * speed * deltaTime);
 
 	PhysicsQueue::GetInstance().SolveCollisions(); //this is extremely temporary
+	this->RigidBody::Tick(); //Always call this at the end!
 }
 
 void Player::Start()
 {
 	this->RigidBody::Start();
+
+	std::vector<std::weak_ptr<GameObject>> children = this->GetChildren();
+	for (int i = 0; i < children.size(); i++)
+	{
+		if(!children[i].expired())
+		{
+			this->camera = std::dynamic_pointer_cast<CameraObject>(children[i].lock());
+
+			if(!this->camera.expired()) break;
+		}
+	}
+
+	if(this->camera.expired())
+	{
+		Logger::Error("Player didn't have camera object!");
+		return;
+	}
+}
+
+void Player::UpdateCamera()
+{
+	std::shared_ptr<CameraObject> cam = this->camera.lock();
+
+	if (this->keyBoardInput.Quit())
+	{
+		PostQuitMessage(0);
+	}
+
+	// Skip game input if ImGui is capturing mouse or keyboard
+	if (ImGui::GetIO().WantCaptureMouse || ImGui::GetIO().WantCaptureKeyboard) {
+		return;
+	}
+
+	// static bool showCursor = true;
+
+	// if (this->keyBoardInput.Interact()) { // 'F'
+	// 	showCursor = !showCursor;
+	// 	ShowCursor(showCursor);
+	// }
+
+	float speed = Time::GetInstance().GetDeltaTime() * 15;
+	// this->transform.Move(this->transform.GetDirectionVector(), this->keyBoardInput.GetMovementVector()[1] * speed);
+	// this->transform.Move(DirectX::XMVector3Rotate(DirectX::XMVectorSet(1, 0, 0, 0), this->transform.GetRotationQuaternion()),
+	// this->keyBoardInput.GetMovementVector()[0] * speed);
+
+	if (true) {
+		std::array<float, 2> lookVector = this->keyBoardInput.GetLookVector();
+
+		static float rot[3] = {0, 0, 0};
+
+		float sensitivity = 2.f;
+		float rotSpeed = sensitivity * Time::GetInstance().GetDeltaTime();
+
+		rot[0] += rotSpeed * lookVector[1];
+		rot[1] += rotSpeed * lookVector[0];
+
+		if (rot[0] > 1.5f) rot[0] = 1.5f;
+		if (rot[0] < -1.5f) rot[0] = -1.5f;
+
+		cam->transform.SetRotationRPY(0.0f, rot[0], rot[1]);
+	}
 }

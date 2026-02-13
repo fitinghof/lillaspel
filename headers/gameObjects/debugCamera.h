@@ -7,7 +7,8 @@
 
 class DebugCamera : public CameraObject {
 public:
-	DebugCamera() : controllerInput(DWORD(0)) {}
+	DebugCamera() : controllerInput(DWORD(0)), rot{0.0f, 0.0f, 0.0f} {
+	}
 
 	KeyboardInput keyboardInput;
 	ControllerInput controllerInput;
@@ -18,5 +19,5 @@ public:
 private:
 	void shootRay();
 
-
+	float rot[3];
 };

@@ -48,7 +48,7 @@ namespace
 		ofn.hwndOwner = hwnd;
 		ofn.lpstrFile = filePath;
 		ofn.nMaxFile = MAX_PATH;
-		ofn.lpstrFilter = L"Scene Files (*.scene)\0*.scene\0All Files (*.*)\0*.*\0";
+		ofn.lpstrFilter = L"Scene Files (*.scene;*.json)\0*.scene;*.json\0All Files (*.*)\0*.*\0";
 		ofn.nFilterIndex = 1;
 		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 

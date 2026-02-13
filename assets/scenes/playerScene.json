@@ -1,29 +1,6 @@
 {
   "gameObjects": [
     {
-      "fov": 80.0,
-      "transform": {
-        "position": [
-          0.0,
-          4.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0,
-          1.0
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      "type": "DebugCamera"
-    },
-
-    {
       "transform": {
         "position": [
           5.0,
@@ -244,7 +221,7 @@
       "transform": {
         "position": [
           0.0,
-          4.0,
+          45.0,
           0.0
         ],
         "rotation": [
@@ -259,8 +236,30 @@
           1.0
         ]
       },
-      "type": "TestPlayer",
+      "type": "Player",
       "children": [
+    {
+      "fov": 80.0,
+      "transform": {
+        "position": [
+          0.0,
+          2.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          1.0,
+          1.0,
+          1.0
+        ]
+      },
+      "type": "CameraObject"
+    },
       {
       "transform": {
         "position": [
@@ -275,12 +274,12 @@
           1.0
         ],
         "scale": [
-          4.0,
-          4.0,
-          4.0
+          0.5,
+          1.5,
+          0.5
         ]
       },
-      "type": "SphereCollider",
+      "type": "BoxCollider",
       "tag": 1,
       "targetTag": 0,
       "solid": true,
@@ -289,8 +288,8 @@
     {
       "transform": {
         "position": [
-          3.0,
           0.0,
+          -2.0,
           0.0
         ],
         "rotation": [
@@ -310,28 +309,6 @@
       "targetTag": 3,
       "solid": true,
       "dynamic": true
-    },
-      {
-      "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",
-      "transform": {
-        "position": [
-          0.0,
-          0.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          0.0,
-          1.0
-        ],
-        "scale": [
-          1.0,
-          1.0,
-          1.0
-        ]
-      },
-      "type": "MeshObject"
     }
       ]
     },

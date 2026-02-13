@@ -10,7 +10,14 @@ public:
 	RigidBody();
 	~RigidBody();
 
+	bool gravity = true;
+	DirectX::XMFLOAT3 linearVelocity = {};
+
 	void Start() override;
+	void Tick() override;
+	void LateTick() override;
+	void PhysicsTick() override;
+	void LatePhysicsTick() override;
 
 	/// <summary>
 	/// Sets parent

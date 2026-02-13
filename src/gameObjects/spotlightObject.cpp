@@ -143,6 +143,11 @@ void SpotlightObject::SetAngle(float angle) {
 		throw std::runtime_error(error);
 	}
 
+	if (angle > 120) {
+		Logger::Warn("Spotlight angle is more than 120 degrees, setting angle to 120");
+		angle = 120;
+	}
+
 	this->camera.lock()->SetFov(angle);
 }
 

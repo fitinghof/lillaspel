@@ -6,7 +6,16 @@ void Player::Tick()
 
 	float* input = this->keyBoardInput.GetMovementVector().data(); //float2
 	float deltaTime = Time::GetInstance().GetDeltaTime();
-	this->linearVelocity = DirectX::XMFLOAT3(input[0] * this->speed * deltaTime, 0, input[1] * speed * deltaTime);
+
+	std::shared_ptr<CameraObject> cam = this->camera.lock();
+	DirectX::XMVECTOR test = {};
+	test.m128_f32[0] = 1;
+
+	DirectX::XMVECTOR moveVector = {};
+	moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(cam->GetGlobalRight(), input[0] * this->speed * deltaTime)); //Add x-input
+	moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(cam->GetGlobalForward(), input[1] * this->speed * deltaTime)); //Add z-input
+
+	DirectX::XMStoreFloat3(&this->linearVelocity, moveVector);
 
 	PhysicsQueue::GetInstance().SolveCollisions(); //this is extremely temporary
 	this->RigidBody::Tick(); //Always call this at the end!

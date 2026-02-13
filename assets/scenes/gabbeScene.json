@@ -255,7 +255,7 @@
           1.0
         ]
       },
-      "type": "Player",
+      "type": "TestPlayer",
       "children": [
       {
       "transform": {

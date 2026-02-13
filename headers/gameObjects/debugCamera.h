@@ -5,15 +5,18 @@
 #include "core/input/keyboardInput.h"
 #include "gameObjects/cameraObject.h"
 
-class DebugCamera : CameraObject {
+class DebugCamera : public CameraObject {
 public:
 	DebugCamera() : controllerInput(DWORD(0)) {}
 
 	KeyboardInput keyboardInput;
 	ControllerInput controllerInput;
 
-	virtual void Tick() override;
+	virtual void Tick() override;	
+	virtual void SaveToJson(nlohmann::json& data) override;
 
 private:
 	void shootRay();
+
+
 };

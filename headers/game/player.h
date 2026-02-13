@@ -3,11 +3,11 @@
 #include "gameObjects/meshObject.h"
 #include "core/physics/physicsQueue.h"
 
-class TestPlayer : public RigidBody
+class Player : public RigidBody
 {
 public:
-	TestPlayer();
-	~TestPlayer();
+	Player() = default;
+	~Player() = default;
 
 	void Tick() override;
 	void Start() override;

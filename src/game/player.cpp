@@ -1,12 +1,11 @@
-#include "core/physics/testPlayer.h"
+#include "game/player.h"
 
-TestPlayer::TestPlayer() {}
+void Player::Tick()
+{
+	
 
-TestPlayer::~TestPlayer() {}
-
-void TestPlayer::Tick()
-{ 
 	this->GameObject3D::Tick();
+
 	DirectX::XMFLOAT3 oldPos;
 	DirectX::XMStoreFloat3(&oldPos, this->transform.GetPosition());
 	float deltaTime = Time::GetInstance().GetDeltaTime();
@@ -42,7 +41,7 @@ void TestPlayer::Tick()
 	PhysicsQueue::GetInstance().SolveCollisions(); //this is extremely temporary
 }
 
-void TestPlayer::Start()
+void Player::Start()
 {
 	this->RigidBody::Start();
 }

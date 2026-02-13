@@ -9,6 +9,7 @@ class DepthBuffer {
 private:
 	Microsoft::WRL::ComPtr<ID3D11Texture2D> texture;
 	std::vector<Microsoft::WRL::ComPtr<ID3D11DepthStencilView>> depthStencilViews;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> depthStencilState;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shaderResourceView;
 
 public:
@@ -19,4 +20,5 @@ public:
 
 	ID3D11DepthStencilView* GetDepthStencilView(UINT arrayIndex) const;
 	ID3D11ShaderResourceView* GetShaderResourceView() const;
+	ID3D11DepthStencilState* GetDepthStencilState() const;
 };

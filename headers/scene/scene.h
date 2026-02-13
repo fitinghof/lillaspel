@@ -7,6 +7,10 @@
 #include <memory>
 #include <vector>
 
+#include "gameObjects/debugCamera.h"
+#include "gameObjects/meshObject.h"
+#include "gameObjects/spotlightObject.h"
+
 class SceneManager;
 
 class Scene : public GameObjectFactory {
@@ -14,7 +18,7 @@ public:
 	Scene();
 	~Scene() = default;
 
-	void SceneTick();
+	void SceneTick(bool isPaused);
 
 	virtual void RegisterGameObject(std::shared_ptr<GameObject> gameObject) override;
 
@@ -32,6 +36,9 @@ private:
 	/// Used after finishing loading a scene
 	/// </summary>
 	void CallStartOnAll();
+
+	void ShowHierarchy();
+	void ShowHierarchyRecursive(std::string name, std::weak_ptr<GameObject> gameObject);
 
 	std::vector<std::shared_ptr<GameObject>> gameObjects;
 	std::vector<std::weak_ptr<GameObject>> deleteQueue;

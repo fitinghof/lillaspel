@@ -64,6 +64,8 @@ public:
 
 	void SetMainCameraInScene(std::shared_ptr<Scene>& scene);
 
+	void TogglePause(bool enable);
+
 private:
 	std::shared_ptr<Scene> mainScene;
 	std::shared_ptr<Scene> emptyScene;
@@ -74,4 +76,6 @@ private:
 	std::string currentScenePath;
 
 	std::vector<std::unique_ptr<Mesh>> tempMeshes; // This is also temporary
+
+	bool isPaused;
 };

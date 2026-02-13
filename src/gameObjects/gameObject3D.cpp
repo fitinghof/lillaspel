@@ -84,6 +84,25 @@ void GameObject3D::SaveToJson(nlohmann::json& data)
 	data["transform"]["scale"] = { this->transform.GetScale().m128_f32[0], this->transform.GetScale().m128_f32[1], this->transform.GetScale().m128_f32[2] };
 }
 
+void GameObject3D::ShowInHierarchy() 
+{ 
+	this->GameObject::ShowInHierarchy(); 
+
+	ImGui::Text("GameObject3D"); 
+
+	// Position
+	DirectX::XMVECTOR pos = this->transform.GetPosition();
+	float newPos[3] = {pos.m128_f32[0], pos.m128_f32[1], pos.m128_f32[2]};
+	ImGui::InputFloat3("Local Position", newPos);
+	this->transform.SetPosition(DirectX::XMVectorSet(newPos[0], newPos[1], newPos[2], 1.0f));
+
+	// Scale
+	DirectX::XMVECTOR scale = this->transform.GetScale();
+	float newScale[3] = {scale.m128_f32[0], scale.m128_f32[1], scale.m128_f32[2]};
+	ImGui::InputFloat3("Local Scale", newScale);
+	this->transform.SetScale(DirectX::XMVectorSet(newScale[0], newScale[1], newScale[2], 1.0f));
+}
+
 DirectX::XMVECTOR GameObject3D::GetDecomposedWorldMatrix(const TransformComponent& component) const
 {
 	DirectX::XMVECTOR scale;

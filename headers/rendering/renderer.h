@@ -21,6 +21,8 @@
 #include "rendering/vertexBuffer.h"
 #include "wrl/client.h"
 #include <algorithm>
+#include "core/assetManager.h"
+#include "rendering/skybox.h"
 
 class Renderer {
 public:
@@ -56,10 +58,16 @@ public:
 	void Resize(const Window& window);
 
 	/// <summary>
-	/// Toggles VSync
+	/// Toggle VSync
 	/// </summary>
 	/// <param name="enable"></param>
 	void ToggleVSync(bool enable);
+
+	/// <summary>
+	/// Toggle wireframe for all objects
+	/// </summary>
+	/// <param name="enable"></param>
+	void ToggleWireframe(bool enable);
 
 	ID3D11Device* GetDevice() const;
 	ID3D11DeviceContext* GetContext() const;
@@ -92,6 +100,7 @@ private:
 	std::unique_ptr<Sampler> sampler;
 	std::unique_ptr<RasterizerState> standardRasterizerState;
 	std::unique_ptr<RasterizerState> wireframeRasterizerState;
+	std::unique_ptr<RasterizerState> skyboxRasterizerState;
 	RasterizerState* currentRasterizerState;
 
 	// Default stuff
@@ -106,6 +115,8 @@ private:
 
 	Shader* currentPixelShader;
 	Shader* currentVertexShader;
+
+	std::unique_ptr<Skybox> skybox;
 
 	// Render Queue:
 
@@ -169,6 +180,8 @@ private:
 
 	void BindCameraMatrix();
 	void BindWorldMatrix(ID3D11Buffer* buffer);
+
+	void DrawSkybox();
 
 	/// <summary>
 	/// Renders a single MeshObject

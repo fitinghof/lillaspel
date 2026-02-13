@@ -8,6 +8,7 @@
 #include <sstream>
 #include <string>
 #include <type_traits>
+#include "core/filepathHolder.h"
 
 enum LogOption { consoleAndLogFile, consoleOnly, logFileOnly };
 
@@ -35,7 +36,7 @@ private:
 	static constexpr const char* logTexts[3] = {"", "[WARNING]", "[ERROR] "};
 
 	static void PrintToFile(std::string info) {
-		std::ofstream file("../../log.txt", std::ios::app);
+		std::ofstream file(FilepathHolder::GetExeDirectory() / ".." / ".." / "log.txt", std::ios::app);
 		file << info << "\n";
 		file.close();
 	}

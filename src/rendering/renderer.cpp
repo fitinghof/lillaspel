@@ -4,7 +4,7 @@
 
 Renderer::Renderer()
 	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),
-	  maximumSpotlights(16) {
+	  maximumSpotlights(16), renderQueue(this->meshRenderQueue, this->spotLightRenderQueue, this->pointLightRenderQueue) {
 }
 
 void Renderer::Init(const Window& window)
@@ -200,9 +200,9 @@ void Renderer::CreateRendererConstantBuffers()
 
 void Renderer::CreateRenderQueue()
 {
-	this->meshRenderQueue = std::make_shared<std::vector<std::weak_ptr<MeshObject>>>();
-	this->SpotLightRenderQueue = std::make_shared<std::vector<std::weak_ptr<SpotlightObject>>>();
-	this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->SpotLightRenderQueue));
+	//this->meshRenderQueue = std::make_shared<std::vector<std::weak_ptr<MeshObject>>>();
+	//this->SpotLightRenderQueue = std::make_shared<std::vector<std::weak_ptr<SpotlightObject>>>();
+	//this->renderQueue = std::unique_ptr<RenderQueue>(new RenderQueue(this->meshRenderQueue, this->SpotLightRenderQueue));
 }
 
 void Renderer::LoadShaders()
@@ -219,16 +219,25 @@ void Renderer::Render()
 {
 	BindInputLayout();
 	auto shadowmaps = this->ShadowPass();
-	this->GetContext()->PSSetShaderResources(5, shadowmaps.size(), shadowmaps.data());
+	this->GetContext()->PSSetShaderResources(5, shadowmaps.spotlightSRVs.size(), shadowmaps.spotlightSRVs.data());
+	this->GetContext()->PSSetShaderResources(6, shadowmaps.pointLightSRVs.size(), shadowmaps.pointLightSRVs.data());
 	RenderPass();
 
 	// Unbinding shadowmaps to allow input on them again
-	for (auto& shadowMap : shadowmaps) {
+	for (auto& spotLightShadowMaps : shadowmaps.spotlightSRVs) {
 		// Since shadowmaps vector is just a non owning clone of all views, it is safe to just set them to nullptr
 		// for unbinding the shadowmaps
-		shadowMap = nullptr;
+		spotLightShadowMaps = nullptr;
 	}
-	this->GetContext()->PSSetShaderResources(5, shadowmaps.size(), shadowmaps.data());
+	this->GetContext()->PSSetShaderResources(5, shadowmaps.spotlightSRVs.size(), shadowmaps.spotlightSRVs.data());
+
+	// Unbinding shadowmaps to allow input on them again
+	for (auto& pointLightShadowMaps : shadowmaps.pointLightSRVs) {
+		// Since shadowmaps vector is just a non owning clone of all views, it is safe to just set them to nullptr
+		// for unbinding the shadowmaps
+		pointLightShadowMaps = nullptr;
+	}
+	this->GetContext()->PSSetShaderResources(5, shadowmaps.pointLightSRVs.size(), shadowmaps.pointLightSRVs.data());
 
 	//ImGui::Begin("Change Skybox");
 	//if (ImGui::Button("Change")) {
@@ -306,22 +315,24 @@ void Renderer::RenderPass()
 	}
 
 	// Bind meshes
-	for (size_t i = 0; i < this->meshRenderQueue->size(); i++)
+	for (size_t i = 0; i < this->meshRenderQueue.size(); i++)
 	{
-		if ((*this->meshRenderQueue)[i].expired())
+		if ((this->meshRenderQueue)[i].expired())
 		{
 			// This should get rid of empty objects
 			Logger::Log("The renderer deleted a meshObject");
-			this->meshRenderQueue->erase(this->meshRenderQueue->begin() + i);
+			this->meshRenderQueue.erase(this->meshRenderQueue.begin() + i);
 			i--;
 			continue;
 		}
 
-		RenderMeshObject((*this->meshRenderQueue)[i].lock().get());
+		RenderMeshObject((this->meshRenderQueue)[i].lock().get());
 	}
 }
 
-std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() { 
+Renderer::ShadowResourceViews Renderer::ShadowPass() { 
+	
+	ShadowResourceViews shadowSRVs{};
 
 	this->hasBoundStatic = false;
 	if (this->currentVertexShader != this->vertexShader.get()) {
@@ -330,22 +341,37 @@ std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() {
 	}
 	this->GetContext()->PSSetShader(nullptr, nullptr, 0);
 
-	const uint32_t lightCount = std::min<uint32_t>(this->SpotLightRenderQueue->size(), this->maximumSpotlights);
+	shadowSRVs.spotlightSRVs = this->SpotLightShadowPass();
+	shadowSRVs.pointLightSRVs = this->PointLightShadowPass();
+	
+	// Reset renderTarget and deapthStencil
+	this->BindRenderTarget();
+
+	// Reset ViewPort
+	this->BindViewport();
+
+	return shadowSRVs;
+
+}
+
+std::vector<ID3D11ShaderResourceView*> Renderer::SpotLightShadowPass() { 
+
+	const uint32_t lightCount = std::min<uint32_t>(this->spotLightRenderQueue.size(), this->maximumSpotlights);
 
 	std::vector<ID3D11ShaderResourceView*> depthStencilViews;
 	depthStencilViews.reserve(lightCount);
 
 
 	for (uint32_t i = 0; i < lightCount; i++) {
-		if ((*this->SpotLightRenderQueue)[i].expired()) {
+		if ((this->spotLightRenderQueue)[i].expired()) {
 			// This should remove deleted lights
 			Logger::Log("The renderer deleted a light");
-			this->SpotLightRenderQueue->erase(this->SpotLightRenderQueue->begin() + i);
+			this->spotLightRenderQueue.erase(this->spotLightRenderQueue.begin() + i);
 			i--;
 			continue;
 		}
 
-		auto light = (*this->SpotLightRenderQueue)[i].lock();
+		auto light = (this->spotLightRenderQueue)[i].lock();
 		if (light->GetResolutionChanged()) {
 			light->SetDepthBuffer(this->GetDevice());
 		}
@@ -368,22 +394,68 @@ std::vector<ID3D11ShaderResourceView*> Renderer::ShadowPass() {
 		this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);
 
 		// Draw all objects to depthstencil
-		for (auto& mesh : *this->meshRenderQueue.get()) {
+		for (auto& mesh : this->meshRenderQueue) {
 			if (mesh.expired()) continue;
 			this->RenderMeshObject(mesh.lock().get(), false);
 			
 		}
 		depthStencilViews.push_back(light->GetSRV());
 	}
-
-	// Reset renderTarget and deapthStencil
-	this->BindRenderTarget();
-
-	// Reset ViewPort
-	this->BindViewport();
-
 	return depthStencilViews; 
+}
 
+std::vector<ID3D11ShaderResourceView*> Renderer::PointLightShadowPass() {
+	const uint32_t lightCount = std::min<uint32_t>(this->pointLightRenderQueue.size(), this->maximumSpotlights);
+
+	std::vector<ID3D11ShaderResourceView*> depthStencilViews;
+	depthStencilViews.reserve(lightCount);
+
+	for (uint32_t i = 0; i < lightCount; i++) {
+		if (this->pointLightRenderQueue[i].expired()) {
+			// This should remove deleted lights
+			Logger::Log("The renderer deleted a light");
+			this->pointLightRenderQueue.erase(this->pointLightRenderQueue.begin() + i);
+			i--;
+			continue;
+		}
+
+		auto light = this->pointLightRenderQueue[i].lock();
+		if (light->GetResolutionChanged()) {
+			light->SetDepthBuffers(this->GetDevice());
+		}
+
+		auto DSViews = light->GetDepthStencilViews();
+		auto SRVs = light->GetSRVs();
+
+		for (size_t j = 0; j < 6; j++) {
+
+			this->immediateContext->ClearDepthStencilView(DSViews[j], D3D11_CLEAR_DEPTH, 1, 0);
+			this->immediateContext->OMSetRenderTargets(0, nullptr, DSViews[j]);
+		
+
+			if (light->cameras[j].expired()) {
+				Logger::Error("Lights shadow camera was dead");
+				continue;
+			}
+			auto matrixContainer = light->cameras[j].lock()->GetCameraMatrix();
+
+			const auto& viewPort = light->GetViewPort();
+			this->immediateContext->RSSetViewports(1, &viewPort);
+			this->cameraBuffer->UpdateBuffer(this->GetContext(), &matrixContainer);
+
+			ID3D11Buffer* buffer = this->cameraBuffer->GetBuffer();
+			this->immediateContext->VSSetConstantBuffers(0, 1, &buffer);
+
+			// Draw all objects to depthstencil
+			for (auto& mesh : this->meshRenderQueue) {
+				if (mesh.expired()) continue;
+				this->RenderMeshObject(mesh.lock().get(), false);
+			}
+			depthStencilViews.push_back(SRVs[j]);
+		}
+	}
+
+	return depthStencilViews;
 }
 
 void Renderer::ClearRenderTargetViewAndDepthStencilView()
@@ -541,12 +613,12 @@ void Renderer::BindMaterial(BaseMaterial* material)
 
 void Renderer::BindLights()
 {
-	if (this->SpotLightRenderQueue->size() > this->maximumSpotlights)
+	if (this->spotLightRenderQueue.size() > this->maximumSpotlights)
 	{
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
-	uint32_t lightCount = std::min<uint32_t>(this->SpotLightRenderQueue->size(), this->maximumSpotlights);
+	uint32_t lightCount = std::min<uint32_t>(this->spotLightRenderQueue.size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
 
@@ -554,18 +626,18 @@ void Renderer::BindLights()
 		std::vector<SpotlightObject::SpotLightContainer> spotlights;
 		for (uint32_t i = 0; i < lightCount; i++)
 		{
-			if ((*this->SpotLightRenderQueue)[i].expired()) 
+			if ((this->spotLightRenderQueue)[i].expired()) 
 			{
 				// This should remove deleted lights
 				Logger::Log("The renderer deleted a light");
-				this->SpotLightRenderQueue->erase(this->SpotLightRenderQueue->begin() + i);
+				this->spotLightRenderQueue.erase(this->spotLightRenderQueue.begin() + i);
 				i--;
 				// Lazy solution
 				BindLights();
 				return;
 			}
 
-			spotlights.push_back((*this->SpotLightRenderQueue)[i].lock()->GetSpotLightData());
+			spotlights.push_back((this->spotLightRenderQueue)[i].lock()->GetSpotLightData());
 		}
 
 		// Updates and binds buffer

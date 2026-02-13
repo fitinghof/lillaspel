@@ -1,6 +1,22 @@
 #include "gameObjects/pointLightObject.h"
 
-PointLightObject::PointLightObject() {}
+PointLightObject::PointLightObject() {
+	this->data = {};
+	DirectX::XMStoreFloat3(&this->data.position, DirectX::XMVectorSet(0, 0, 0, 0));
+	DirectX::XMStoreFloat4(&this->data.color, DirectX::XMVectorSet(1, 1, 1, 1));
+
+	this->shadowViewPort = {
+		.TopLeftX = 0,
+		.TopLeftY = 0,
+		.Width = static_cast<FLOAT>(128),
+		.Height = static_cast<FLOAT>(128),
+		.MinDepth = 0.0f,
+		.MaxDepth = 1.0f,
+	};
+
+	Logger::Log("Created a pointLight.");
+	this->resolutionChanged = true;
+}
 
 PointLightObject::PointLightContainer PointLightObject::GetPointLightData() {
 	DirectX::XMStoreFloat3(&this->data.position, GetGlobalPosition());

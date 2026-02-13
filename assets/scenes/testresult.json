@@ -165,7 +165,7 @@
           1.0
         ]
       },
-      "type": "SpotlightObject"
+      "type": "PointLightObject"
     },
     {
       "angleRadians": 6.2831854820251465,

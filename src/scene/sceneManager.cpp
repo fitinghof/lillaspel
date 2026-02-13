@@ -1,5 +1,6 @@
 #include "scene/sceneManager.h"
 #include "gameObjects/room.h"
+#include "core/filepathHolder.h"
 
 // Very good macro, please don't remove
 #define NAMEOF(x) #x
@@ -24,15 +25,13 @@ void SceneManager::SceneTick()
 		this->mainScene = this->emptyScene;
 	}
 
-	if (!this->isPaused) {
-		this->mainScene->SceneTick();
-	}
+	this->mainScene->SceneTick(this->isPaused);
 
-	ImGui::Begin("SceneTest");
-	if (ImGui::Button("Delete Scene")) {
-		DeleteScene(this->mainScene);
-	}
-	ImGui::End();
+	//ImGui::Begin("SceneTest");
+	//if (ImGui::Button("Delete Scene")) {
+	//	DeleteScene(this->mainScene);
+	//}
+	//ImGui::End();
 }
 
 void SceneManager::LoadScene(Scenes scene)
@@ -50,7 +49,7 @@ void SceneManager::LoadScene(Scenes scene)
 		Logger::Warn("There is no end credits scene.");
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile("../../../../assets/scenes/testresult.json");
+		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "testresult.json").string());
 		break;
 	default:
 		break;

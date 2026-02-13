@@ -63,6 +63,8 @@ void MeshObject::ShowInHierarchy()
 
 	ImGui::Text("MeshObject"); 
 
-	std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdent());
-	ImGui::Text(meshText.c_str()); 
+	if (!this->GetMesh().GetMesh().expired()) {
+		std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdent());
+		ImGui::Text(meshText.c_str()); 
+	}
 }

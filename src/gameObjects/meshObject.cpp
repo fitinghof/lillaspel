@@ -56,3 +56,15 @@ void MeshObject::SaveToJson(nlohmann::json& data)
 
 	data["meshIdentifier"] = GetMesh().GetMeshIdent();
 }
+
+void MeshObject::ShowInHierarchy() 
+{ 
+	this->GameObject3D::ShowInHierarchy();
+
+	ImGui::Text("MeshObject"); 
+
+	if (!this->GetMesh().GetMesh().expired()) {
+		std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdent());
+		ImGui::Text(meshText.c_str()); 
+	}
+}

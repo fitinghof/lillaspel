@@ -1,5 +1,6 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
+#include "core/filepathHolder.h"
 
 Renderer::Renderer()
 	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),
@@ -28,6 +29,9 @@ void Renderer::SetAllDefaults()
 	CreateRendererConstantBuffers();
 
 	LoadShaders();
+
+	this->skybox = std::make_unique<Skybox>();
+	this->skybox->Init(this->device.Get(), this->immediateContext.Get(), (FilepathHolder::GetAssetsDirectory() / "skybox" / "space.dds").string());
 }
 
 void Renderer::SetViewport(const Window& window)
@@ -150,6 +154,7 @@ void Renderer::CreateRasterizerStates()
 	this->standardRasterizerState = std::make_unique<RasterizerState>();
 	this->standardRasterizerState->Init(this->device.Get(), &rastDesc);
 
+	// Wireframe rasterizer desc doesn't cull anything and draws in wireframe
 	D3D11_RASTERIZER_DESC wireframeRastDesc;
 	ZeroMemory(&wireframeRastDesc, sizeof(wireframeRastDesc));
 	wireframeRastDesc.CullMode = D3D11_CULL_NONE;
@@ -157,6 +162,17 @@ void Renderer::CreateRasterizerStates()
 	wireframeRastDesc.FillMode = D3D11_FILL_WIREFRAME; // Wireframe
 	this->wireframeRasterizerState = std::make_unique<RasterizerState>();
 	this->wireframeRasterizerState->Init(this->device.Get(), &wireframeRastDesc);
+
+	// This ended up being the same as the normal rasterizerDesc,
+	// but I'm leaving it in case there was something wrong with skybox
+	// because I feel like it should be CULL_FRONT and not CULL_BACK
+	D3D11_RASTERIZER_DESC skyboxRastDesc;
+	ZeroMemory(&skyboxRastDesc, sizeof(skyboxRastDesc));
+	skyboxRastDesc.CullMode = D3D11_CULL_BACK;
+	skyboxRastDesc.DepthClipEnable = TRUE;
+	skyboxRastDesc.FillMode = D3D11_FILL_SOLID;
+	this->skyboxRasterizerState = std::make_unique<RasterizerState>();
+	this->skyboxRasterizerState->Init(this->device.Get(), &skyboxRastDesc);
 }
 
 void Renderer::CreateRendererConstantBuffers()
@@ -198,6 +214,12 @@ void Renderer::LoadShaders()
 void Renderer::Render()
 {
 	RenderPass();
+
+	//ImGui::Begin("Change Skybox");
+	//if (ImGui::Button("Change")) {
+	//	this->skybox->SwapCubemap(this->device.Get(), this->immediateContext.Get(), "../../../../assets/skybox/space.dds");
+	//}
+	//ImGui::End();
 }
 
 void Renderer::Present()
@@ -213,9 +235,11 @@ void Renderer::Resize(const Window& window)
 	BindViewport();
 }
 
-void Renderer::ToggleVSync(bool enable)
-{
-	this->isVSyncEnabled = enable;
+void Renderer::ToggleVSync(bool enable) { this->isVSyncEnabled = enable; }
+
+void Renderer::ToggleWireframe(bool enable) {
+	Logger::Log("test");
+	this->renderAllWireframe = enable;
 }
 
 ID3D11Device* Renderer::GetDevice() const
@@ -235,7 +259,6 @@ IDXGISwapChain* Renderer::GetSwapChain() const
 
 void Renderer::RenderPass()
 {
-	// THIS IS THE ISSUE WITH SCALING PROBABLY
 	// Bind basic stuff (it probably doesn't need to be set every frame)
 	if (!this->hasBoundStatic) {
 		BindSampler();
@@ -249,20 +272,22 @@ void Renderer::RenderPass()
 	// Clear last frame
 	ClearRenderTargetViewAndDepthStencilView();
 
-	// Bind rasterizerState
-	if (!this->renderAllWireframe) 
-	{
-		BindRasterizerState(this->standardRasterizerState.get());
-	} 
-	else
-	{
-		BindRasterizerState(this->wireframeRasterizerState.get());
-		BindMaterial(this->defaultUnlitMat.lock().get());
-	}
-
 	// Bind frame specific stuff
 	BindCameraMatrix();
 	BindLights();
+
+	// Bind skybox
+	// The skybox needs to not be wireframe and also correct culling
+	BindRasterizerState(this->skyboxRasterizerState.get());
+	DrawSkybox();
+
+	// Bind rasterizerState
+	if (!this->renderAllWireframe) {
+		BindRasterizerState(this->standardRasterizerState.get());
+	} else {
+		BindMaterial(this->defaultUnlitMat.lock().get());
+		BindRasterizerState(this->wireframeRasterizerState.get());
+	}
 
 	// Bind meshes
 	for (size_t i = 0; i < this->meshRenderQueue->size(); i++)
@@ -337,6 +362,7 @@ void Renderer::BindRenderTarget()
 	// Render target
 	ID3D11RenderTargetView* rtv = this->renderTarget->GetRenderTargetView();
 	this->immediateContext->OMSetRenderTargets(1, &rtv, this->depthBuffer->GetDepthStencilView(0));
+	this->immediateContext->OMSetDepthStencilState(this->depthBuffer->GetDepthStencilState(), 1);
 }
 
 void Renderer::BindViewport()
@@ -348,7 +374,7 @@ void Renderer::BindRasterizerState(RasterizerState* rastState)
 {
 	if (rastState == nullptr)
 	{
-		Logger::Error("RasterizerSate is nullptr");
+		Logger::Error("RasterizerState is nullptr");
 	}
 
 	this->immediateContext->RSSetState(rastState->GetRasterizerState());
@@ -435,7 +461,7 @@ void Renderer::BindLights()
 		Logger::Log("Just letting you know, there's more lights in the scene than the renderer supports. Increase maximumSpotlights.");
 	}
 
-	const uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
+	uint32_t lightCount = std::min<uint32_t>(this->lightRenderQueue->size(), this->maximumSpotlights);
 
 	if (lightCount > 0) {
 
@@ -449,7 +475,9 @@ void Renderer::BindLights()
 				Logger::Log("The renderer deleted a light");
 				this->lightRenderQueue->erase(this->lightRenderQueue->begin() + i);
 				i--;
-				continue;
+				// Lazy solution
+				BindLights();
+				return;
 			}
 
 			spotlights.push_back((*this->lightRenderQueue)[i].lock()->data);
@@ -478,7 +506,17 @@ void Renderer::BindCameraMatrix()
 
 void Renderer::BindWorldMatrix(ID3D11Buffer* buffer)
 {
-	this->immediateContext->VSSetConstantBuffers(1, 1, &buffer);
+	this->immediateContext->VSSetConstantBuffers(1, 1, &buffer); }
+
+void Renderer::DrawSkybox() {
+	this->skybox->Draw(this->immediateContext.Get());
+
+	// Since the skybox sets shaders
+	this->currentVertexShader = nullptr;
+	this->currentPixelShader = nullptr;
+
+	// Make sure that a real material is bound
+	BindMaterial(this->defaultMat.lock().get());
 }
 
 void Renderer::RenderMeshObject(MeshObject* meshObject)

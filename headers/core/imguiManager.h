@@ -25,6 +25,7 @@ public:
 	void SetFullscreenChangeCallback(std::function<void(bool)> callback);
 	void SetVSyncChangeCallback(std::function<void(bool)> callback);
 	void SetWireframeChangeCallback(std::function<void(bool)> callback);
+	void SetPauseExecutionChangeCallback(std::function<void(bool)> callback);
 	void SetSaveSceneChangeCallback(std::function<void(const std::string&)> callback);
 	void SetSaveSceneAsChangeCallback(std::function<void(const std::string&)> callback);
 	void SetLoadSceneChangeCallback(std::function<void(const std::string&)> callback);
@@ -45,6 +46,7 @@ private:
 	// Debug
 	bool showConsoleWindow = false;
 	bool showWireframe = false;
+	bool pauseExecution = false;
 
 	// Edit
 	bool showTransformWindow = false;
@@ -55,6 +57,7 @@ private:
 	std::function<void(bool)> fullscreenChangeCallback;
 	std::function<void(bool)> vSyncChangeCallback;
 	std::function<void(bool)> wireframeChangeCallback;
+	std::function<void(bool)> pauseChangeCallback;
 	std::function<void(const std::string&)> saveSceneChangeCallback;
 	std::function<void(const std::string&)> saveSceneAsChangeCallback;
 	std::function<void(const std::string&)> loadSceneChangeCallback;

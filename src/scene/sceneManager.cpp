@@ -14,6 +14,12 @@ SceneManager::SceneManager(Renderer* rend) : mainScene(nullptr), renderer(rend),
 	this->objectFromString.RegisterType<DebugCamera>(NAMEOF(DebugCamera));
 	this->objectFromString.RegisterType<SpaceShip>(NAMEOF(SpaceShip));
 	this->objectFromString.RegisterType<Room>(NAMEOF(Room));
+	this->objectFromString.RegisterType<BoxCollider>(NAMEOF(BoxCollider));
+	this->objectFromString.RegisterType<SphereCollider>(NAMEOF(SphereCollider));
+	this->objectFromString.RegisterType<RigidBody>(NAMEOF(RigidBody));
+	this->objectFromString.RegisterType<SoundSourceObject>(NAMEOF(SoundSourceObject));
+
+	this->objectFromString.RegisterType<TestPlayer>(NAMEOF(TestPlayer));
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();
@@ -133,6 +139,11 @@ void SceneManager::SaveSceneToFile(const std::string &filePath)
 		}
 	}
 
+	//Logger::Log(this->mainScene->GetNumberOfGameObjects());
+	//this->mainScene->QueueDeleteGameObject(light2);
+	//Logger::Log("Loaded scene");
+
+	////////////////
 	std::ofstream outFile(filePath);
 	outFile << data;
 	outFile.close();

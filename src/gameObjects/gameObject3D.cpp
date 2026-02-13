@@ -53,8 +53,17 @@ DirectX::XMVECTOR GameObject3D::GetGlobalForward() const
 	return DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 0, 1, 0), GetGlobalRotation());
 }
 
-void GameObject3D::LoadFromJson(const nlohmann::json& data)
+DirectX::XMVECTOR GameObject3D::GetGlobalRight() const 
+{ 
+	return DirectX::XMVector3Rotate(DirectX::XMVectorSet(1, 0, 0, 0), GetGlobalRotation());
+}
+
+DirectX::XMVECTOR GameObject3D::GetGlobalUp() const
 {
+	return DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), GetGlobalRotation());
+}
+
+void GameObject3D::LoadFromJson(const nlohmann::json& data) {
 	this->GameObject::LoadFromJson(data);
 
 	if (data.contains("transform")) {

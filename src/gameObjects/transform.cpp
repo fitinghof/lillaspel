@@ -47,6 +47,16 @@ DirectX::XMVECTOR Transform::GetDirectionVector() const {
 	return DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 0, 1, 0), this->quaternion);
 }
 
+DirectX::XMVECTOR Transform::GetRightVector() const 
+{
+	return DirectX::XMVector3Rotate(DirectX::XMVectorSet(1, 0, 0, 0), this->quaternion);
+}
+
+DirectX::XMVECTOR Transform::GetUpVector() const 
+{ 
+    return DirectX::XMVector3Rotate(DirectX::XMVectorSet(0, 1, 0, 0), this->quaternion);
+}
+
 DirectX::XMVECTOR Transform::GetScale() const { return this->scale; }
 
 DirectX::XMFLOAT4X4 Transform::GetWorldMatrix(bool inverseTranspose) const {

@@ -13,4 +13,7 @@ public:
 	ControllerInput controllerInput;
 
 	virtual void Tick() override;
+
+private:
+	void shootRay();
 };

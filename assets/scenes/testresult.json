@@ -22,6 +22,28 @@
       },
       "type": "DebugCamera"
     },
+      {
+        "meshIdentifier": "meshes/indicatorSphere05.glb:Mesh_0",
+        "transform": {
+          "position": [
+            0.0,
+            2.0,
+            0.0
+          ],
+          "rotation": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "scale": [
+            1.0,
+            1.0,
+            1.0
+          ]
+        },
+        "type": "MeshObject"
+      },
     {
       "children": [
         {
@@ -29,7 +51,7 @@
             {
               "children": [
                 {
-                  "meshIdentifier": "TexBox/TextureCube.glb:Mesh_0",
+                  "meshIdentifier": "CS/cs2.glb:Mesh_0",
                   "transform": {
                     "position": [
                       0.0,
@@ -95,7 +117,7 @@
           "type": "MeshObject"
         }
       ],
-      "meshIdentifier": "CS/cs2.glb:Mesh_0",
+      "meshIdentifier": "Box/indicatorSphereWithMaterial.glb:Mesh_0",
       "transform": {
         "position": [
           0.0,

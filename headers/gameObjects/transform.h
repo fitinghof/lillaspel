@@ -89,6 +89,18 @@ public:
 	DirectX::XMVECTOR GetDirectionVector() const;
 
 	/// <summary>
+	/// Returns the right direction vector based on current rotation
+	/// </summary>
+	/// <returns></returns>
+	DirectX::XMVECTOR GetRightVector() const;
+
+	/// <summary>
+	/// Returns the up direction vector based on current rotation
+	/// </summary>
+	/// <returns></returns>
+	DirectX::XMVECTOR GetUpVector() const;
+
+	/// <summary>
 	/// Returns the scale vector for the transform
 	/// </summary>
 	/// <returns></returns>

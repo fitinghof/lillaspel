@@ -53,7 +53,7 @@ void MeshObject::SaveToJson(nlohmann::json& data)
 
 	data["type"] = "MeshObject";
 
-	data["meshIdentifier"] = GetMesh().GetMeshIdent();
+	data["meshIdentifier"] = GetMesh().GetMeshIdentifier();
 }
 
 void MeshObject::ShowInHierarchy() 
@@ -65,20 +65,21 @@ void MeshObject::ShowInHierarchy()
 	ImGui::Checkbox("Hide", &this->hide);
 
 	if (!this->GetMesh().GetMesh().expired()) {
-		std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdent());
+		std::string meshText = std::format("Mesh: {}", this->GetMesh().GetMeshIdentifier());
 		ImGui::Text(meshText.c_str()); 
 
 		ImGui::Text("Materials");
 		for (int i = 0; i < this->GetMesh().GetMesh().lock()->GetSubMeshes().size(); i++) {
-			std::string materialName = this->GetMesh().GetMaterial(i).lock()->identifier;
-			if (materialName.size() > 32) {
-				materialName = "..." + materialName.substr(materialName.size() - 32, std::string::npos);
+			std::string materialName = this->GetMesh().GetMaterial(i).lock()->GetIdentifier();
+			std::string shortMaterialName = materialName;
+			if (shortMaterialName.size() > 32) {
+				shortMaterialName = "..." + shortMaterialName.substr(shortMaterialName.size() - 32, std::string::npos);
 			}
 
-			materialName = std::to_string(i) + materialName;
+			shortMaterialName = std::to_string(i) + shortMaterialName;
 
-			if (ImGui::TreeNode(materialName.c_str())) {
-				ImGui::Text(materialName.c_str());
+			if (ImGui::TreeNode(shortMaterialName.c_str())) {
+				ImGui::Text(("Identifier: " +  materialName).c_str());
 
 				if (ImGui::Button("Change material")) ImGui::OpenPopup("change_mat");
 				if (ImGui::BeginPopup("change_mat")) {

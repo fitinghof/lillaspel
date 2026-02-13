@@ -64,6 +64,9 @@ public:
 	virtual void LoadFromJson(const nlohmann::json& data);
 	virtual void SaveToJson(nlohmann::json& data);
 
+	/// <summary>
+	/// What the object shows in the hierarchy. Look at how other objects (CameraObject, MeshObject etc) have implemented it.
+	/// </summary>
 	virtual void ShowInHierarchy();
 
 	/// <summary>
@@ -114,10 +117,12 @@ private:
 	char imguiName[64];
 
 protected:
+	// Any interaction with the scene is done through the factory.
 	GameObjectFactory* factory;
-	std::string name;
-	bool isActive;
-	bool isActiveOverride; // If true, then a parent is inactive
+
+	std::string name; // Mostly used for the object hierarchy.
+	bool isActive; // If false, then this object is marked as inactive.
+	bool isActiveOverride; // If true, then a parent of this object is inactive.
 
 	bool imguiIsActive;
 };

@@ -105,6 +105,8 @@ void Scene::ShowHierarchy()
 
 	ImGui::SetNextWindowSize(ImVec2(400.f, 500.f), ImGuiCond_FirstUseEver);
 	ImGui::Begin("Object Hierarchy", &ImguiManager::showObjectHierarchy, ImGuiWindowFlags_MenuBar);
+	
+	// Create GameObjects button
 	if (ImGui::Button("Create")) ImGui::OpenPopup("select_gameobject");
 	if (ImGui::BeginPopup("select_gameobject")) {
 		if (ImGui::Selectable("GameObject")) {
@@ -129,12 +131,15 @@ void Scene::ShowHierarchy()
 
 		ImGui::EndPopup();
 	}
+
+	// Create the object hierarchy
 	for (size_t i = 0; i < this->gameObjects.size(); i++) {
 		std::weak_ptr<GameObject> gameObject = this->gameObjects[i];
 		if (gameObject.lock()->parent.expired()) {
 			ShowHierarchyRecursive(gameObject.lock()->name, gameObject);
 		}
 	}
+
 	ImGui::End();
 }
 

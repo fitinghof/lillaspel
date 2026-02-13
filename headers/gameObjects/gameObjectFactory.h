@@ -24,6 +24,7 @@ public:
 
 	/// <summary>
 	/// Get the first object of a type. Returns expired weak_ptr if there are none.
+	/// T is any type derived from GameObject.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <returns></returns>
@@ -32,6 +33,7 @@ public:
 
 	/// <summary>
 	/// Get all objects of a type. Returns empty vector if there are none.
+	/// T is any type derived from GameObject.
 	/// </summary>
 	/// <typeparam name="T"></typeparam>
 	/// <returns></returns>
@@ -40,9 +42,22 @@ public:
 
 	virtual ~GameObjectFactory() = default;
 
+	/// <summary>
+	/// Gets a unique id, useful for naming gameobjects.
+	/// </summary>
+	/// <returns></returns>
 	virtual int GetNextID() = 0;
 
+	/// <summary>
+	/// Get selected GameObject. Used in the Object Hierarchy.
+	/// </summary>
+	/// <returns></returns>
 	virtual std::weak_ptr<GameObject> GetSelected() { return this->selectedObject; }
+
+	/// <summary>
+	/// Select GameObject. Used in the Object Hierarchy.
+	/// </summary>
+	/// <param name="newSelected"></param>
 	virtual void SetSelected(std::weak_ptr<GameObject>& newSelected) { this->selectedObject = newSelected; }
 
 private:

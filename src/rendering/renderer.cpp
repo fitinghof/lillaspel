@@ -1,5 +1,6 @@
 #include "rendering/renderer.h"
 #include "gameObjects/objectLoader.h"
+#include "core/filepathHolder.h"
 
 Renderer::Renderer()
 	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),
@@ -30,7 +31,7 @@ void Renderer::SetAllDefaults()
 	LoadShaders();
 
 	this->skybox = std::make_unique<Skybox>();
-	this->skybox->Init(this->device.Get(), this->immediateContext.Get(), "../../../../assets/skybox/space.dds");
+	this->skybox->Init(this->device.Get(), this->immediateContext.Get(), (FilepathHolder::GetAssetsDirectory() / "skybox" / "space.dds").string());
 }
 
 void Renderer::SetViewport(const Window& window)

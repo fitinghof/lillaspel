@@ -4,11 +4,14 @@
 #include "utilities/time.h"
 #include "core/input/inputManager.h"
 #include <memory>
+#include "core/filepathHolder.h"
 
 // Game Loop
 void Game::Run(HINSTANCE hInstance, int nCmdShow)
 {
     Window window(hInstance, nCmdShow, "Game Window");
+
+    FilepathHolder::SetDirectiories();
 
     this->renderer.Init(window);
     AssetManager::GetInstance().SetDevicePointer(this->renderer.GetDevice());
@@ -67,3 +70,6 @@ void Game::Run(HINSTANCE hInstance, int nCmdShow)
         InputManager::GetInstance().Reset();
     }
 }
+
+std::filesystem::path FilepathHolder::exeDirectory;
+std::filesystem::path FilepathHolder::assetsDirectory;

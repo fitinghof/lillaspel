@@ -5,7 +5,7 @@
 #include "core/input/keyboardInput.h"
 #include "gameObjects/cameraObject.h"
 
-class DebugCamera : CameraObject {
+class DebugCamera : public CameraObject {
 public:
 	DebugCamera() : controllerInput(DWORD(0)) {}
 

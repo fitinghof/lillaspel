@@ -40,6 +40,8 @@ public:
 
 	virtual ~GameObjectFactory() = default;
 
+	virtual int GetNextID() = 0;
+
 private:
 	/// <summary>
 	/// Add GameObject to game engine logic

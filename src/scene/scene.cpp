@@ -1,12 +1,21 @@
 #include "scene/scene.h"
+#include "core/imguiManager.h"
 
-Scene::Scene() : gameObjects(), finishedLoading(true) {
+Scene::Scene() : gameObjects(), finishedLoading(true), currentGameObjectId(0) {
 }
 
 void Scene::SceneTick(bool isPaused)
 {
 	for (size_t i = 0; i < this->gameObjects.size(); i++) {
 		std::shared_ptr<GameObject> gameObject = this->gameObjects[i];
+
+		// If paused, only debug camera should run
+		if (isPaused) {
+			if (DebugCamera* cam = dynamic_cast<DebugCamera*>(gameObject.get()); cam == nullptr) {
+				continue;
+			}
+		}
+
 		gameObject->Tick();
 		gameObject->LateTick();
 	}
@@ -21,6 +30,7 @@ void Scene::RegisterGameObject(std::shared_ptr<GameObject> gameObject)
 	this->gameObjects.push_back(gameObject);
 	gameObject->factory = this;
 	gameObject->myPtr = gameObject;
+	gameObject->name = "GameObject " + std::to_string(this->GetNextID());
 	if (this->finishedLoading) {
 		gameObject->Start();
 	}
@@ -33,7 +43,11 @@ void Scene::QueueDeleteGameObject(std::weak_ptr<GameObject> gameObject)
 
 size_t Scene::GetNumberOfGameObjects()
 {
-	return this->gameObjects.size();
+	return this->gameObjects.size(); }
+
+int Scene::GetNextID() 
+{ 
+	return this->currentGameObjectId++; 
 }
 
 void Scene::DeleteDeleteQueue()
@@ -85,8 +99,10 @@ void Scene::CallStartOnAll() {
 
 void Scene::ShowHierarchy() 
 {
+	if (!ImguiManager::showObjectHierarchy) return;
+
 	ImGui::SetNextWindowSize(ImVec2(400.f, 500.f), ImGuiCond_FirstUseEver);
-	ImGui::Begin("Object Hierarchy");
+	ImGui::Begin("Object Hierarchy", &ImguiManager::showObjectHierarchy, ImGuiWindowFlags_MenuBar);
 	if (ImGui::Button("Create")) ImGui::OpenPopup("select_gameobject");
 	if (ImGui::BeginPopup("select_gameobject")) {
 		if (ImGui::Selectable("GameObject")) {
@@ -102,7 +118,7 @@ void Scene::ShowHierarchy()
 			this->CreateGameObjectOfType<CameraObject>();
 		}
 		// Debug Camera apparently breaks
-		//if (ImGui::Selectable("DebugCamera")) {
+		// if (ImGui::Selectable("DebugCamera")) {
 		//	this->CreateGameObjectOfType<DebugCamera>();
 		//}
 		if (ImGui::Selectable("SpotlightObject")) {
@@ -114,7 +130,7 @@ void Scene::ShowHierarchy()
 	for (size_t i = 0; i < this->gameObjects.size(); i++) {
 		std::weak_ptr<GameObject> gameObject = this->gameObjects[i];
 		if (gameObject.lock()->parent.expired()) {
-			ShowHierarchyRecursive("GameObject " + std::to_string(i), gameObject);
+			ShowHierarchyRecursive(gameObject.lock()->name, gameObject);
 		}
 	}
 	ImGui::End();

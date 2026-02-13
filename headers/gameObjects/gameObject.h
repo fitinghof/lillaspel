@@ -64,6 +64,8 @@ public:
 
 	virtual void ShowInHierarchy();
 
+	virtual const std::string& GetName();
+
 private:
 	/// <summary>
 	/// WARNING: Engine only. Do not use for any in-game logic.
@@ -87,4 +89,5 @@ private:
 
 protected:
 	GameObjectFactory* factory;
+	std::string name;
 };

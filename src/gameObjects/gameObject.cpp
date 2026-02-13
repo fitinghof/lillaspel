@@ -104,14 +104,18 @@ std::shared_ptr<GameObject> GameObject::GetPtr()
 	//return shared_from_this();
 }
 
-void GameObject::LoadFromJson(const nlohmann::json& data)
-{
+void GameObject::LoadFromJson(const nlohmann::json& data) {
 	// Children are loaded by the sceneManager
+
+	if (data.contains("name")) {
+		this->name = data.at("name").get<std::string>();
+	}
 }
 
 void GameObject::SaveToJson(nlohmann::json& data)
 {
 	data["type"] = "GameObject";
+	data["name"] = this->name;
 
 	for (size_t i = 0; i < this->children.size(); i++)
 	{
@@ -125,3 +129,5 @@ void GameObject::ShowInHierarchy() {
 		this->factory->QueueDeleteGameObject(this->GetPtr());
 	}
 }
+
+const std::string& GameObject::GetName() { return this->name; }

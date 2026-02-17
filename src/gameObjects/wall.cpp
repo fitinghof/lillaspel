@@ -101,11 +101,11 @@ void Wall::SetWallState(int wallState) {
 	Room::WallState wallStateEnum = static_cast<Room::WallState>(wallState);
 	switch (wallStateEnum) {
 	case (Room::WallState::window):
-		this->SpawnInteractables();
+		//this->SpawnInteractables();
 		break;
 
 	case (Room::WallState::solid):
-		this->SpawnInteractables();
+		//this->SpawnInteractables();
 		break;
 
 	case (Room::WallState::door):

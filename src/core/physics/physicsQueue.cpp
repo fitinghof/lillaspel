@@ -74,6 +74,7 @@ void PhysicsQueue::AddStrayCollider(std::weak_ptr<Collider> collider)
     this->strayColliders.push_back(collider);
 
     this->colliderIdCounter++;
+	Logger::Warn("Collider amount:", this->colliderIdCounter);
 }
 void PhysicsQueue::AddToAllColliders(std::weak_ptr<Collider> collider) {
 	collider.lock()->SetId(this->colliderIdCounter);

@@ -20,21 +20,13 @@
           1.0
         ]
       },
-      "type": "DebugCamera",
-      "children": [
-        {
-      "angleRadians": 6.2831854820251465,
-      "color": [
-        1.0,
-        1.0,
-        1.0,
-        1.0
-      ],
-      "intensity": 20.0,
+      "type": "SpaceShip"
+    },
+    {
       "transform": {
         "position": [
-          0.0,
-          0.0,
+          5.0,
+          45.0,
           5.0
         ],
         "rotation": [
@@ -49,16 +41,17 @@
           1.0
         ]
       },
-      "type": "SpotlightObject"
-    }
-      ]
-    },
+      "type": "Player",
+      "gravity": true,
+      "speed": 18,
+      "mouseSensitivity": 0.004,
+      "children": [
     {
       "fov": 80.0,
       "transform": {
         "position": [
           0.0,
-          0.0,
+          2.0,
           0.0
         ],
         "rotation": [
@@ -73,7 +66,59 @@
           1.0
         ]
       },
-      "type": "SpaceShip"
+      "type": "CameraObject"
+    },
+      {
+      "transform": {
+        "position": [
+          0.0,
+          0.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "scale": [
+          0.05,
+          0.15,
+          0.05
+        ]
+      },
+      "type": "BoxCollider",
+      "tag": 1,
+      "targetTag": 0,
+      "solid": true,
+      "dynamic": true
+    },
+    {
+      "transform": {
+        "position": [
+          0.0,
+          -2.0,
+          0.0
+        ],
+        "rotation": [
+          0.0,
+          0.0,
+          1.1,
+          1.0
+        ],
+        "scale": [
+          2.0,
+          2.0,
+          2.0
+        ]
+      },
+      "type": "SphereCollider",
+      "tag": 1,
+      "targetTag": 3,
+      "solid": true,
+      "dynamic": true
+    }
+      ]
     }
     
   ]

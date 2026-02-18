@@ -51,6 +51,8 @@ public:
 	/// <returns></returns>
 	DirectX::XMFLOAT3 GetExtents();
 
+	SATData GetSatData();
+
 	bool IntersectWithRay(const Ray& ray, float& distance, float maxDistance) override;
 
 private:

@@ -116,6 +116,8 @@ public:
 	/// <param name="resolveDistance"></param>
 	bool BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance);
 
+	std::weak_ptr<MeshObject> GetMeshObjectChild();
+
 	//DirectX::XMFLOAT3 resolveAxis = {};
 	//float resolveDistance = 0;
 
@@ -139,7 +141,7 @@ public:
 
 private:
 	int id = -1;
-	std::weak_ptr<GameObject> meshObjectChild; //reference to the mesh visual representation of the collider (remove?)
+	std::weak_ptr<MeshObject> meshObjectChild; //reference to the mesh visual representation of the collider (remove?)
 	std::weak_ptr<RigidBody> rigidBodyParent;
 	std::weak_ptr<GameObject3D> gameObject3DParent;
 

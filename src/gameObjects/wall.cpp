@@ -26,6 +26,42 @@ void Wall::Start(){
 
 }
 
+void Wall::Tick()
+{
+		//this->transform.Rotate(0, Time::GetInstance().GetDeltaTime(), 0);
+
+	if(GetAsyncKeyState('I'))
+	{
+
+		Logger::Log("NR OF COLLDEIRS: ", this->wallColliders.size());
+		DirectX::XMVECTOR rotation = this->wallColliders[0].lock()->GetGlobalRotation();
+		DirectX::XMVECTOR rotationQuat = this->wallColliders[0].lock()->transform.GetRotationQuaternion();
+
+		std::shared_ptr<MeshObject> meshObj = this->wallColliders[0].lock()->GetMeshObjectChild().lock();
+		DirectX::XMVECTOR meshObjRotation = meshObj->GetGlobalRotation();
+		DirectX::XMVECTOR meshObjRotationQuat = meshObj->transform.GetRotationQuaternion();
+
+		std::shared_ptr<BoxCollider> box = std::dynamic_pointer_cast<BoxCollider>(this->wallColliders[0].lock());
+		if(box != nullptr)
+		{
+			Logger::Log("****SAT-DATA*****");
+			SATData satData = box->GetSatData();
+
+			for (int i = 0; i < 8; i++)
+			{
+				Logger::Log("pos: ", satData.positionData[i].x, ", ", satData.positionData[i].y, ", ", satData.positionData[i].z);
+			}
+			Logger::Log("*********");
+		}
+
+		Logger::Log("MESHOBJECT GLOBAL ROTATION: ", meshObjRotation.m128_f32[0], ", ", meshObjRotation.m128_f32[1], ", ", meshObjRotation.m128_f32[2]);
+		Logger::Log("MESHOBJECT ROTATION QUAT: ", meshObjRotationQuat.m128_f32[0], ", ", meshObjRotationQuat.m128_f32[1], ", ", meshObjRotationQuat.m128_f32[2]);
+		Logger::Log("COLLIDER 2 GLOBAL ROTATION: ", rotation.m128_f32[0], ", ", rotation.m128_f32[1], ", ", rotation.m128_f32[2]);
+		Logger::Log("COLLIDER 2 ROTATION QUAT: ", rotationQuat.m128_f32[0], ", ", rotationQuat.m128_f32[1], ", ", rotationQuat.m128_f32[2]);
+		Logger::Log("-------------------------------------------------------");
+	}
+}
+
 void Wall::SetWAllIndex(int wallIndex) { this->wallIndex = wallIndex; }
 
 

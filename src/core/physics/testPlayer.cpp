@@ -7,7 +7,7 @@ TestPlayer::~TestPlayer() {}
 void TestPlayer::Tick()
 { 
 	this->RigidBody::Tick();
-	this->gravity = false;
+	this->gravity = true;
 
 	// this->transform.Rotate(0, deltaTime, 0);
 
@@ -16,8 +16,6 @@ void TestPlayer::Tick()
 
 void TestPlayer::PhysicsTick()
 {
-	RigidBody::PhysicsTick();
-
 	float fixedDeltaTime = Time::GetInstance().GetFixedDeltaTime();
 	this->moveVector = DirectX::XMFLOAT3(0, 0, 0);
 	float speed = 18;
@@ -44,7 +42,9 @@ void TestPlayer::PhysicsTick()
 
 	this->linearVelocity = moveVector;
 
-	this->transform.Rotate(0, Time::GetInstance().GetFixedDeltaTime());
+		RigidBody::PhysicsTick();
+
+	//this->transform.Rotate(0, Time::GetInstance().GetFixedDeltaTime());
 }
 
 void TestPlayer::Start() { this->RigidBody::Start(); }

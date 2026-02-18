@@ -53,7 +53,7 @@ void Room::Start() {
 
 		this->floor = meshobj;
 	}
-	for (size_t i = 0; i < 3; i++) {
+	for (size_t i = 0; i < 4; i++) {
 
 		auto meshobjWeak = this->factory->CreateGameObjectOfType<Wall>();
 

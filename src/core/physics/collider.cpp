@@ -30,7 +30,17 @@ void Collider::SetParent(std::weak_ptr<GameObject> parent)
 	}
 
 	std::shared_ptr<RigidBody> rigidBodyParent = std::dynamic_pointer_cast<RigidBody>(newParent);
+	if(rigidBodyParent != nullptr)
+	{
+		Logger::Error("Collider got parented to RigidBody");
+	}
+
 	std::shared_ptr<GameObject3D> gameObject3DParent = std::dynamic_pointer_cast<GameObject3D>(newParent);
+	if(gameObject3DParent != nullptr)
+	{
+		Logger::Error("Collider got parented to GameObject3D");
+	}
+
 	std::shared_ptr<Collider> thisCollider = std::static_pointer_cast<Collider>(this->GetPtr());
 
 	if (rigidBodyParent)
@@ -87,6 +97,7 @@ void Collider::Start()
 	visualMeshObject->SetMesh(meshData);
 	visualMeshObject->transform.SetScale(scale);
 	visualMeshObject->SetParent(std::static_pointer_cast<Collider>(this->GetPtr()));
+	this->meshObjectChild = visualMeshObject;
 }
 
 bool Collider::Collision(Collider* otherCollider)
@@ -239,6 +250,11 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 	}
 
 	return false;
+}
+
+std::weak_ptr<MeshObject> Collider::GetMeshObjectChild()
+{
+	return this->meshObjectChild;
 }
 
 bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance)

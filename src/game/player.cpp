@@ -30,7 +30,9 @@ void Player::Tick()
 	this->input[1] = this->keyBoardInput.GetMovementVector().data()[1];
 	this->UpdateCamera();
 
-	//Logger::Log("linear velocity: " + std::to_string(this->linearVelocity.x) + ", " + std::to_string(this->linearVelocity.y) + ", " + std::to_string(this->linearVelocity.z));
+	//this->transform.Rotate(0, Time::GetInstance().GetDeltaTime());
+
+	Logger::Log("linear velocity: " + std::to_string(this->linearVelocity.x) + ", " + std::to_string(this->linearVelocity.y) + ", " + std::to_string(this->linearVelocity.z));
 }
 
 void Player::PhysicsTick()

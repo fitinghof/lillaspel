@@ -82,39 +82,14 @@
           1.0
         ],
         "scale": [
-          0.05,
-          0.15,
-          0.05
-        ]
-      },
-      "type": "BoxCollider",
-      "tag": 1,
-      "targetTag": 0,
-      "solid": true,
-      "dynamic": true
-    },
-    {
-      "transform": {
-        "position": [
-          0.0,
-          -2.0,
-          0.0
-        ],
-        "rotation": [
-          0.0,
-          0.0,
-          1.1,
-          1.0
-        ],
-        "scale": [
-          2.0,
-          2.0,
-          2.0
+          1.5,
+          1.5,
+          1.5
         ]
       },
       "type": "SphereCollider",
       "tag": 1,
-      "targetTag": 3,
+      "targetTag": 0,
       "solid": true,
       "dynamic": true
     }

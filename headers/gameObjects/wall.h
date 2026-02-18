@@ -11,6 +11,7 @@ public:
 	virtual void OnInteract() override;
 
 	virtual void Start() override;
+	void Tick() override;
 
 	void SetWAllIndex(int wallIndex);
 

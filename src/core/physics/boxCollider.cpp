@@ -38,6 +38,17 @@ void BoxCollider::Tick()
 
 	this->BuildCornersArray(this->satData.positionData);
 	DirectX::XMStoreFloat3(&this->satData.center, this->GetGlobalPosition());
+
+	if(GetAsyncKeyState('I'))
+	{
+					Logger::Log("****SAT-DATA in BOXCOLLIDER*****");
+
+			for (int i = 0; i < 8; i++)
+			{
+				Logger::Log("pos: ", this->satData.positionData[i].x, ", ", this->satData.positionData[i].y, ", ", this->satData.positionData[i].z);
+			}
+			Logger::Log("*********");
+	}
 }
 
 void BoxCollider::LoadFromJson(const nlohmann::json& data)
@@ -144,6 +155,11 @@ DirectX::XMFLOAT3 BoxCollider::GetExtents()
 	DirectX::XMStoreFloat3(&extents, this->GetGlobalScale());
 	
 	return extents;
+}
+
+SATData BoxCollider::GetSatData()
+{
+	return this->satData;
 }
 
 void BoxCollider::SetPosition(DirectX::XMFLOAT3 newCenter)

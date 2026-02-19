@@ -9,7 +9,7 @@
 #include <chrono>
 #include <cmath>
 
-// #define DEBUG_TIMER
+// static constexpr bool DEBUG_TIMER = true;
 
 Renderer::Renderer()
 	: viewport(), currentPixelShader(nullptr), currentVertexShader(nullptr), currentRasterizerState(nullptr),

@@ -1,32 +1,25 @@
 #include "core/physics/collider.h"
 #include "core/physics/boxCollider.h"
-#include "core/physics/sphereCollider.h"
-#include "core/physics/rigidBody.h"
 #include "core/physics/physicsQueue.h" //are here to prevent circular dependecies
+#include "core/physics/rigidBody.h"
+#include "core/physics/sphereCollider.h"
 
-#define SHOW_COLLIDER
+static constexpr bool SHOW_COLLIDER = true;
 
-Collider::Collider()
-{
-}
+Collider::Collider() {}
 
-Collider::~Collider()
-{
-}
+Collider::~Collider() {}
 
-void Collider::SetParent(std::weak_ptr<GameObject> parent)
-{
+void Collider::SetParent(std::weak_ptr<GameObject> parent) {
 	std::shared_ptr<GameObject> newParent = parent.lock();
 
-	if (!newParent)
-	{
+	if (!newParent) {
 		Logger::Error("Tried to set expired gameobject as parent");
 		return;
 	}
 
 	std::shared_ptr<Collider> colliderParent = std::dynamic_pointer_cast<Collider>(newParent);
-	if(colliderParent != nullptr)
-	{
+	if (colliderParent != nullptr) {
 		Logger::Error("Tried to set Collider as parent to a Collider");
 		return;
 	}
@@ -35,76 +28,63 @@ void Collider::SetParent(std::weak_ptr<GameObject> parent)
 	std::shared_ptr<GameObject3D> gameObject3DParent = std::dynamic_pointer_cast<GameObject3D>(newParent);
 	std::shared_ptr<Collider> thisCollider = std::static_pointer_cast<Collider>(this->GetPtr());
 
-	if (rigidBodyParent)
-	{
+	if (rigidBodyParent) {
 		this->rigidBodyParent = rigidBodyParent;
 		rigidBodyParent->AddColliderChild(thisCollider);
 		PhysicsQueue::GetInstance().AddToAllColliders(thisCollider);
-	}
-	else if (gameObject3DParent)
-	{
+	} else if (gameObject3DParent) {
 		this->gameObject3DParent = gameObject3DParent;
 		PhysicsQueue::GetInstance().AddStrayCollider(thisCollider);
 		PhysicsQueue::GetInstance().AddToAllColliders(thisCollider);
 		Logger::Log("Added stray Collider with GameObject3D parent to physics queue");
-	}
-	else
-	{
+	} else {
 		Logger::Error("Tried to set GameObject as parent on Collider (parent has to be derived from GameObject3D)");
 		return;
-	} 
+	}
 
 	this->GameObject3D::SetParent(newParent);
 }
 
-void Collider::Start()
-{
+void Collider::Start() {
 	GameObject3D::Start();
+	if constexpr (SHOW_COLLIDER) {
+		MeshObjData meshData = {};
+		DirectX::XMVECTOR scale;
+		scale.m128_f32[0] = 1;
+		scale.m128_f32[1] = 1;
+		scale.m128_f32[2] = 1;
 
-	#ifdef SHOW_COLLIDER
-	MeshObjData meshData = {};
-	DirectX::XMVECTOR scale;
-	scale.m128_f32[0] = 1;
-	scale.m128_f32[1] = 1;
-	scale.m128_f32[2] = 1;
+		if (this->type == ColliderType::SPHERE) {
+			scale = DirectX::XMVectorScale(scale, 0.5f);
+			meshData = AssetManager::GetInstance().GetMeshObjData("meshes/indicatorSphere05.glb:Mesh_0");
+		} else {
+			meshData = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0");
+		}
 
-	if(this->type == ColliderType::SPHERE)
-	{
-		scale = DirectX::XMVectorScale(scale, 0.5f);
-		meshData = AssetManager::GetInstance().GetMeshObjData("meshes/indicatorSphere05.glb:Mesh_0");
+		auto material = AssetManager::GetInstance().GetMaterialWeakPtr("wireframeWhite");
+		if (material.expired()) {
+			Logger::Error("Collider mesh material was expired");
+			return;
+		}
+
+		meshData.SetMaterial(0, material.lock());
+		auto visualMeshObject = this->factory->CreateGameObjectOfType<MeshObject>().lock();
+		visualMeshObject->SetMesh(meshData);
+		visualMeshObject->transform.SetScale(scale);
+		visualMeshObject->SetParent(std::static_pointer_cast<Collider>(this->GetPtr()));
 	}
-	else
-	{
-		meshData = AssetManager::GetInstance().GetMeshObjData("TexBox/TextureCube.glb:Mesh_0");
-	}
-
-	auto material = AssetManager::GetInstance().GetMaterialWeakPtr("wireframeWhite");
-	if(material.expired())
-	{
-		Logger::Error("Collider mesh material was expired");
-		return;
-	}
-
-	meshData.SetMaterial(0, material.lock());
-	auto visualMeshObject = this->factory->CreateGameObjectOfType<MeshObject>().lock();
-	visualMeshObject->SetMesh(meshData);
-	visualMeshObject->transform.SetScale(scale);
-	visualMeshObject->SetParent(std::static_pointer_cast<Collider>(this->GetPtr()));
-	#endif
 }
 
-bool Collider::Collision(Collider* otherCollider)
-{
+bool Collider::Collision(Collider* otherCollider) {
 	DirectX::XMFLOAT3 mtvAxis = {};
 	float mtvDistance = 0;
 
-	if(!this->dynamic && !otherCollider->dynamic) return false;
+	if (!this->dynamic && !otherCollider->dynamic) return false;
 
 	return this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
 }
 
-bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNormal)
-{
+bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNormal) {
 	DirectX::XMFLOAT3 mtvAxis = {};
 	float mtvDistance = 0;
 	bool collision = this->CollisionHandling(otherCollider, mtvAxis, mtvDistance);
@@ -115,33 +95,20 @@ bool Collider::Collision(Collider* otherCollider, DirectX::XMVECTOR& contactNorm
 	return collision;
 }
 
-void Collider::Tick()
-{
-	this->GameObject3D::Tick();
-}
+void Collider::Tick() { this->GameObject3D::Tick(); }
 
-void Collider::SetId(int id) 
-{
-	this->id = id;
-}
+void Collider::SetId(int id) { this->id = id; }
 
-int Collider::GetId()
-{ 
-	return this->id; 
-}
+int Collider::GetId() { return this->id; }
 
-void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance)
-{
+void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDistance) {
 	std::shared_ptr<RigidBody> rigidBodyParent = this->rigidBodyParent.lock();
 	std::shared_ptr<GameObject3D> gameObject3DParent = this->gameObject3DParent.lock();
 	GameObject3D* moveTarget = this;
 
-	if (rigidBodyParent)
-	{
+	if (rigidBodyParent) {
 		moveTarget = rigidBodyParent.get();
-	} 
-	else if (gameObject3DParent)
-	{
+	} else if (gameObject3DParent) {
 		moveTarget = gameObject3DParent.get();
 	}
 
@@ -154,8 +121,8 @@ void Collider::ResolveCollision(DirectX::XMFLOAT3 resolveAxis, float resolveDist
 	moveTarget->transform.SetPosition(newPosition);
 }
 
-bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis, float& resolveDistance)
-{
+bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, DirectX::XMFLOAT3& resolveAxis,
+								  float& resolveDistance) {
 	using namespace DirectX;
 
 	XMVECTOR boxCenter = box->transform.GetGlobalPosition();
@@ -165,19 +132,22 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 
 	XMMATRIX boxWorldMatrix = box->transform.GetGlobalWorldMatrix(false);
 
-	//we get the inverse of the rotation and translation matrices, scale should not be included
+	// we get the inverse of the rotation and translation matrices, scale should not be included
 	XMVECTOR scale, rotation, translation;
 	XMMatrixDecompose(&scale, &rotation, &translation, boxWorldMatrix);
 
 	// Logger::Log("scale: ", scale.m128_f32[0], ", ", scale.m128_f32[1], ", ", scale.m128_f32[2]);
 	// Logger::Log("rotation: ", rotation.m128_f32[0], ", ", rotation.m128_f32[1], ", ", rotation.m128_f32[2]);
-	// Logger::Log("translation: ", translation.m128_f32[0], ", ", translation.m128_f32[1], ", ", translation.m128_f32[2]);
-
+	// Logger::Log("translation: ", translation.m128_f32[0], ", ", translation.m128_f32[1], ", ",
+	// translation.m128_f32[2]);
 
 	XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(rotation);
-	XMMATRIX invRotationMatrix = XMMatrixTranspose(rotationMatrix); //rotationMatrix here won't be pre-transposed, so a transpose is required to get the inverse
-	XMMATRIX invTranslationMatrix = XMMatrixTranslation(-boxCenter.m128_f32[0], -boxCenter.m128_f32[1], -boxCenter.m128_f32[2]);
-	XMMATRIX invScalingMatrix = XMMatrixScaling(1.0f / XMVectorGetX(scale), 1.0f / XMVectorGetY(scale), 1.0f / XMVectorGetZ(scale));
+	XMMATRIX invRotationMatrix = XMMatrixTranspose(
+		rotationMatrix); // rotationMatrix here won't be pre-transposed, so a transpose is required to get the inverse
+	XMMATRIX invTranslationMatrix =
+		XMMatrixTranslation(-boxCenter.m128_f32[0], -boxCenter.m128_f32[1], -boxCenter.m128_f32[2]);
+	XMMATRIX invScalingMatrix =
+		XMMatrixScaling(1.0f / XMVectorGetX(scale), 1.0f / XMVectorGetY(scale), 1.0f / XMVectorGetZ(scale));
 
 	XMMATRIX worldToLocalMatrix = invTranslationMatrix * invRotationMatrix;
 	XMVECTOR vLocalSphereCenter = XMVector3TransformCoord(sphereCenter, worldToLocalMatrix);
@@ -188,53 +158,46 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 	float distSq = XMVectorGetX(XMVector3LengthSq(delta));
 	float radius = sphere->GetDiameter() * 0.5f;
 
-	if (distSq < radius * radius)
-	{
+	if (distSq < radius * radius) {
 		XMVECTOR axisLocal = XMVectorZero();
 		float penetration = 0;
 
-		if (box->dynamic)
-		{
+		if (box->dynamic) {
 			int a = 0;
 		}
 
 		std::shared_ptr<RigidBody> rigidBodyParent = this->rigidBodyParent.lock();
 
-		//sphere center is inside of box
-		if (distSq < 1e-8f)
-		{
-			//THIS IS NOT WORKING FOR SOME FUNNY REASON
+		// sphere center is inside of box
+		if (distSq < 1e-8f) {
+			// THIS IS NOT WORKING FOR SOME FUNNY REASON
 
 			XMVECTOR physicsPosition = {};
 			XMVECTOR previousPhysicsPosition = {};
 
-			if(rigidBodyParent)
-			{
+			if (rigidBodyParent) {
 				physicsPosition = XMVectorAdd(rigidBodyParent->GetPhysicsPosition(), this->transform.GetPosition());
-				previousPhysicsPosition = XMVectorAdd(rigidBodyParent->GetPreviousPhysicsPosition(), this->transform.GetPosition());
+				previousPhysicsPosition =
+					XMVectorAdd(rigidBodyParent->GetPreviousPhysicsPosition(), this->transform.GetPosition());
 
 				XMVECTOR axisLocal = XMVectorSubtract(previousPhysicsPosition, physicsPosition);
 				penetration = XMVectorGetX(XMVector3Length(axisLocal));
 				axisLocal = XMVector3Normalize(axisLocal);
 			}
-		}
-		else
-		{
+		} else {
 			axisLocal = XMVector3Normalize(delta);
 			penetration = radius - sqrtf(distSq);
 		}
 
 		XMMATRIX scalingMatrix = XMMatrixScaling(XMVectorGetX(scale), XMVectorGetY(scale), XMVectorGetZ(scale));
-		XMMATRIX translationMatrix = XMMatrixTranslation(boxCenter.m128_f32[0], boxCenter.m128_f32[1], boxCenter.m128_f32[2]);
+		XMMATRIX translationMatrix =
+			XMMatrixTranslation(boxCenter.m128_f32[0], boxCenter.m128_f32[1], boxCenter.m128_f32[2]);
 		XMMATRIX localToWorldMatrix = scalingMatrix * rotationMatrix * translationMatrix;
 
 		XMVECTOR axisWorld = {};
-		if(!rigidBodyParent)
-		{
+		if (!rigidBodyParent) {
 			axisWorld = XMVector3TransformNormal(axisLocal, localToWorldMatrix);
-		}
-		else
-		{
+		} else {
 			axisWorld = axisLocal;
 		}
 
@@ -247,13 +210,11 @@ bool Collider::BoxSphereCollision(BoxCollider* box, SphereCollider* sphere, Dire
 	return false;
 }
 
-bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance)
-{
+bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtvAxis, float& mtvDistance) {
 	bool collision = false;
 	collision = this->DoubleDispatchCollision(otherCollider, mtvAxis, mtvDistance);
 
-	if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE)
-	{
+	if (this->type == ColliderType::BOX && otherCollider->type == ColliderType::SPHERE) {
 		mtvDistance = -mtvDistance;
 	}
 
@@ -261,21 +222,14 @@ bool Collider::CollisionHandling(Collider* otherCollider, DirectX::XMFLOAT3& mtv
 	if (!this->solid || !otherCollider->solid) return collision;
 
 	// Determine who moves
-	if (this->dynamic && otherCollider->dynamic)
-	{
+	if (this->dynamic && otherCollider->dynamic) {
 		this->ResolveCollision(mtvAxis, mtvDistance / 2);
 		otherCollider->ResolveCollision(mtvAxis, -mtvDistance / 2);
-	}
-	else if (this->dynamic)
-	{
+	} else if (this->dynamic) {
 		this->ResolveCollision(mtvAxis, mtvDistance);
-	}
-	else if (otherCollider->dynamic)
-	{
+	} else if (otherCollider->dynamic) {
 		otherCollider->ResolveCollision(mtvAxis, -mtvDistance);
 	}
 
 	return true;
 }
-
-

@@ -24,8 +24,6 @@ private:
 	std::weak_ptr<SoundSourceObject> speaker;
 	std::weak_ptr<GameObject3D> muzzle;
 
-	Timer musicTimer;
-	Timer sfxTimer;
 	Timer shootCoolDown;
 
 	float damage = 20;

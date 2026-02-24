@@ -105,7 +105,6 @@ void Player::Start()
 
 	this->musicTimer.Initialize(2);
 	this->sfxTimer.Initialize(0.4f);
-	this->shootCoolDown.Initialize(0.3f);
 
 
 	//Master Volume
@@ -127,7 +126,7 @@ void Player::Start()
 	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Step1.wav"));
 	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Step2.wav"));
 	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Step3.wav"));
-	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Shoot3.wav"));
+	//this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Shoot3.wav"));
 }
 
 void Player::Tick()
@@ -138,7 +137,6 @@ void Player::Tick()
 
 	DirectX::XMVECTOR position = this->transform.GetPosition();
 	AudioManager::GetInstance().SetListenerPosition(position.m128_f32[0], position.m128_f32[1], position.m128_f32[2]);
-	this->speaker.lock()->SetSourcePosition(position.m128_f32[0], position.m128_f32[1], position.m128_f32[2]);
 
 	this->input[0] = this->keyBoardInput.GetMovementVector().data()[0] + this->controllerInput->GetMovementVector().data()[0];
 	this->input[1] = this->keyBoardInput.GetMovementVector().data()[1] + this->controllerInput->GetMovementVector().data()[1];
@@ -157,7 +155,6 @@ void Player::Tick()
 	if(deltaTime < 1) //to prevent tick spam when loading scene
 	{
 		this->musicTimer.Tick(deltaTime);
-		this->shootCoolDown.Tick(deltaTime);
 
 		if(this->isGrounded && DirectX::XMVectorGetX(DirectX::XMVector3Length(this->moveVector)) > 0.01f)
 		{

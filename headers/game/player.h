@@ -53,7 +53,6 @@ public:
 
 	Timer musicTimer;
 	Timer sfxTimer;
-	Timer shootCoolDown;
 
 	ResourceManager resources;
 

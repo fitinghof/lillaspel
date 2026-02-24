@@ -39,7 +39,7 @@ void SoundSourceObject::Tick()
 {
 	this->GameObject3D::Tick();
 
-	DirectX::XMVECTOR pos = this->transform.GetPosition();
+	DirectX::XMVECTOR pos = this->transform.GetGlobalPosition();
 	for (int i = 0; i < this->nrOfSources; i++)
 	{
 		alSource3f(this->sources[i], AL_POSITION, (ALfloat)pos.m128_f32[0], (ALfloat)pos.m128_f32[1], (ALfloat)pos.m128_f32[2]);

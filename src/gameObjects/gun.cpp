@@ -14,8 +14,8 @@ void Gun::Shoot() {
 	this->shootCoolDown.Reset();
 
 
-	//std::shared_ptr<SoundSourceObject> lockedSpeaker = this->speaker.lock();
-	//lockedSpeaker->Play(this->soundClips[0]); // shoot sound
+	std::shared_ptr<SoundSourceObject> lockedSpeaker = this->speaker.lock();
+	lockedSpeaker->Play(this->soundClips[0]); // shoot sound
 	
 
 	const DirectX::XMVECTOR lookVec = this->muzzle.lock()->transform.GetGlobalForward();
@@ -53,16 +53,14 @@ void Gun::Shoot() {
 
 void Gun::Start() {
 
-	this->musicTimer.Initialize(2);
-	this->sfxTimer.Initialize(0.4f);
 	this->shootCoolDown.Initialize(0.3f);
 
 	// SFX
-	/*this->speaker = this->factory->CreateGameObjectOfType<SoundSourceObject>();
+	this->speaker = this->factory->CreateGameObjectOfType<SoundSourceObject>();
 	this->speaker.lock()->SetParent(this->GetPtr());
 	this->speaker.lock()->SetGain(1.0f);
 
-	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Shoot3.wav"));*/
+	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Shoot3.wav"));
 
 
 	{
@@ -102,6 +100,4 @@ void Gun::Tick() {
 	{
 		this->shootCoolDown.Tick(deltaTime);
 	}
-
-
 }

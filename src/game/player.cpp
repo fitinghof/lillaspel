@@ -159,7 +159,7 @@ void Player::Tick()
 		this->musicTimer.Tick(deltaTime);
 		this->shootCoolDown.Tick(deltaTime);
 
-		if(DirectX::XMVectorGetX(DirectX::XMVector3Length(this->moveVector)) > 0.01f)
+		if(this->isGrounded && DirectX::XMVectorGetX(DirectX::XMVector3Length(this->moveVector)) > 0.01f)
 		{
 			this->sfxTimer.Tick(deltaTime);
 		}

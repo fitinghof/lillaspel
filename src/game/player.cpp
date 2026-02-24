@@ -3,6 +3,7 @@
 #include "gameObjects/meshObject.h"
 #include <numbers>
 #include "game/gameManager.h"
+#include "gameObjects/SpaceShipObj.h"
 
 
 
@@ -83,6 +84,22 @@ void Player::Start()
 		colliderobj->SetName("PlayerCollider " + std::to_string(this->factory->GetNextID()));
 	}
 
+	//GroundCheck
+	{
+		auto colliderobjWeak = this->factory->CreateGameObjectOfType<SphereCollider>();
+		auto colliderobj = colliderobjWeak.lock();
+		colliderobj->SetDynamic(true);
+		colliderobj->SetSolid(false);
+		DirectX::XMFLOAT3 pos(0.0f, -0.3, 0.0f);
+		colliderobj->transform.SetPosition(DirectX::XMLoadFloat3(&pos));
+		DirectX::XMFLOAT3 scale(0.5f, 0.5f, 0.5f);
+		colliderobj->transform.SetScale(DirectX::XMLoadFloat3(&scale));
+		colliderobj->SetParent(this->GetPtr());
+		colliderobj->SetTag(Tag::PLAYER);
+		colliderobj->SetIgnoreTag(~Tag::FLOOR);
+		colliderobj->SetName("PlayerCollider " + std::to_string(this->factory->GetNextID()));
+	}
+
 	std::function<void(std::weak_ptr<GameObject3D>)> function = [&](std::weak_ptr<GameObject3D> gameObject3D) { this->OnCollision(gameObject3D); };
 	this->SetAllOnCollisionFunction(function);
 
@@ -125,6 +142,18 @@ void Player::Tick()
 
 	this->input[0] = this->keyBoardInput.GetMovementVector().data()[0] + this->controllerInput->GetMovementVector().data()[0];
 	this->input[1] = this->keyBoardInput.GetMovementVector().data()[1] + this->controllerInput->GetMovementVector().data()[1];
+	
+	this->jumpInput = this->keyBoardInput.Jump() || this->controllerInput->Jump();
+	if(this->jumpInput && this->isGrounded)
+	{
+		this->isJumping = true;
+	}
+	else
+	{
+		this->isJumping = false;
+	}
+
+
 	this->UpdateCamera();
 	this->Interact();
 
@@ -187,12 +216,28 @@ void Player::PhysicsTick()
 		return;
 	}
 
-	this->moveVector = {};
+	this->moveVector.m128_f32[0] = 0;
+	this->moveVector.m128_f32[2] = 0;
 	this->moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(this->transform.GetGlobalRight(), this->input[0] * this->speed * fixedDeltaTime)); //Add x-input
 	this->moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(this->transform.GetGlobalForward(), this->input[1] * this->speed * fixedDeltaTime)); //Add z-input
 
+	if(this->isJumping)
+	{
+		DirectX::XMVECTOR jumpVector = {};
+		jumpVector.m128_f32[0] = 0;
+		jumpVector.m128_f32[1] = this->jumpForce * fixedDeltaTime;
+		jumpVector.m128_f32[2] = 0;
+
+		Logger::Log("IS JUMPING IS TRUE!!!!!!!!!!!");
+		
+		this->moveVector = DirectX::XMVectorAdd(this->moveVector, jumpVector);
+	}
+
 	DirectX::XMStoreFloat3(&this->linearVelocity, this->moveVector);
 	this->RigidBody::PhysicsTick(); //has to be last because of gravity
+
+	//reset isGrounded, this gets set to true in OnCollision
+	this->isGrounded = false;
 }
 
 void Player::UpdateCamera()
@@ -244,9 +289,14 @@ void Player::SetCameraRotation(float r, float p, float y) {
 
 void Player::OnCollision(std::weak_ptr<GameObject3D> gameObject3D)
 {
-	std::string name = gameObject3D.lock()->GetName();
+	if(gameObject3D.expired()) return;
+	std::shared_ptr<SpaceShip> spaceShip = std::dynamic_pointer_cast<SpaceShip>(gameObject3D.lock());
 
-	//Logger::Log("COLLIDED WITH ", name);
+	//This happens when player collides with the spaceship aka the floor
+	if(spaceShip)
+	{
+		this->isGrounded = true;
+	}
 }
 
 void Player::LoadFromJson(const nlohmann::json& data)

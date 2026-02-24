@@ -21,6 +21,10 @@ public:
 	std::vector<SoundClip*> soundClips;
 	std::weak_ptr<SoundSourceObject> speaker;
 
+	bool isGrounded = false;
+	bool isJumping = false;
+
+	float jumpForce = 80;
 	float speed = 12;
 	float mouseSensitivity = 0.05f;
 	float stickSensitivity = 1100.0f;
@@ -55,6 +59,7 @@ public:
 
 private:
 	float input[2] = {};
+	bool jumpInput = false;
 	bool showCursor = true;
 
 	float cameraRotation[3];

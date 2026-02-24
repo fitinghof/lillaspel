@@ -33,7 +33,7 @@ void RigidBody::PhysicsTick()
 {
 	this->GameObject3D::PhysicsTick();
 
-	if(this->gravity) this->linearVelocity.y -= 12.0f * Time::GetInstance().GetFixedDeltaTime();
+	if(this->gravity) this->linearVelocity.y -= 0.6f * Time::GetInstance().GetFixedDeltaTime();
 }
 
 void RigidBody::LatePhysicsTick()

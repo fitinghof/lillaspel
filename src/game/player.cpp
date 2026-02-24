@@ -148,10 +148,6 @@ void Player::Tick()
 	{
 		this->isJumping = true;
 	}
-	else
-	{
-		this->isJumping = false;
-	}
 
 
 	this->UpdateCamera();
@@ -208,6 +204,8 @@ void Player::PhysicsTick()
 {
 	float fixedDeltaTime = Time::GetInstance().GetFixedDeltaTime();
 
+	Logger::Log(std::to_string(this->linearVelocity.x), ", ", std::to_string(this->linearVelocity.y), ", ", std::to_string(this->linearVelocity.z));
+
 	std::shared_ptr<CameraObject> cam = this->camera.lock();
 
 	if(!cam)
@@ -216,8 +214,14 @@ void Player::PhysicsTick()
 		return;
 	}
 
-	this->moveVector.m128_f32[0] = 0;
-	this->moveVector.m128_f32[2] = 0;
+	this->linearVelocity.x = 0;
+	this->linearVelocity.z = 0;
+	if(this->isGrounded)
+	{
+		this->linearVelocity.y = 0;
+	}
+
+	this->moveVector = {};
 	this->moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(this->transform.GetGlobalRight(), this->input[0] * this->speed * fixedDeltaTime)); //Add x-input
 	this->moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(this->transform.GetGlobalForward(), this->input[1] * this->speed * fixedDeltaTime)); //Add z-input
 
@@ -227,13 +231,16 @@ void Player::PhysicsTick()
 		jumpVector.m128_f32[0] = 0;
 		jumpVector.m128_f32[1] = this->jumpForce * fixedDeltaTime;
 		jumpVector.m128_f32[2] = 0;
-
-		Logger::Log("IS JUMPING IS TRUE!!!!!!!!!!!");
 		
 		this->moveVector = DirectX::XMVectorAdd(this->moveVector, jumpVector);
+		this->isJumping = false;
 	}
 
-	DirectX::XMStoreFloat3(&this->linearVelocity, this->moveVector);
+	DirectX::XMVECTOR linearVelocityVector = {};
+	linearVelocityVector = DirectX::XMLoadFloat3(&this->linearVelocity);
+	linearVelocityVector = DirectX::XMVectorAdd(linearVelocityVector, moveVector);
+
+	DirectX::XMStoreFloat3(&this->linearVelocity, linearVelocityVector);
 	this->RigidBody::PhysicsTick(); //has to be last because of gravity
 
 	//reset isGrounded, this gets set to true in OnCollision

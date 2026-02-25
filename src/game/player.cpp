@@ -1,5 +1,7 @@
 #include "game/player.h"
 #include "core/physics/sphereCollider.h"
+#include "game/gameManager.h"
+#include "game/hud.h"
 #include "gameObjects/meshObject.h"
 #include <numbers>
 #include "game/gameManager.h"
@@ -7,18 +9,13 @@
 
 
 
-Player::Player() : cameraRotation{0, 0, 0} {
-	this->controllerInput = std::make_shared<ControllerInput>(0);
-}
+Player::Player() : cameraRotation{0, 0, 0} { this->controllerInput = std::make_shared<ControllerInput>(0); }
 
-Player::~Player()
-{
-}
+Player::~Player() {}
 
-void Player::Start()
-{
+void Player::Start() {
 	this->RigidBody::Start();
-	 //adding camera
+	// adding camera
 	auto cameraWeak = this->factory->CreateGameObjectOfType<CameraObject>();
 	auto cameraShared = cameraWeak.lock();
 	DirectX::XMFLOAT3 pos(0.0f, 1.5f, 0.0f);
@@ -27,7 +24,7 @@ void Player::Start()
 
 	this->camera = cameraShared;
 
-	//adding gun
+	// adding gun
 	{
 		auto gunWeak = this->factory->CreateGameObjectOfType<Gun>();
 		auto gun = gunWeak.lock();
@@ -37,8 +34,7 @@ void Player::Start()
 		this->gun = gun;
 	}
 
-
-	//adding body colliders
+	// adding body colliders
 	{
 		auto colliderobjWeak = this->factory->CreateGameObjectOfType<SphereCollider>();
 		auto colliderobj = colliderobjWeak.lock();
@@ -106,31 +102,29 @@ void Player::Start()
 	this->musicTimer.Initialize(2);
 	this->sfxTimer.Initialize(0.4f);
 
-
-	//Master Volume
+	// Master Volume
 	AudioManager::GetInstance().SetMasterMusicVolume(0.4f);
 	AudioManager::GetInstance().SetMasterSoundEffectsVolume(1);
 
-	//Music
+	// Music
 	AudioManager::GetInstance().AddMusicTrackStandardFolder("LethalContact.wav", "contact");
 
-	//SFX
+	// SFX
 	this->speaker = this->factory->CreateGameObjectOfType<SoundSourceObject>();
 	this->speaker.lock()->SetParent(this->GetPtr());
 	this->speaker.lock()->SetGain(1.0f);
 
-	//AssetManager::GetInstance().AddSoundClipStandardFolder("Step1.wav", "step1");
-	// AssetManager::GetInstance().AddSoundClipStandardFolder("Step2.wav", "step2");
-	// AssetManager::GetInstance().AddSoundClipStandardFolder("Step3.wav", "step3");
-	
+	// AssetManager::GetInstance().AddSoundClipStandardFolder("Step1.wav", "step1");
+	//  AssetManager::GetInstance().AddSoundClipStandardFolder("Step2.wav", "step2");
+	//  AssetManager::GetInstance().AddSoundClipStandardFolder("Step3.wav", "step3");
+
 	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Step1.wav"));
 	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Step2.wav"));
 	this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Step3.wav"));
 	//this->soundClips.push_back(AssetManager::GetInstance().GetSoundClip("Shoot3.wav"));
 }
 
-void Player::Tick()
-{
+void Player::Tick() {
 	this->RigidBody::Tick();
 
 	InputManager::GetInstance().ReadControllerInput(this->controllerInput->GetControllerIndex());
@@ -152,7 +146,7 @@ void Player::Tick()
 	this->Interact();
 
 	float deltaTime = Time::GetInstance().GetDeltaTime();
-	if(deltaTime < 1) //to prevent tick spam when loading scene
+	if (deltaTime < 1) // to prevent tick spam when loading scene
 	{
 		this->musicTimer.Tick(deltaTime);
 
@@ -162,15 +156,13 @@ void Player::Tick()
 		}
 	}
 
-	if(this->musicTimer.TimeIsUp() && !isPlayingMusic)
-	{
-		//AudioManager::GetInstance().FadeInPlay("contact", 0, 6);
+	if (this->musicTimer.TimeIsUp() && !isPlayingMusic) {
+		// AudioManager::GetInstance().FadeInPlay("contact", 0, 6);
 		AudioManager::GetInstance().Play("contact");
 		this->isPlayingMusic = true;
 	}
 
-	if(this->sfxTimer.TimeIsUp())
-	{
+	if (this->sfxTimer.TimeIsUp()) {
 		int randomIndex = RandomInt(0, 2);
 
 		std::shared_ptr<SoundSourceObject> lockedSpeaker = this->speaker.lock();
@@ -180,9 +172,11 @@ void Player::Tick()
 		this->sfxTimer.Reset();
 	}
 
-	//this->aim();
+	// this->aim();
 	this->checkForTriggerPress();
 
+	// Update HUD with current resources
+	if (this->hud) this->hud->Update(this->resources, this->health);
 
 	ImGui::Begin("GameManager testing");
 	if (ImGui::Button("Win")) {
@@ -197,16 +191,14 @@ void Player::Tick()
 	ImGui::End();
 }
 
-void Player::PhysicsTick()
-{
+void Player::PhysicsTick() {
 	float fixedDeltaTime = Time::GetInstance().GetFixedDeltaTime();
 
 	Logger::Log(std::to_string(this->linearVelocity.x), ", ", std::to_string(this->linearVelocity.y), ", ", std::to_string(this->linearVelocity.z));
 
 	std::shared_ptr<CameraObject> cam = this->camera.lock();
 
-	if(!cam)
-	{
+	if (!cam) {
 		Logger::Error("Player couldn't find any camera!");
 		return;
 	}
@@ -219,8 +211,12 @@ void Player::PhysicsTick()
 	}
 
 	this->moveVector = {};
-	this->moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(this->transform.GetGlobalRight(), this->input[0] * this->speed * fixedDeltaTime)); //Add x-input
-	this->moveVector = DirectX::XMVectorAdd(moveVector, DirectX::XMVectorScale(this->transform.GetGlobalForward(), this->input[1] * this->speed * fixedDeltaTime)); //Add z-input
+	this->moveVector = DirectX::XMVectorAdd(
+		moveVector, DirectX::XMVectorScale(this->transform.GetGlobalRight(),
+										   this->input[0] * this->speed * fixedDeltaTime)); // Add x-input
+	this->moveVector = DirectX::XMVectorAdd(
+		moveVector, DirectX::XMVectorScale(this->transform.GetGlobalForward(),
+										   this->input[1] * this->speed * fixedDeltaTime)); // Add z-input
 
 	if(this->isJumping)
 	{
@@ -244,12 +240,10 @@ void Player::PhysicsTick()
 	this->isGrounded = false;
 }
 
-void Player::UpdateCamera()
-{
+void Player::UpdateCamera() {
 	std::shared_ptr<CameraObject> cam = this->camera.lock();
 
-	if (this->keyBoardInput.Quit())
-	{
+	if (this->keyBoardInput.Quit()) {
 		PostQuitMessage(0);
 	}
 
@@ -258,8 +252,7 @@ void Player::UpdateCamera()
 		return;
 	}
 
-	if (this->keyBoardInput.ToggleCamera()) 
-	{
+	if (this->keyBoardInput.ToggleCamera()) {
 		this->showCursor = !this->showCursor;
 		ShowCursor(this->showCursor);
 		this->canShoot = !this->canShoot;
@@ -303,29 +296,23 @@ void Player::OnCollision(std::weak_ptr<GameObject3D> gameObject3D)
 	}
 }
 
-void Player::LoadFromJson(const nlohmann::json& data)
-{
+void Player::LoadFromJson(const nlohmann::json& data) {
 	this->RigidBody::LoadFromJson(data);
 
-	if(data.contains("speed"))
-	{
+	if (data.contains("speed")) {
 		this->speed = static_cast<float>(data.at("speed").get<float>());
 		Logger::Log("'speed' was found in json: " + std::to_string(this->speed));
-	}
-	else
-	{
+	} else {
 		Logger::Log("didn't find 'speed'!!!");
 	}
 
-	if(data.contains("mouseSensitivity"))
-	{
-		this->mouseSensitivity = (float)data.at("mouseSensitivity").get<float>();
+	if (data.contains("mouseSensitivity")) {
+		this->mouseSensitivity = (float) data.at("mouseSensitivity").get<float>();
 		Logger::Log("'mouseSensitivity' was found in json: " + std::to_string(this->mouseSensitivity));
 	}
 }
 
-void Player::SaveToJson(nlohmann::json& data)
-{
+void Player::SaveToJson(nlohmann::json& data) {
 	this->RigidBody::SaveToJson(data);
 
 	data["speed"] = this->speed;
@@ -336,13 +323,11 @@ void Player::Interact() {
 
 	const DirectX::XMVECTOR lookVec = this->camera.lock()->transform.GetGlobalForward();
 	const DirectX::XMVECTOR posVec = this->camera.lock()->transform.GetGlobalPosition();
-	
+
 	if (this->keyBoardInput.Interact() || this->controllerInput->Interact()) {
 
 		Ray ray{Vector3D{posVec}, Vector3D{lookVec}};
 		RayCastData rayCastData;
-
-		
 
 		bool didHit = PhysicsQueue::GetInstance().castRay(ray, rayCastData);
 		std::string hitString;
@@ -368,7 +353,7 @@ void Player::Interact() {
 			hitString = "miss";
 		}
 
-		//Logger::Log(hitString, " at distance: ", std::to_string(rayCastData.distance));
+		// Logger::Log(hitString, " at distance: ", std::to_string(rayCastData.distance));
 	}
 }
 
@@ -377,7 +362,6 @@ void Player::checkForTriggerPress() {
 	if (this->keyBoardInput.LeftClick() || this->controllerInput->RightClick() && this->canShoot) {
 		this->gun.lock()->Shoot();
 	}
-
 }
 
 void Player::aim() {
@@ -387,10 +371,9 @@ void Player::aim() {
 		this->gun.lock()->transform.SetPosition(DirectX::XMLoadFloat3(&pos));
 		isAiming = true;
 	} else if (this->keyBoardInput.RightClick() || this->controllerInput->LeftClick() && this->canShoot && isAiming) {
-	
+
 		DirectX::XMFLOAT3 pos(-0.4f, -0.4f, 0.7f);
 		this->gun.lock()->transform.SetPosition(DirectX::XMLoadFloat3(&pos));
 		isAiming = false;
 	}
-
 }

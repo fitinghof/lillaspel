@@ -8,14 +8,19 @@
 #include "game/crosshair.h"
 #include "game/events.h"
 #include "game/gameManager.h"
+#include "game/gunPickUp.h"
 #include "gameObjects/enemy.h"
 #include "gameObjects/pointLightObject.h"
 #include "gameObjects/room.h"
 #include "gameObjects/turret.h"
-#include "game/gunPickUp.h"
 
 // std
 #include <Windows.h>
+#include <shellapi.h>
+
+namespace {
+constexpr const char* kQuitMenuUrl = "https://forms.office.com/e/V5rVqBVb4z";
+}
 
 // Very good macro, please don't remove
 #define NAMEOF(x) #x
@@ -58,7 +63,6 @@ SceneManager::SceneManager(Renderer* rend)
 	this->objectFromString.RegisterType<Player>(NAMEOF(Player)); // Game specific
 	this->objectFromString.RegisterType<GameManager>(NAMEOF(GameManager));
 	this->objectFromString.RegisterType<GunPickUp>(NAMEOF(GunPickUp));
-
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();
@@ -181,7 +185,12 @@ void SceneManager::LoadSceneFromFile(const std::string& filePath) {
 
 	// register listener for Exit
 	this->eventManager->RegisterCallback(static_cast<int>(ButtonEvent::EXIT), []() {
-		Logger::Log("EXIT event triggered: posting quit message");
+		Logger::Log("EXIT event triggered: opening link and posting quit message");
+		auto openResult =
+			reinterpret_cast<intptr_t>(ShellExecuteA(nullptr, "open", kQuitMenuUrl, nullptr, nullptr, SW_SHOWNORMAL));
+		if (openResult <= 32) {
+			Logger::Error("Failed to open quit menu URL");
+		}
 		PostQuitMessage(0);
 	});
 

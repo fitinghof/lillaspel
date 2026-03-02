@@ -101,6 +101,8 @@ void SpaceShip::Start() {
 	auto room = this->GetRoom(this->START_ROOM_X, this->START_ROOM_Y);
 	auto nodes = room.lock()->GetPathfindingNodes();
 
+	//cockPit
+	this->createCockpit();
 	// Connect cockpit to room
 	room.lock()->SetWallState(Room::WallIndex::South, Room::WallState::door);
 	this->pathfinder->AddEdge(nodes[Room::WallIndex::South * 2 + 1], cockpit->GetPathfindingNodes()[1], 1);
@@ -113,11 +115,27 @@ void SpaceShip::CreateFloorColider() {
 	DirectX::XMFLOAT3 pos((this->SHIP_MAX_SIZE_X * this->ROOM_SIZE) * 0.5f, 0,
 						  (this->SHIP_MAX_SIZE_Y * this->ROOM_SIZE) * 0.5f);
 	colliderobj->transform.SetPosition(DirectX::XMLoadFloat3(&pos));
-	DirectX::XMFLOAT3 scale(((this->SHIP_MAX_SIZE_X) * this->ROOM_SIZE + this->ROOM_SIZE) * 0.5f, 0.5f,
-							((this->SHIP_MAX_SIZE_Y) * this->ROOM_SIZE + this->ROOM_SIZE) * 0.5f);
+	DirectX::XMFLOAT3 scale(((this->SHIP_MAX_SIZE_X) * this->ROOM_SIZE + this->ROOM_SIZE) * 0.5f + 20, 0.5f,
+							((this->SHIP_MAX_SIZE_Y) * this->ROOM_SIZE + this->ROOM_SIZE) * 0.5f + 20);
 	colliderobj->transform.SetScale(DirectX::XMLoadFloat3(&scale));
 	colliderobj->SetParent(this->GetPtr());
 	colliderobj->SetTag(Tag::FLOOR);
 	//colliderobj->ignoreTag = Tag::DISTANCE;
+
+}
+
+void SpaceShip::createCockpit() {
+
+	auto roomMesh = this->factory->CreateStaticGameObject<Room>();
+
+	roomMesh->transform.SetPosition(DirectX::XMVectorSet(this->START_ROOM_X * this->ROOM_SIZE, 0, -1 * this->ROOM_SIZE, 0));
+
+	roomMesh->SetParent(this->GetPtr());
+
+	roomMesh.Init();
+
+	roomMesh->SetWallState(Room::WallIndex::North, Room::WallState::door);
+	roomMesh->SetWallState(Room::WallIndex::East, Room::WallState::solid);
+	roomMesh->SetWallState(Room::WallIndex::West, Room::WallState::solid);
 
 }

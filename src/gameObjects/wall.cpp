@@ -124,7 +124,7 @@ void Wall::SetWallState(int wallState, bool edgeWall) {
 		break;
 
 	case (Room::WallState::solid):
-		this->SpawnInteractables();
+		//this->SpawnInteractables();
 		break;
 
 	case (Room::WallState::door):

@@ -75,4 +75,5 @@ private:
 
 	std::unique_ptr<AStar> pathfinder;
 	void CreateFloorColider();
+	void createCockpit();
 };

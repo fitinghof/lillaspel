@@ -86,7 +86,7 @@ private:
 	int onClickEventID = 0;
 	int onPressedEventID = 0;
 	int onReleasedEventID = 0;
-	int onHoverEventID = 0;
+	int onHoverEventID = 4;
 
 	DirectX::XMFLOAT4 color{1.0f, 1.0f, 1.0f, 1.0f};
 

@@ -195,7 +195,12 @@ void SceneManager::LoadSceneFromFile(const std::string& filePath) {
 	});
 
 	this->eventManager->RegisterCallback(static_cast<int>(ButtonEvent::PLAY_SOUND),
-										 []() { Logger::Log("Sound is being played"); });
+										 []() {
+		Logger::Log("Sound is being played");
+
+		SoundClip* hoverClip = AssetManager::GetInstance().GetSoundClip("UIButtonHoverNew.wav");
+
+	});
 
 	// After all objects are started, wire any buttons that were created/modified in the editor
 	for (const auto& go : this->mainScene->GetGameObjects()) {

@@ -48,7 +48,7 @@ void GameManager::Start() {
 	// Set up rounds
 	this->rounds.reserve(10);
 	this->rounds.push_back(Round{3, 1, 10});
-	this->rounds.push_back(Round{5, 1, 20});
+	this->rounds.push_back(Round{80, 4, 20});
 	this->rounds.push_back(Round{7, 1});
 	this->rounds.push_back(Round{10, 2});
 	this->rounds.push_back(Round{15, 2});

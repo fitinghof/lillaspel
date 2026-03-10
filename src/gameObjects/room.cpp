@@ -84,16 +84,16 @@ void Room::Start() {
 
 		this->roof = meshobj;
 	}
-	{
-		auto meshobj = this->factory->CreateStaticGameObject<MeshObject>();
+	////{
+	////	auto meshobj = this->factory->CreateStaticGameObject<MeshObject>();
 
-		meshobj->SetParent(this->GetPtr());
+	////	meshobj->SetParent(this->GetPtr());
 
-		MeshObjData meshdata = AssetManager::GetInstance().GetMeshObjData("SpaceShip/room2.glb:Mesh_4");
-		meshobj->SetMesh(meshdata);
+	////	MeshObjData meshdata = AssetManager::GetInstance().GetMeshObjData("SpaceShip/room2.glb:Mesh_4");
+	////	meshobj->SetMesh(meshdata);
 
-		this->floor = meshobj;
-	}
+	////	this->floor = meshobj;
+	////}
 	Logger::Warn("i am a room at x:", this->pos[0], " y: ", this->pos[1]);
 	auto parentWeak = this->GetParent();
 	if (parentWeak.expired()) {

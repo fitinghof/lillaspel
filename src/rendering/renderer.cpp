@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cmath>
 #include <memory>
+#include "game/gameManager.h"
 
 // #define DEBUG_TIMER
 
@@ -971,7 +972,7 @@ void Renderer::SpotLightShadowPass() {
 
 	// Sort cameras besed on distance
 
-	DirectX::XMVECTOR mainCameraPos = CameraObject::GetMainCamera().transform.GetGlobalPosition();
+	DirectX::XMVECTOR mainCameraPos = GameManager::GetInstance()->GetPlayer()->transform.GetGlobalPosition();
 
 	std::sort(this->spotLightRenderQueue.begin(), this->spotLightRenderQueue.end(),
 			  [&](std::weak_ptr<SpotlightObject> a, std::weak_ptr<SpotlightObject> b) {

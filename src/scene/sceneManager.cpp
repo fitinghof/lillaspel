@@ -6,18 +6,19 @@
 #include "core/eventManager.h"
 #include "core/filepathHolder.h"
 #include "game/crosshair.h"
+#include "game/drone.h"
 #include "game/events.h"
 #include "game/footBall.h"
 #include "game/gameManager.h"
-#include "gameObjects/enemies/drone.h"
 #include "game/gunPickUp.h"
 #include "game/musicPlayer.h"
+#include "game/rotatingCamera.h"
+#include "game/startButton.h"
+#include "gameObjects/enemies/drone.h"
 #include "gameObjects/enemies/enemy.h"
 #include "gameObjects/pointLightObject.h"
 #include "gameObjects/room.h"
 #include "gameObjects/turret.h"
-#include "game/rotatingCamera.h"
-#include "game/startButton.h"
 
 // std
 #include <Windows.h>
@@ -76,6 +77,7 @@ SceneManager::SceneManager(Renderer* rend)
 	this->objectFromString.RegisterType<Turret>(NAMEOF(Turret));
 	this->objectFromString.RegisterType<TestEnemy>(NAMEOF(TestEnemy));
 	this->objectFromString.RegisterType<Drone>(NAMEOF(Drone));
+	this->objectFromString.RegisterType<FPVDrone>(NAMEOF(FPVDrone));
 
 	// UI widget types
 	this->objectFromString.RegisterType<UI::CanvasObject>(NAMEOF(UI::CanvasObject));
@@ -94,7 +96,6 @@ SceneManager::SceneManager(Renderer* rend)
 
 	this->objectFromString.RegisterType<RotatingCamera>(NAMEOF(RotatingCamera));
 	this->objectFromString.RegisterType<StartButton>(NAMEOF(StartButton));
-
 
 	CreateNewScene(this->emptyScene);
 	this->emptyScene->CreateGameObjectOfType<CameraObject>();
@@ -172,13 +173,13 @@ void SceneManager::LoadScene(Scenes scene) {
 		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "MainMenu.scene").string());
 		break;
 	case Scenes::GAME:
-		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "SpaceShipScene.json").string());
+		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "playerScene.json").string());
 		break;
 	case Scenes::END_CREDITS:
 		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "EndCredits.scene").string());
 		break;
 	case Scenes::DEMO:
-		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "testresult.json").string());
+		LoadSceneFromFile((FilepathHolder::GetAssetsDirectory() / "scenes" / "playerScene.json").string());
 		break;
 	default:
 		break;
@@ -226,7 +227,7 @@ void SceneManager::LoadSceneFromFile(const std::string& filePath) {
 	this->eventManager->RegisterCallback(static_cast<int>(ButtonEvent::PLAY), [this]() {
 		Logger::Log("PLAY event triggered: loading GAME scene");
 		this->mainScene->QueueLoadScene(
-			(FilepathHolder::GetAssetsDirectory() / "scenes" / "SpaceShipScene.json").string());
+			(FilepathHolder::GetAssetsDirectory() / "scenes" / "playerScene.json").string());
 	});
 
 	// register listener for Exit
